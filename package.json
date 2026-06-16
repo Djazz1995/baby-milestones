@@ -49,7 +49,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "db:smoke": "node --env-file=.env scripts/smoke-supabase.mjs",
-    "db:smoke3": "node --env-file=.env scripts/smoke-phase3.mjs"
+    "db:smoke3": "node --env-file=.env scripts/smoke-phase3.mjs",
+    "db:smoke4": "node --env-file=.env scripts/smoke-phase4.mjs"
   },
   "private": true
 }

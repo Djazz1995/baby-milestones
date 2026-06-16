@@ -87,12 +87,16 @@ function rateInWindow(completions: string[], skips: string[], days: number): num
 }
 
 export const completionService = {
-  async complete(goalId: string, source: CompletionSource = 'tap'): Promise<Completion> {
+  async complete(
+    goalId: string,
+    source: CompletionSource = 'tap',
+    witnessed = false
+  ): Promise<Completion> {
     const userId = await getUserId();
     if (!userId) throw new Error('Not signed in.');
     const { data, error } = await supabase
       .from('completions')
-      .insert({ goal_id: goalId, user_id: userId, source })
+      .insert({ goal_id: goalId, user_id: userId, source, witnessed })
       .select()
       .single();
     if (error) throw error;

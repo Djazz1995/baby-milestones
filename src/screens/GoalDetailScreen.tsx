@@ -1,5 +1,5 @@
-import { Stack, useRouter } from 'expo-router';
-import { useState } from 'react';
+import { Stack, useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/button';
@@ -16,6 +16,12 @@ const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 function slotText(s: ScheduleSlot): string {
   return `${WEEKDAYS[s.day - 1]} ${s.label ? `${s.label} ` : ''}${s.time}`;
+}
+
+/** Is any reminder scheduled for today's weekday? */
+function isScheduledToday(slots: ScheduleSlot[]): boolean {
+  const isoToday = new Date().getDay() === 0 ? 7 : new Date().getDay();
+  return slots.some((s) => s.day === isoToday);
 }
 
 /** Soonest upcoming slot from now (wraps to next week). */
@@ -48,9 +54,17 @@ export function GoalDetailScreen({ goalId }: Props) {
   const { complete, completing } = useComplete();
   const [justDone, setJustDone] = useState(false);
 
+  // Refresh stats/goal when returning (e.g. after a skip or edit).
+  useFocusEffect(
+    useCallback(() => {
+      refetchGoal();
+      refetchStats();
+    }, [refetchGoal, refetchStats])
+  );
+
   async function onDone() {
     try {
-      await complete(goalId, 'tap');
+      await complete(goalId, 'tap', Boolean(goal?.buddyId));
       setJustDone(true);
       await refetchStats();
     } catch (e) {
@@ -98,6 +112,7 @@ export function GoalDetailScreen({ goalId }: Props) {
   }
 
   const next = nextReminder(goal.schedule.slots);
+  const scheduledToday = isScheduledToday(goal.schedule.slots);
 
   return (
     <ThemedView style={styles.container}>
@@ -105,8 +120,12 @@ export function GoalDetailScreen({ goalId }: Props) {
         options={{
           title: goal.name,
           headerRight: () => (
-            <Pressable onPress={() => router.push(`/goal/${goalId}/edit`)} hitSlop={8}>
-              <ThemedText type="linkPrimary">Edit</ThemedText>
+            <Pressable
+              onPress={() => router.push(`/goal/${goalId}/edit`)}
+              hitSlop={12}
+              style={styles.headerBtn}
+            >
+              <ThemedText style={styles.headerBtnText}>Edit</ThemedText>
             </Pressable>
           ),
         }}
@@ -131,6 +150,11 @@ export function GoalDetailScreen({ goalId }: Props) {
           {goal.blockers.length > 0 ? (
             <ThemedText type="small" themeColor="textSecondary">
               Excuses on file: {goal.blockers.join(', ')}
+            </ThemedText>
+          ) : null}
+          {goal.buddyId ? (
+            <ThemedText type="small" themeColor="textSecondary">
+              👁 A buddy sees your wins and bails.
             </ThemedText>
           ) : null}
         </View>
@@ -160,6 +184,13 @@ export function GoalDetailScreen({ goalId }: Props) {
         ) : null}
 
         <Button title="Done ✓" onPress={onDone} loading={completing} style={styles.doneHero} />
+        {scheduledToday && !goal.paused ? (
+          <Button
+            title="I can’t today"
+            variant="secondary"
+            onPress={() => router.push(`/goal/${goalId}/skip`)}
+          />
+        ) : null}
         <Button
           title={goal.paused ? 'Resume' : 'Pause'}
           variant="secondary"
@@ -204,6 +235,12 @@ const styles = StyleSheet.create({
     padding: Spacing.three,
     borderRadius: Spacing.three,
     gap: Spacing.half,
+  },
+  headerBtn: { paddingHorizontal: Spacing.two },
+  headerBtnText: {
+    fontSize: 17,
+    fontWeight: '600',
+    color: '#3c87f7',
   },
   doneHero: { minHeight: 60 },
   deleteLink: { alignSelf: 'center', paddingVertical: Spacing.three },

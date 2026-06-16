@@ -50,12 +50,13 @@ Loop: **create goal → home list → tap Done → streak updates.**
 - [x] Goal-detail hierarchy: **Done** as hero (taller primary), **Edit** → header-right button, **Delete** demoted to a small red text link, Pause secondary.
 - [x] "**Next reminder**" card on goal detail — soonest upcoming slot from `schedule.slots` (pure date math; shows "Paused — next would be" when paused).
 
-## Phase 4 — Engagement mechanics
+## Phase 4 — Engagement mechanics — code-complete (buddy push deferred to Phase 5)
 
-- [ ] `SkipService` + skip flow screen (friction: reason → countdown → roast, §4.5).
-- [ ] `BuddyService` + buddy invite/manage screen (§4.6).
-- [ ] Buddy notify on complete/skip.
-- **Done when:** skip recorded w/ friction; buddy sees events.
+- [x] `SkipService` + `useSkip` + skip flow screen (friction: reason → 5s countdown → final roast, §4.5). Entry: "I can't today" on goal detail. Placeholder roasts (Phase 6 replaces).
+- [x] `BuddyService` + `useBuddies` + Buddy manage screen (invite by contact / list / remove, §4.6). Reached via Settings. Buddy picker in goal form; `goal.buddyId` wired.
+- [x] Completions carry `witnessed` when the goal has a buddy; detail shows a "buddy watching" indicator.
+- [ ] **Buddy push notify on complete/skip** — needs FCM/push infra → **Phase 5**. (Link + witnessed flag stored now; delivery later.)
+- **Done when:** skip recorded w/ friction; buddy link + witnessed flag persist. — ✅ `npm run db:smoke4` (skip + buddy + witnessed, RLS holds). tsc/lint green.
 
 ## Phase 5 — Notifications + escalation (own subsystem)
 
@@ -63,6 +64,7 @@ Loop: **create goal → home list → tap Done → streak updates.**
 - [ ] `EscalationService` — tactic ladder, wave→tactic map (§3.3).
 - [ ] `NotificationService` — schedule per goal, handle tap → route to complete/skip.
 - [ ] `fcm.ts` + Supabase cron Edge Function to trigger at goal times (§8.2).
+- [ ] **Buddy push on complete/skip** (carried from Phase 4) — FCM to the buddy's device when a witnessed goal is completed or skipped (§4.6).
 - [ ] Today's per-goal **status (done / pending / skipped)** on home + goal detail — needs scheduled-vs-acted tracking (same source that fills `StreakStats.ignoredCount`, stubbed in Phase 3).
 - **Done when:** ignored goal escalates through waves; tap deep-links into app.
 

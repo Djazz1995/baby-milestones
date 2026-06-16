@@ -18,6 +18,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { useBuddies } from '@/hooks/use-buddies';
 import { useGoal } from '@/hooks/use-goal';
 import type { EscalationSpeed, GoalCategory, RudenessLevel, ScheduleSlot } from '@/models';
 import { goalService } from '@/services/goalService';
@@ -72,6 +73,7 @@ export function GoalEditScreen({ goalId }: Props) {
   const router = useRouter();
   const theme = useTheme();
   const { data: existing } = useGoal(goalId);
+  const { data: buddies } = useBuddies();
 
   const [name, setName] = useState('');
   const [category, setCategory] = useState<GoalCategory>('gym');
@@ -84,6 +86,7 @@ export function GoalEditScreen({ goalId }: Props) {
   const [selectedLabel, setSelectedLabel] = useState<string>();
   const [rudeness, setRudeness] = useState<RudenessLevel>(3);
   const [speed, setSpeed] = useState<EscalationSpeed>('normal');
+  const [buddyId, setBuddyId] = useState<string>();
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [timeDraft, setTimeDraft] = useState<Date>(() => timeToDate('07:00'));
   const [saving, setSaving] = useState(false);
@@ -104,6 +107,7 @@ export function GoalEditScreen({ goalId }: Props) {
     setSlots(existing.schedule.slots);
     setRudeness(existing.rudenessLevel);
     setSpeed(existing.escalationSpeed);
+    setBuddyId(existing.buddyId);
   }, [existing]);
 
   // Default the builder's label + time to the category's first option.
@@ -176,6 +180,7 @@ export function GoalEditScreen({ goalId }: Props) {
       schedule: { slots },
       rudenessLevel: rudeness,
       escalationSpeed: speed,
+      buddyId,
     };
     try {
       if (goalId) await goalService.update(goalId, input);
@@ -380,6 +385,26 @@ export function GoalEditScreen({ goalId }: Props) {
             onSelect={(s) => setSpeed(s)}
             label={(s) => s}
           />
+        </Field>
+
+        <Field label="Accountability buddy (optional)">
+          {buddies.length === 0 ? (
+            <ThemedText type="small" themeColor="textSecondary">
+              No buddies yet — add one in Settings.
+            </ThemedText>
+          ) : (
+            <View style={styles.chips}>
+              <Chip text="None" active={!buddyId} onPress={() => setBuddyId(undefined)} />
+              {buddies.map((b) => (
+                <Chip
+                  key={b.id}
+                  text={b.contact}
+                  active={buddyId === b.id}
+                  onPress={() => setBuddyId(b.id)}
+                />
+              ))}
+            </View>
+          )}
         </Field>
 
         {error ? (
