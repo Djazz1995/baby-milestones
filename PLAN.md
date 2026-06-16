@@ -8,15 +8,15 @@ Target: v1.0 scope from [AGENTS.md](AGENTS.md) §11. This plan turns that scope 
 
 ## Architecture decisions (locked from prior discussion)
 
-| Decision | Choice | Why |
-|---|---|---|
-| Identity | Supabase **anonymous auth**, UUID in `expo-secure-store` | zero-friction install funnel; no login wall |
-| Login | Optional email/OAuth **upgrade**, only for buddy / cross-device | not a gate |
-| AI generation | **Server-side** (Supabase Edge Function), behind swappable `generateRoast()` interface | phone can't run AI in background; provider not locked |
-| Notification copy | **Pre-generated cached pool**, baked into notification at schedule time | OS fires notifications offline/backgrounded; can't call API at fire moment |
-| Personalization | **Template string** (cue/name/callback), not a live API call in v1 | cost + offline |
-| Escalation timing | **Local scheduled notifications** (`scheduleNotificationAsync`), all waves queued at goal time, cancel rest on Done | reliable +15min cadence; works offline; no per-push server cost |
-| Build type | **Dev build** (`expo-dev-client`), NOT Expo Go | remote push unavailable in Expo Go since SDK 53 |
+| Decision          | Choice                                                                                                              | Why                                                                        |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| Identity          | Supabase **anonymous auth**, UUID in `expo-secure-store`                                                            | zero-friction install funnel; no login wall                                |
+| Login             | Optional email/OAuth **upgrade**, only for buddy / cross-device                                                     | not a gate                                                                 |
+| AI generation     | **Server-side** (Supabase Edge Function), behind swappable `generateRoast()` interface                              | phone can't run AI in background; provider not locked                      |
+| Notification copy | **Pre-generated cached pool**, baked into notification at schedule time                                             | OS fires notifications offline/backgrounded; can't call API at fire moment |
+| Personalization   | **Template string** (cue/name/callback), not a live API call in v1                                                  | cost + offline                                                             |
+| Escalation timing | **Local scheduled notifications** (`scheduleNotificationAsync`), all waves queued at goal time, cancel rest on Done | reliable +15min cadence; works offline; no per-push server cost            |
+| Build type        | **Dev build** (`expo-dev-client`), NOT Expo Go                                                                      | remote push unavailable in Expo Go since SDK 53                            |
 
 **Verified against v56 docs:** `scheduleNotificationAsync`, `cancelScheduledNotificationAsync`, `cancelAllScheduledNotificationsAsync`, `addNotificationResponseReceivedListener`, `DEFAULT_ACTION_IDENTIFIER`, trigger types `DATE` / `DAILY` / `TIME_INTERVAL`. iOS OS-level cap ~64 pending notifications (5 goals × 4 waves = 20, safe).
 
@@ -108,13 +108,13 @@ This is the risky, load-bearing piece. Build + test in isolation first.
 
 ## Risk register
 
-| Risk | Mitigation |
-|---|---|
-| iOS kills background execution | Don't rely on it — local-scheduled + pre-baked copy. Live gen is server-only. |
-| Notification timing drift / Doze | Real-device test matrix in Phase 3; local notifs survive Doze, verify. |
-| Model refuses rude tone / flat comedy | Settled by §0.1 bake-off before build. |
-| Anon-user orphan rows pile up | Post-v1 cleanup job (delete anon inactive 30d). Note, not a blocker. |
-| Safety filter false-misses | §9.3 kill switch + blocklist + de-identified review logs. |
+| Risk                                  | Mitigation                                                                    |
+| ------------------------------------- | ----------------------------------------------------------------------------- |
+| iOS kills background execution        | Don't rely on it — local-scheduled + pre-baked copy. Live gen is server-only. |
+| Notification timing drift / Doze      | Real-device test matrix in Phase 3; local notifs survive Doze, verify.        |
+| Model refuses rude tone / flat comedy | Settled by §0.1 bake-off before build.                                        |
+| Anon-user orphan rows pile up         | Post-v1 cleanup job (delete anon inactive 30d). Note, not a blocker.          |
+| Safety filter false-misses            | §9.3 kill switch + blocklist + de-identified review logs.                     |
 
 ## Rough sequencing
 

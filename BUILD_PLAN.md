@@ -16,22 +16,22 @@ are the riskiest subsystem and the real product — don't leave too late, don't 
 
 > Skip only if already decided to build regardless. These are product gates, not code.
 
-## Phase 1 — Project foundation
+## Phase 1 — Project foundation ✅ DONE
 
-- [ ] Expo app init (SDK 54 — read https://docs.expo.dev/versions/v54.0.0/ first, per AGENTS.md top).
-- [ ] TS strict, folder skeleton: `src/{models,services,hooks,lib,screens}`.
-- [ ] Lint/format, path aliases (`@/`).
-- [ ] Nav skeleton — tab bar + stacks, empty screen stubs for all §14 pages.
-- **Done when:** app boots, navigate between blank screens.
+- [x] Expo app init (SDK 54 — RN 0.81, React 19.1, expo-router 6).
+- [x] TS strict, folder skeleton: `src/{models,services,hooks,lib,screens}`.
+- [x] Lint/format, path aliases (`@/`). — `expo lint` + prettier (`.prettierrc.json`, `format` script, `eslint-config-prettier`).
+- [x] Nav skeleton — root Stack + `(tabs)` group, stubs for all 11 §14 pages (routing in `src/app`, UI in `src/screens` via `ScreenPlaceholder`).
+- **Done when:** app boots, navigate between blank screens. — verified: tsc clean, lint exit 0, web + iOS bundles export.
 
-## Phase 2 — Data layer
+## Phase 2 — Data layer — code-complete (needs cloud project to verify)
 
-- [ ] `src/models` — all §15.2 shapes.
-- [ ] Supabase project + schema: `users, goals, completions, skips, buddies, roast_lines`.
-- [ ] RLS policies (user owns their rows).
-- [ ] `src/lib/supabase.ts` client.
-- [ ] Auth (Supabase anon/email) — minimal, just need a user id.
-- **Done when:** can read/write a goal row from a script/test.
+- [x] `src/models` — all §15.2 shapes (one file per model + barrel `index.ts`).
+- [x] Schema: `profiles, goals, completions, skips, buddies, roast_lines` — `supabase/migrations/0001_init.sql`. (☐ apply to a real cloud project.)
+- [x] RLS policies (owner-only CRUD; `roast_lines` read-only to authenticated). In the migration.
+- [x] `src/lib/supabase.ts` client — web-safe chunked SecureStore adapter, `persistSession`, `autoRefreshToken`.
+- [x] Auth — `src/lib/auth.ts` `ensureSession()` anon sign-in + profile auto-create trigger.
+- **Done when:** can read/write a goal row from a script/test. — script `scripts/smoke-supabase.mjs` (`npm run db:smoke`); ☐ **run pending cloud project + `.env` creds + "anonymous sign-ins" enabled**.
 
 ## Phase 3 — Core vertical slice (the proof)
 

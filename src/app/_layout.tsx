@@ -15,8 +15,14 @@ export default function RootLayout() {
         <Stack.Screen name="goal/new" options={{ presentation: 'modal', title: 'New Goal' }} />
         <Stack.Screen name="goal/[id]/index" options={{ title: 'Goal' }} />
         <Stack.Screen name="goal/[id]/edit" options={{ title: 'Edit Goal' }} />
-        <Stack.Screen name="goal/[id]/skip" options={{ presentation: 'modal', title: "I can't today" }} />
-        <Stack.Screen name="goal/[id]/complete" options={{ presentation: 'modal', title: 'Done' }} />
+        <Stack.Screen
+          name="goal/[id]/skip"
+          options={{ presentation: 'modal', title: "I can't today" }}
+        />
+        <Stack.Screen
+          name="goal/[id]/complete"
+          options={{ presentation: 'modal', title: 'Done' }}
+        />
         <Stack.Screen name="buddy" options={{ title: 'Accountability Buddy' }} />
         <Stack.Screen name="share/[cardId]" options={{ presentation: 'modal', title: 'Share' }} />
         <Stack.Screen name="paywall" options={{ presentation: 'modal', title: 'Upgrade' }} />

@@ -46,7 +46,7 @@ The whole product is "is it actually funny." Don't pick the model by price; pick
 
 ### 1.1 Summary
 
-RoastMode is a mobile app (iOS & Android) that uses AI to motivate users through funny, harsh, relentless notifications **that escalate in tactic, not just volume**. Users set goals across categories like gym, studying, chores, or any custom habit. If they don't act, the AI shifts strategy — shrinking the task, invoking stakes, then going full theatrical roast. Completion is logged by tap (with optional social witness). The comedy is the product *and* the marketing; the behavioral nudges underneath are what actually move the user.
+RoastMode is a mobile app (iOS & Android) that uses AI to motivate users through funny, harsh, relentless notifications **that escalate in tactic, not just volume**. Users set goals across categories like gym, studying, chores, or any custom habit. If they don't act, the AI shifts strategy — shrinking the task, invoking stakes, then going full theatrical roast. Completion is logged by tap (with optional social witness). The comedy is the product _and_ the marketing; the behavioral nudges underneath are what actually move the user.
 
 ### 1.2 Vision
 
@@ -99,7 +99,7 @@ When a goal is ignored, the app **changes strategy each wave** rather than just 
 - **Wave 3 (+30 min) — Stakes / social.** "Want me to tell your accountability buddy you bailed? Last chance."
 - **Wave 4+ — Full roast / lore.** The theatrical, maximally shareable payoff.
 
-Each wave maps to a lever in 3.2. The harshness is *functional* — a nudge ladder that happens to be funny, not a comedy generator that happens to nag.
+Each wave maps to a lever in 3.2. The harshness is _functional_ — a nudge ladder that happens to be funny, not a comedy generator that happens to nag.
 
 ---
 
@@ -137,6 +137,7 @@ Driven by the Section 3.3 tactic ladder. All copy AI-generated (Claude API) with
 ### 4.4 Photo Verification (DEFERRED to v1.1 — rationale)
 
 Originally v1.0. Moved out because:
+
 - Vision judging "is this a gym?" misfires both ways: false FAIL → rage-uninstall ("I DID go"); false PASS → feature is pointless.
 - Adds vision-API cost to every completion.
 - The highest-comedy moment is also the highest-frustration moment; ship the core loop first.
@@ -178,7 +179,7 @@ The known failure mode: install → screenshot → share → delete in two weeks
 
 1. **It actually works.** Behavioral levers (Section 3) drive real completions; users keep the app that gets results. Outcome retention > joke retention.
 2. **Social witness (Section 4.6).** A human watching is stickier than any AI line.
-3. **It learns you.** Callbacks to the user's *specific* excuses sharpen over weeks → becomes "your" roaster; generic clones can't replace it. This is the switching cost.
+3. **It learns you.** Callbacks to the user's _specific_ excuses sharpen over weeks → becomes "your" roaster; generic clones can't replace it. This is the switching cost.
 4. **Freshness engine.** Rotate personas, unlock new "characters"/lore over time, seasonal events — so the comedy never feels on loop.
 5. **Variable reward + streak loss-aversion.** Unpredictable verdicts + visible streak you don't want to break.
 6. **Identity.** Reinforce "you're becoming someone who shows up."
@@ -191,12 +192,12 @@ Retention target stays D7 40%+ but is explicitly treated as the primary product 
 
 Global default with per-goal override. Four tiers:
 
-| Level | Name | Tone |
-|---|---|---|
-| 1 | Mild Disappointment | Sarcastic but gentle. Disapproving parent. |
-| 2 | Drill Sergeant | Loud, direct, no excuses entertained. |
-| 3 | Full Roast | Comedic and brutal. Jokes at your expense. |
-| 4 | Unhinged | Absurdist, theatrical. Maximum chaos. |
+| Level | Name                | Tone                                       |
+| ----- | ------------------- | ------------------------------------------ |
+| 1     | Mild Disappointment | Sarcastic but gentle. Disapproving parent. |
+| 2     | Drill Sergeant      | Loud, direct, no excuses entertained.      |
+| 3     | Full Roast          | Comedic and brutal. Jokes at your expense. |
+| 4     | Unhinged            | Absurdist, theatrical. Maximum chaos.      |
 
 Every generation call is briefed on the current level. Tier 4 may include fake lore ("The Council of Goals"), running gags, callbacks.
 
@@ -207,9 +208,11 @@ Every generation call is briefed on the current level. Tier 4 may include fake l
 ## 7. Settings
 
 ### 7.1 Per-Goal
+
 Name, category, cue, schedule, rudeness override, escalation speed, accountability buddy, notifications on/off (pause without deleting).
 
 ### 7.2 Global
+
 Default rudeness, default escalation speed, quiet hours, weekly summary on/off (v1.1), sharing preferences (always watermark / never share location metadata), notification sound (standard / drill whistle / foghorn / silent).
 
 ---
@@ -217,14 +220,17 @@ Default rudeness, default escalation speed, quiet hours, weekly summary on/off (
 ## 8. Tech Stack
 
 ### 8.1 Mobile
+
 - **React Native (Expo)** — single codebase iOS + Android. Handles local notification scheduling and deep links from notification tap.
 
 ### 8.2 Backend
+
 - **Supabase** — accounts, goals, completion history, streaks, buddy links.
 - **Firebase Cloud Messaging (FCM)** — push delivery both platforms.
 - **Scheduled jobs** — Supabase Edge Functions / cron to trigger generation at goal times.
 
 ### 8.3 AI (provider-swappable — NOT locked to one vendor)
+
 - **Generation goes behind a thin provider interface**, not hardcoded to one vendor. A single `generateRoast(context)` abstraction wraps whichever model wins the bake-off (Section 0.1). Swapping providers must be a config change, not a refactor.
 - **Default candidate: Anthropic Claude (claude-sonnet-4-6)** for comedy quality and reliable handling of the rude-but-not-cruel tone; **vision verdicts (claude-sonnet-4-6)** when 4.4 ships. But the choice is decided by the bake-off, not assumed.
 - **Cost-tier candidates for batch generation:** Kimi (Moonshot), DeepSeek, Gemini Flash, Claude Haiku. At cached-pool volume (Section 8.4) per-token price is near-irrelevant — pick on comedy + refusal behavior, not headline price.
@@ -234,15 +240,18 @@ Default rudeness, default escalation speed, quiet hours, weekly summary on/off (
 - Prompt context: goal name, category, cue, rudeness level, escalation wave + mapped tactic, recent history, day of week.
 
 ### 8.4 AI Unit Economics (NEW — decided, not open)
+
 Per-user generation cost is a real constraint on a free tier. Controls:
+
 - **Pre-generate + cache** a pool of wave-appropriate lines per (category, level, wave); personalize only the top layer (cue, name, callback) at send time.
-- **Caching makes per-token price near-irrelevant.** Lines are a *shared* pool reused across all users, not per-user. Rough volume: 6 cat × 4 level × 4 wave × ~50 lines ≈ 4,800 lines, generated once and refreshed (e.g. weekly) — pennies on any candidate model. → optimize comedy quality, not headline token price.
+- **Caching makes per-token price near-irrelevant.** Lines are a _shared_ pool reused across all users, not per-user. Rough volume: 6 cat × 4 level × 4 wave × ~50 lines ≈ 4,800 lines, generated once and refreshed (e.g. weekly) — pennies on any candidate model. → optimize comedy quality, not headline token price.
 - **Personalization layer = template string, not an API call, in v1.** Inserting cue/name/callback into a cached line is string interpolation. Live inference at send time is avoided entirely for v1 unless a feature provably needs it.
 - **Batch** generation off-peak; avoid a live API call per push where a cached variant works.
 - **Free tier caps** generation volume; **Unhinged tier + multi-goal are paid** (covers cost and creates the upgrade reason).
 - Track **AI cost per active user** from day 1 as a first-class metric.
 
 ### 8.5 Media
+
 - Verification photos (v1.1) to Supabase Storage; processed by Anthropic API, not stored long-term without opt-in.
 - Shareable cards generated client-side or via a light image service.
 
@@ -251,6 +260,7 @@ Per-user generation cost is a real constraint on a free tier. Controls:
 ## 9. App Store Compliance & Moderation
 
 ### 9.1 iOS
+
 - Framed as opt-in tough-love; rudeness is user-controlled → content is self-directed.
 - No slurs, no targeting protected groups, no body shaming.
 - Precedent: Carrot Fitness (similar harsh/sarcastic tone, years on store).
@@ -258,10 +268,13 @@ Per-user generation cost is a real constraint on a free tier. Controls:
 - First-launch notice: "This app uses harsh humor. Content is opt-in and user-controlled."
 
 ### 9.2 Google Play
+
 More lenient; same content rules, lower review risk.
 
 ### 9.3 Generation Guardrails (NEW)
+
 AI generating "brutal" content is a brand/store gun, especially Tier 4. Controls:
+
 - System prompt enforces the golden rule + hard limits on every call.
 - **Post-generation safety filter** (classifier or rules) rejects/regenerates lines crossing body/identity/mental-health/self-harm lines before send.
 - Server-side logging of prompts + completions for abuse review (de-identified).
@@ -282,6 +295,7 @@ AI generating "brutal" content is a brand/store gun, especially Tier 4. Controls
 ## 11. MVP Scope (v1.0)
 
 **Include:**
+
 - Goal creation (up to 5 goals) with cue field
 - Push notifications with AI-generated copy
 - **Tactic-ladder escalation (3–4 waves, Section 3.3)**
@@ -295,6 +309,7 @@ AI generating "brutal" content is a brand/store gun, especially Tier 4. Controls
 - AI cost controls: cached line pool + free-tier caps (Section 8.4)
 
 **Defer to v1.1+:**
+
 - Photo verification + verdicts (Section 4.4)
 - Weekly summary notifications
 - "Friend sets/judges your goal" multiplayer
@@ -330,6 +345,7 @@ AI generating "brutal" content is a brand/store gun, especially Tier 4. Controls
 The UI surfaces needed for the MVP scope (Section 11), grouped by flow. Deferred-feature screens are listed separately and are NOT built in v1.0.
 
 ### 14.1 Onboarding (first launch)
+
 1. **Welcome / hook** — one-line pitch + sample roast card.
 2. **Harsh-humor consent notice** — required by Section 9.1 ("opt-in, user-controlled").
 3. **Default rudeness + escalation pick** — global defaults.
@@ -337,6 +353,7 @@ The UI surfaces needed for the MVP scope (Section 11), grouped by flow. Deferred
 5. **First goal create** — funnels into goal setup.
 
 ### 14.2 Core loop
+
 6. **Home / dashboard** — all goals at a glance (done/pending/skipped today) + streak summary (Section 4.7).
 7. **Goal create / edit** — name, category, cue, schedule, rudeness override, escalation speed, buddy (Section 4.1).
 8. **Goal detail** — per-goal streak, completion rate, timeline, roasts-received badge (Section 4.7).
@@ -344,17 +361,21 @@ The UI surfaces needed for the MVP scope (Section 11), grouped by flow. Deferred
 10. **Skip flow** — "I can't today" → reason → countdown → final roast (Section 4.5; friction is intentional).
 
 ### 14.3 Social + share
+
 11. **Accountability buddy** — invite/manage buddy, see what gets shared (Section 4.6).
 12. **Share card** — watermarked roast card, export to IG / TikTok / X / WhatsApp (Section 4.8).
 
 ### 14.4 Settings
+
 13. **Settings (global)** — default rudeness, escalation, quiet hours, sound, sharing prefs (Section 7.2).
 14. **Paywall / upgrade** — free vs paid gating: 5 goals, Unhinged, buddy (Section 12).
 
 ### 14.5 System surface (not a full screen)
+
 15. **Notification + deep-link targets** — push taps route into completion / skip / goal detail. Needs design, but not a standalone page.
 
 ### 14.6 Deferred to v1.1+ (no page in v1.0)
+
 Photo verification + verdicts (4.4), weekly summary notifications, "friend sets/judges your goal" multiplayer, "Roast of the Week", analytics dashboard.
 
 ---
@@ -377,6 +398,7 @@ src/
 **Flow:** `screens → hooks → services → lib`. Models flow back up.
 
 **Rules:**
+
 - Screens import models for typing + call hooks. Never import `services` or `lib` directly.
 - Services are plain TS (framework-agnostic, testable without React). Return the model directly; **throw on error**.
 - Hooks (`useGoals`, `useGoal(id)`, `useStreak(id)`, `useSkip`, `useRoastCard`, `useBuddy`, `useUser`, `useBilling`) wrap services, hold loading/error state, catch.
@@ -384,45 +406,45 @@ src/
 
 ### 15.2 Models (`src/models`)
 
-| Model | Core fields | PRD |
-|---|---|---|
-| `Goal` | id, name, category, cue, schedule, rudenessLevel, escalationSpeed, buddyId?, paused | 4.1 |
-| `GoalCategory` | enum: gym/study/chores/diet/sleep/custom | 4.1 |
-| `Schedule` | days[], timeOfDay, intervalHours? | 4.1 |
-| `RudenessLevel` | enum 1–4 | 6 |
-| `EscalationSpeed` | enum slow/normal/unhinged | 4.1 |
-| `EscalationWave` | wave#, tactic (snark/shrink/stakes/roast) | 3.3 |
-| `Completion` | id, goalId, timestamp, source (tap/notif), witnessed | 4.3 |
-| `Skip` | id, goalId, timestamp, reason | 4.5 |
-| `StreakStats` | current, longest, completionRate7/30/90, ignoredCount | 4.7 |
-| `RoastCard` | id, goalId, text, wave, watermark, createdAt | 4.8 |
-| `Buddy` | id, contact, inviteStatus | 4.6 |
-| `User` | id, defaults (rudeness/escalation/quietHours/sound), tier (free/paid) | 7.2, 12 |
-| `NotificationPayload` | goalId, wave, body, deepLink | 4.2 |
+| Model                 | Core fields                                                                         | PRD     |
+| --------------------- | ----------------------------------------------------------------------------------- | ------- |
+| `Goal`                | id, name, category, cue, schedule, rudenessLevel, escalationSpeed, buddyId?, paused | 4.1     |
+| `GoalCategory`        | enum: gym/study/chores/diet/sleep/custom                                            | 4.1     |
+| `Schedule`            | days[], timeOfDay, intervalHours?                                                   | 4.1     |
+| `RudenessLevel`       | enum 1–4                                                                            | 6       |
+| `EscalationSpeed`     | enum slow/normal/unhinged                                                           | 4.1     |
+| `EscalationWave`      | wave#, tactic (snark/shrink/stakes/roast)                                           | 3.3     |
+| `Completion`          | id, goalId, timestamp, source (tap/notif), witnessed                                | 4.3     |
+| `Skip`                | id, goalId, timestamp, reason                                                       | 4.5     |
+| `StreakStats`         | current, longest, completionRate7/30/90, ignoredCount                               | 4.7     |
+| `RoastCard`           | id, goalId, text, wave, watermark, createdAt                                        | 4.8     |
+| `Buddy`               | id, contact, inviteStatus                                                           | 4.6     |
+| `User`                | id, defaults (rudeness/escalation/quietHours/sound), tier (free/paid)               | 7.2, 12 |
+| `NotificationPayload` | goalId, wave, body, deepLink                                                        | 4.2     |
 
 ### 15.3 Services (`src/services`)
 
-| Service | Responsibility | Key methods → returns |
-|---|---|---|
-| `GoalService` | CRUD goals | `list()→Goal[]`, `get(id)→Goal`, `create/update/delete`, `pause(id)` |
-| `CompletionService` | mark done, streak math | `complete(goalId)→Completion`, `getStats(goalId)→StreakStats` |
-| `SkipService` | skip flow + friction | `skip(goalId,reason)→Skip` |
-| `RoastService` | fetch/personalize lines | `getLine(goalId,wave)→RoastCard` (cached pool + template interp, 8.4 — no live AI call v1) |
-| `NotificationService` | schedule + deep links | `scheduleForGoal(goal)`, `cancel(goalId)`, `handleTap(payload)` |
-| `BuddyService` | invite, notify buddy | `invite(contact)→Buddy`, `notifyCompletion/notifySkip` |
-| `ShareService` | build/export cards | `buildCard(roast)→RoastCard`, `export(card,target)` |
-| `UserService` | profile, defaults, tier | `getUser()→User`, `updateDefaults()`, `getTier()` |
-| `BillingService` | paywall gating | `canAddGoal()`, `canUseUnhinged()`, `purchase()` |
-| `EscalationService` | tactic-ladder logic | `nextWave(goal,history)→EscalationWave` (maps wave→tactic, 3.3) |
+| Service               | Responsibility          | Key methods → returns                                                                      |
+| --------------------- | ----------------------- | ------------------------------------------------------------------------------------------ |
+| `GoalService`         | CRUD goals              | `list()→Goal[]`, `get(id)→Goal`, `create/update/delete`, `pause(id)`                       |
+| `CompletionService`   | mark done, streak math  | `complete(goalId)→Completion`, `getStats(goalId)→StreakStats`                              |
+| `SkipService`         | skip flow + friction    | `skip(goalId,reason)→Skip`                                                                 |
+| `RoastService`        | fetch/personalize lines | `getLine(goalId,wave)→RoastCard` (cached pool + template interp, 8.4 — no live AI call v1) |
+| `NotificationService` | schedule + deep links   | `scheduleForGoal(goal)`, `cancel(goalId)`, `handleTap(payload)`                            |
+| `BuddyService`        | invite, notify buddy    | `invite(contact)→Buddy`, `notifyCompletion/notifySkip`                                     |
+| `ShareService`        | build/export cards      | `buildCard(roast)→RoastCard`, `export(card,target)`                                        |
+| `UserService`         | profile, defaults, tier | `getUser()→User`, `updateDefaults()`, `getTier()`                                          |
+| `BillingService`      | paywall gating          | `canAddGoal()`, `canUseUnhinged()`, `purchase()`                                           |
+| `EscalationService`   | tactic-ladder logic     | `nextWave(goal,history)→EscalationWave` (maps wave→tactic, 3.3)                            |
 
 ### 15.4 Lib (`src/lib`) — swappable SDK wrappers
 
-| Module | Wraps | Notes |
-|---|---|---|
-| `supabase.ts` | Supabase client | accounts, goals, history (8.2) |
-| `fcm.ts` | Firebase messaging | push delivery (8.2) |
-| `notifications.ts` | expo-notifications | local schedule + tap deep link |
-| `ai/provider.ts` | `generateRoast(context)` interface | swappable vendor (8.3); batch/cron only, not runtime |
+| Module             | Wraps                              | Notes                                                |
+| ------------------ | ---------------------------------- | ---------------------------------------------------- |
+| `supabase.ts`      | Supabase client                    | accounts, goals, history (8.2)                       |
+| `fcm.ts`           | Firebase messaging                 | push delivery (8.2)                                  |
+| `notifications.ts` | expo-notifications                 | local schedule + tap deep link                       |
+| `ai/provider.ts`   | `generateRoast(context)` interface | swappable vendor (8.3); batch/cron only, not runtime |
 
 ### 15.5 Where AI lives
 
