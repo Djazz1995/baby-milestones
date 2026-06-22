@@ -117,16 +117,18 @@ The tracker fundamentals standard habit apps have, and that give the roast bette
 - [x] Migration `0007_add_push_token.sql` (profiles.push_token for cron targeting). **Pending apply.**
 - **Done when (local):** ✅ goal schedules local reminders; tap deep-links in; agenda lists the day; stats shows week grid + streak. **Server escalation/digest/buddy-push:** deferred to a deploy pass (cron + Expo Push creds + dev build for real device tokens). UI sim run still pending.
 
-## Phase 6 — Roast content pipeline (§8.4)
+## Phase 6 — Roast content pipeline (§8.4) ✅ DONE (data path verified; UI sim run pending)
 
-- [ ] `ai/provider.ts` swappable interface (bake-off winner).
-- [ ] Batch/cron job → fills `roast_lines` shared pool (cat × level × wave).
-- [ ] `RoastService.getLine()` — read pool + string-interpolate cue/name/callback (NO live AI v1).
-- [ ] Wire `goal.blockers` (user-declared excuses) as `{excuse}` callback slots in stakes/roast waves — **must pass the §9.3 safety filter first** (excuse OK, person/mental-health never). Captured in Phase 3.
-- [ ] **Daily-digest roast lines** — multi-goal summary variant (new "digest" wave/template, e.g. `{count}` tasks + callback). Same cached-pool + interpolation model, no live AI. Feeds the Phase 5 digest push. Through §9.3 filter.
-- [ ] **Partial-completion roast lines** — for quantified goals (Phase 4.6), mock the ratio not just the skip. Template slots `{done}` / `{target}` / `{unit}`. Cached pool keyed by completion ratio bucket (e.g. <25% / ~half / almost). Roast the effort level, never the person (§3.1). Through §9.3 filter. (Tone target: dry, sarcastic praise of a weak partial — actual lines come from the pool, not hardcoded.)
-- [ ] Post-generation safety filter (§9.3) + blocklist + kill switch.
-- **Done when:** notifications pull real cached roast lines, filtered.
+- [x] `src/lib/ai/provider.ts` swappable interface (`RoastProvider`/`generate`) — Anthropic impl stubbed (pending §0.1 bake-off); v1 default = **offline seed corpus** (no spend, user-chosen).
+- [x] Batch job → fills `roast_lines` shared pool — `scripts/generate-roasts.mjs` (`npm run roast:generate`): hand-authored corpus (cat × level × wave + skip + digest + partial), every line cleared by the §9.3 mirror, emits idempotent `0009_seed_roast_lines.sql` (247 lines). No service-role key needed — applied via the normal migration flow.
+- [x] `RoastService.getLine()` / `lineText` / `getSkip` / `getDigest` / `getPartial` — read pool + **slot-eligibility filter** + string-interpolate `{name}/{cue}/{excuse}/{count}/{done}/{target}/{unit}` (NO live AI v1). `src/services/roastService.ts` + `useRoast` hook.
+- [x] Wire `goal.blockers` as `{excuse}` slots — `safeExcuse()` picks the first blocker that clears `isSafeExcuse` (§9.3); lines needing `{excuse}` are only chosen when a safe one exists.
+- [x] **Daily-digest roast lines** — `kind='digest'` pool (slot `{count}`), `roastService.getDigest()`. Feeds the Phase 5 digest push (cron wiring still deferred). Through §9.3.
+- [x] **Partial-completion roast lines** — `kind='partial'`, keyed by ratio bucket (`low`/`half`/`almost`), slots `{done}/{target}/{unit}`. `getPartial()` wired into goal-detail Done verdict for quantified goals. Through §9.3.
+- [x] Post-generation safety filter (§9.3) — `src/lib/safety.ts` (blocklist: body/identity/mental-health/self-harm/person-worth) + **kill switch** (`EXPO_PUBLIC_ROAST_KILL_SWITCH` → neutral copy). Mirrored in the generator + smoke.
+- [x] Replaced placeholders — SkipScreen (`getSkip`), notificationService Wave-1 body (`lineText`), goal-detail completion verdict (`getPartial`).
+- [x] Migration `0008_roast_pool_variants.sql` — `kind`/`bucket` cols, nullable wave/tactic/category, constraints + indexes.
+- **Done when:** notifications pull real cached roast lines, filtered. — ✅ `0008` + `0009` applied to cloud; `npm run db:smoke6` passes (247 lines, all 4 kinds, all pass §9.3, wave line interpolates). tsc/lint/web-export green. UI sim run still pending.
 
 ## Phase 7 — Share + monetization
 

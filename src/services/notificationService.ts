@@ -1,9 +1,10 @@
 /** Local notification scheduling per goal + tap routing. AGENTS.md §4.2, §15.3.
  *
- *  v1 schedules Wave-1 reminders locally at each goal's scheduled slot times.
- *  Conditional escalation (Wave 2+ only if ignored) and weekly-target/digest
- *  nudges are server-driven (§8.2) — see the Edge Function scaffold. Body copy
- *  here is a placeholder until the Phase 6 cached roast pool lands. */
+ *  v1 schedules Wave-1 reminders locally at each goal's scheduled slot times,
+ *  with body copy pulled from the Phase 6 cached roast pool (RoastService —
+ *  pool read + string interp, NO live AI §8.4). Conditional escalation (Wave 2+
+ *  only if ignored) and weekly-target/digest nudges are server-driven (§8.2) —
+ *  see the Edge Function scaffold. */
 
 import { Platform } from 'react-native';
 
@@ -16,16 +17,18 @@ import {
   type NotifData,
 } from '@/lib/notifications';
 import type { Goal } from '@/models';
-import { escalationService } from '@/services/escalationService';
+import { roastService } from '@/services/roastService';
 
 /** Local notifications are native-only; no-op on web. */
 const SUPPORTED = Platform.OS !== 'web';
 
-/** Placeholder Wave-1 copy (Phase 6 replaces with cached, filtered lines). */
-function wave1Body(goal: Goal): string {
-  const tactic = escalationService.nextWave(goal.escalationSpeed, 0)?.tactic ?? 'snark';
-  void tactic; // wave→tactic mapping reserved for Phase 6 copy selection.
-  return goal.cue ? `${goal.cue}. It’s staring at you.` : `${goal.name}. Now. No excuses.`;
+/** Wave-1 copy from the cached pool; neutral fallback if the pool is unreachable. */
+async function wave1Body(goal: Goal): Promise<string> {
+  try {
+    return await roastService.lineText(goal, 1);
+  } catch {
+    return goal.cue ? `${goal.cue}.` : `${goal.name}. Time to go.`;
+  }
 }
 
 function parseTime(time: string): { hour: number; minute: number } {
@@ -46,6 +49,7 @@ export const notificationService = {
     await this.cancelForGoal(goal.id);
     if (goal.paused || goal.archived) return;
 
+    const body = await wave1Body(goal);
     for (const slot of goal.schedule.slots) {
       const { hour, minute } = parseTime(slot.time);
       const data: NotifData = {
@@ -58,7 +62,7 @@ export const notificationService = {
         hour,
         minute,
         title: 'RoastMode',
-        body: wave1Body(goal),
+        body,
         data,
       });
     }

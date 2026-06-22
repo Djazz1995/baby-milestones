@@ -7,43 +7,10 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { useGoal } from '@/hooks/use-goal';
+import { useRoast } from '@/hooks/use-roast';
 import { useSkip } from '@/hooks/use-skip';
-import type { RudenessLevel } from '@/models';
 
 const REASONS = ['No time', 'Too tired', 'Not feeling it', 'Sick', 'Other'];
-
-/**
- * Placeholder skip roasts (§4.5), tiered by rudeness level (§6). Phase 6
- * replaces these with the cached, model-generated pool. Golden rule (§3.1):
- * roast the excuse and the behavior, never the person.
- */
-const SKIP_ROASTS: Record<RudenessLevel, ((reason: string) => string)[]> = {
-  1: [
-    (r) => `Skipping for “${r}”. That’s a little disappointing, but okay.`,
-    () => `Logged. We’ll pretend this didn’t happen. Try tomorrow?`,
-  ],
-  2: [
-    (r) => `“${r}.” Excuse received and filed. Streak’s bleeding. Fix it tomorrow.`,
-    () => `Skip logged. No medals for showing up to bail. Move.`,
-  ],
-  3: [
-    (r) => `“${r}” — the hit single that never stops playing. Streak’s dead, and you killed it.`,
-    () => `Skipped again. At this point the gym is just a building you’ve heard rumors about.`,
-    (r) => `Bold of you to type “${r}” and hit confirm. The couch is proud. Nobody else is.`,
-  ],
-  4: [
-    (r) =>
-      `The Council of Goals has reviewed “${r}.” Verdict: denied, embarrassing, and weirdly on-brand. Streak revoked.`,
-    () =>
-      `BREAKING: local legend folds to the couch for the umpteenth time. Couch declares a dynasty. Crowd goes mild.`,
-    (r) => `“${r}.” Magnificent work of fiction. The streak wept, then perished. Curtains.`,
-  ],
-};
-
-function pickRoast(level: RudenessLevel, reason: string): string {
-  const bank = SKIP_ROASTS[level];
-  return bank[Math.floor(Math.random() * bank.length)](reason);
-}
 
 const COUNTDOWN_SECONDS = 5;
 
@@ -53,6 +20,7 @@ export function SkipScreen({ goalId }: Props) {
   const router = useRouter();
   const { data: goal } = useGoal(goalId);
   const { skip, skipping } = useSkip();
+  const { getSkip } = useRoast();
   const [step, setStep] = useState<'reason' | 'confirm' | 'done'>('reason');
   const [reason, setReason] = useState<string>();
   const [countdown, setCountdown] = useState(COUNTDOWN_SECONDS);
@@ -84,7 +52,10 @@ export function SkipScreen({ goalId }: Props) {
     if (!reason) return;
     try {
       await skip(goalId, reason);
-      setRoast(pickRoast(goal?.rudenessLevel ?? 3, reason));
+      const line = await getSkip(goal?.rudenessLevel ?? 3, reason).catch(
+        () => 'Skip logged. Counts against your streak.'
+      );
+      setRoast(line);
       setStep('done');
     } catch (e) {
       setError((e as Error).message);

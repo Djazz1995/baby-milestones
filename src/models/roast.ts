@@ -3,17 +3,31 @@
 import type { GoalCategory, RudenessLevel } from './goal';
 import type { EscalationTactic } from './escalation';
 
+/** What surface a pooled line is for (§4.2, §4.3, §4.5). */
+export type RoastKind = 'wave' | 'skip' | 'digest' | 'partial';
+
+/** Completion-ratio band for `partial` lines (§4.3): <25% / ~half / almost. */
+export type PartialBucket = 'low' | 'half' | 'almost';
+
 /**
- * One line in the shared, pre-generated pool (§8.4). NOT per-user — keyed by
- * (category, level, wave) and reused across all users. `text` may contain
- * template slots (e.g. {cue}, {name}) filled at send time by string interp.
+ * One line in the shared, pre-generated pool (§8.4). NOT per-user — reused
+ * across all users and keyed by `kind`:
+ * - `wave`    → (category, level, wave, tactic)
+ * - `skip`    → (level) [category optional]
+ * - `digest`  → (level) [cross-category, so category is null]
+ * - `partial` → (category, level, bucket)
+ * `text` may contain template slots (e.g. {cue}, {name}, {excuse}, {count},
+ * {done}/{target}/{unit}) filled at send time by string interpolation — never
+ * a live AI call (§8.4).
  */
 export type RoastLine = {
   id: string;
-  category: GoalCategory;
+  kind: RoastKind;
+  category?: GoalCategory;
   level: RudenessLevel;
-  wave: number;
-  tactic: EscalationTactic;
+  wave?: number;
+  tactic?: EscalationTactic;
+  bucket?: PartialBucket;
   text: string;
 };
 

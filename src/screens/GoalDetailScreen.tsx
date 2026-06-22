@@ -16,6 +16,7 @@ import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { useComplete } from '@/hooks/use-complete';
 import { useGoal } from '@/hooks/use-goal';
+import { useRoast } from '@/hooks/use-roast';
 import { useStreak } from '@/hooks/use-streak';
 import { useTodayStatuses } from '@/hooks/use-today-status';
 import { useTheme } from '@/hooks/use-theme';
@@ -65,7 +66,8 @@ export function GoalDetailScreen({ goalId }: Props) {
   const { data: stats, refetch: refetchStats } = useStreak(goalId);
   const { data: statuses, refetch: refetchStatus } = useTodayStatuses(goal ? [goal] : []);
   const { complete, completing } = useComplete();
-  const [justDone, setJustDone] = useState(false);
+  const { getPartial } = useRoast();
+  const [verdict, setVerdict] = useState<string>();
   const [amountDraft, setAmountDraft] = useState('');
 
   // Refresh stats/goal when returning (e.g. after a skip or edit).
@@ -90,7 +92,13 @@ export function GoalDetailScreen({ goalId }: Props) {
     }
     try {
       await complete(goalId, 'tap', Boolean(goal?.buddyId), amount);
-      setJustDone(true);
+      // Partial quantified log → roast the ratio (§4.3); full/plain → win line.
+      const partial =
+        goal && typeof amount === 'number' && typeof goal.targetValue === 'number' && amount < goal.targetValue;
+      const line = partial
+        ? await getPartial(goal!, amount!).catch(() => undefined)
+        : undefined;
+      setVerdict(line ?? 'Logged. The couch loses this round.');
       setAmountDraft('');
       await refetchStats();
     } catch (e) {
@@ -237,9 +245,9 @@ export function GoalDetailScreen({ goalId }: Props) {
           />
         </View>
 
-        {justDone ? (
+        {verdict ? (
           <ThemedText type="smallBold" style={{ color: '#30A46C' }}>
-            Logged. The couch loses this round.
+            {verdict}
           </ThemedText>
         ) : null}
 

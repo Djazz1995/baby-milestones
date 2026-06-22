@@ -66,7 +66,9 @@
     "db:smoke3": "node --env-file=.env scripts/smoke-phase3.mjs",
     "db:smoke4": "node --env-file=.env scripts/smoke-phase4.mjs",
     "db:smoke4_5": "node --env-file=.env scripts/smoke-phase4_5.mjs",
-    "db:smoke4_6": "node --env-file=.env scripts/smoke-phase4_6.mjs"
+    "db:smoke4_6": "node --env-file=.env scripts/smoke-phase4_6.mjs",
+    "db:smoke6": "node --env-file=.env scripts/smoke-phase6.mjs",
+    "roast:generate": "node scripts/generate-roasts.mjs"
   },
   "private": true
 }
