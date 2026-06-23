@@ -28,7 +28,7 @@ are the riskiest subsystem and the real product — don't leave too late, don't 
 Core build (Phases 1–8 + Phase 5 server logic) is code-complete and DB-verified via smokes. Ordered next steps:
 
 1. [x] **Commit the work** — Phases 5(server)–8 checkpointed before live testing.
-2. [ ] **Run in iOS simulator** — first real UI pass: onboarding → create goal → Done → skip flow → share card → settings → archive/unarchive. Fix what the sim surfaces; clears the "UI sim run pending" notes. (Notifications won't fire here — needs a dev build.)
+2. [~] **Run in iOS simulator** — ✅ app builds + launches on the iOS 26.5 sim (iPhone 17 Pro) via `npx expo run:ios`; onboarding → Home verified rendering clean, no crashes. Fixed en route: removed unused `@expo/ui` (incompatible with SDK 54, broke the iOS build); web-crash guard on the notification hook. **Still to walk:** create goal → Done → skip → share → agenda/stats → settings. (Notifications won't fire in sim — needs a dev build.)
 3. [ ] **EAS dev build** — required before notifications work at all (`eas build --profile development`). Gives real push tokens + lets the cron reach the device.
 4. [ ] **Go live on notifications** — `supabase functions deploy escalation-cron`; schedule every ~5 min (pg_cron / dashboard); add Expo Push creds (FCM + APNs); verify on device (ignore a goal → Wave 2/3/4 land; morning digest arrives).
 5. [ ] **AI content pass** — run the Phase 0.1 bake-off (pick funniest non-refusing model); wire `anthropicProvider.generate()`, set `ANTHROPIC_API_KEY` + `ROAST_PROVIDER=anthropic`; `npm run roast:generate` → real-model pool (~50 lines per cat×level×wave) through the §9.3 filter.

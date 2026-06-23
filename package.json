@@ -4,7 +4,6 @@
   "version": "1.0.0",
   "dependencies": {
     "@expo/html-elements": "^0.10.1",
-    "@expo/ui": "~0.2.0-beta.9",
     "@gluestack-ui/core": "^3.0.25",
     "@gluestack-ui/utils": "^3.0.21",
     "@legendapp/motion": "^2.5.3",
@@ -58,8 +57,8 @@
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint",
     "format": "prettier --write .",

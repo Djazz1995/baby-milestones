@@ -150,12 +150,20 @@ export function GoalDetailScreen({ goalId }: Props) {
 
   const next = nextReminder(goal.schedule.slots);
   const scheduledToday = isScheduledToday(goal.schedule.slots);
-  const todayStatus = statuses[goal.id];
+  const today = statuses[goal.id];
+  const todayStatus = today?.status;
   const quantified = typeof goal.targetValue === 'number';
+  const weekTarget = goal.schedule.weeklyTarget;
+  const weekDone = today?.weekDone ?? 0;
+  const weekMet = weekTarget != null && weekDone >= weekTarget;
   // Binary goals complete once per day; block re-tapping. Quantified goals may
   // keep logging to accumulate toward the target.
   const completedToday = todayStatus === 'done';
   const doneLocked = completedToday && !quantified;
+  // Fixed-schedule goal not scheduled today (weekly handled by weekMet below):
+  // not actionable. 'off' from statusService; exclude paused/archived states.
+  const notDueToday =
+    !weekMet && weekTarget == null && todayStatus === 'off' && !goal.paused && !goal.archived;
   const todayLabel =
     todayStatus === 'done'
       ? { text: 'Done today', color: '#30A46C' }
@@ -194,12 +202,17 @@ export function GoalDetailScreen({ goalId }: Props) {
             {goal.paused ? ' · paused' : ''}
           </ThemedText>
           <ThemedText type="small" themeColor="textSecondary">
-            {goal.schedule.weeklyTarget
-              ? `${goal.schedule.weeklyTarget}× per week`
+            {weekTarget
+              ? `${weekTarget} ${weekTarget === 1 ? 'day' : 'days'} a week`
               : goal.schedule.slots.length > 0
                 ? goal.schedule.slots.map(slotText).join(', ')
                 : 'No reminders set'}
           </ThemedText>
+          {weekTarget ? (
+            <ThemedText type="smallBold" style={{ color: weekMet ? '#30A46C' : '#3c87f7' }}>
+              This week: {weekDone}/{weekTarget} done
+            </ThemedText>
+          ) : null}
           {typeof goal.targetValue === 'number' ? (
             <ThemedText type="small" themeColor="textSecondary">
               Target: {goal.targetValue} {goal.unit ?? ''}
@@ -265,7 +278,11 @@ export function GoalDetailScreen({ goalId }: Props) {
           </View>
         ) : null}
 
-        {doneLocked ? (
+        {weekMet ? (
+          <Button title="Done this week ✓" disabled style={styles.doneHero} />
+        ) : notDueToday ? (
+          <Button title="Not due today" disabled style={styles.doneHero} />
+        ) : doneLocked ? (
           <Button title="Done today ✓" disabled style={styles.doneHero} />
         ) : (
           <Button title="Done ✓" onPress={onDone} loading={completing} style={styles.doneHero} />

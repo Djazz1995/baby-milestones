@@ -96,7 +96,7 @@ export function AgendaScreen() {
             </ThemedText>
           ) : (
             entries.map(({ goal, times, flexible }) => {
-              const status = isToday ? statuses[goal.id] : undefined;
+              const status = isToday ? statuses[goal.id]?.status : undefined;
               const color = status ? STATUS_COLOR[status] : null;
               return (
                 <Link key={goal.id} href={`/goal/${goal.id}`} asChild>
@@ -106,7 +106,7 @@ export function AgendaScreen() {
                         <ThemedText type="smallBold">{goal.name}</ThemedText>
                         <ThemedText type="small" themeColor="textSecondary">
                           {flexible
-                            ? `${goal.schedule.weeklyTarget}× per week${times.length ? ` · ${times.join(', ')}` : ' · any time'}`
+                            ? `${goal.schedule.weeklyTarget} ${goal.schedule.weeklyTarget === 1 ? 'day' : 'days'} a week`
                             : times.join(', ')}
                         </ThemedText>
                       </View>

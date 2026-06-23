@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, TextInput } from 'react-native';
 
 import { Button } from '@/components/button';
@@ -9,6 +9,7 @@ import { Spacing } from '@/constants/theme';
 import { useBilling } from '@/hooks/use-billing';
 import { useGoal } from '@/hooks/use-goal';
 import { useTheme } from '@/hooks/use-theme';
+import { useUser } from '@/hooks/use-user';
 import type { EscalationSpeed, GoalCategory, RudenessLevel, Schedule } from '@/models';
 import { goalService } from '@/services/goalService';
 import { notificationService } from '@/services/notificationService';
@@ -36,7 +37,9 @@ export function GoalEditScreen({ goalId }: Props) {
   const theme = useTheme();
   const inputStyle = useInputStyle();
   const { data: existing } = useGoal(goalId);
+  const { data: user } = useUser();
   const { canAddGoal, canUseRudeness, canUseBuddy } = useBilling();
+  const appliedDefaults = useRef(false);
 
   const [name, setName] = useState('');
   const [category, setCategory] = useState<GoalCategory>('gym');
@@ -69,6 +72,14 @@ export function GoalEditScreen({ goalId }: Props) {
     setBuddyId(existing.buddyId);
     setCollectionId(existing.collectionId);
   }, [existing]);
+
+  // New goals inherit the user's global defaults (§7.2). Once, before edits.
+  useEffect(() => {
+    if (goalId || !user || appliedDefaults.current) return;
+    appliedDefaults.current = true;
+    setRudeness(user.defaults.rudenessLevel);
+    setSpeed(user.defaults.escalationSpeed);
+  }, [goalId, user]);
 
   const descriptor = GOAL_TYPES[category];
   const has = (id: string) => descriptor.blocks.includes(id as never);

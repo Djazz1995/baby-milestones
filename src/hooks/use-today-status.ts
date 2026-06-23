@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import type { Goal, TodayStatus } from '@/models';
+import type { Goal, GoalToday } from '@/models';
 import { statusService } from '@/services/statusService';
 
-/** Today's status (done/skipped/pending/off) for a list of goals (§4.7). */
+/** Today's snapshot (status + weekly progress) for a list of goals (§4.7). */
 export function useTodayStatuses(goals: Goal[]) {
-  const [data, setData] = useState<Record<string, TodayStatus>>({});
+  const [data, setData] = useState<Record<string, GoalToday>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error>();
 

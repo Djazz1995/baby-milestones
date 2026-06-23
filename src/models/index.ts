@@ -9,7 +9,7 @@ export type {
   ScheduleSlot,
 } from './goal';
 export type { EscalationWave, EscalationTactic } from './escalation';
-export type { Completion, CompletionSource, Skip, StreakStats, TodayStatus } from './completion';
+export type { Completion, CompletionSource, Skip, StreakStats, TodayStatus, GoalToday } from './completion';
 export type { Buddy, BuddyInviteStatus } from './buddy';
 export type { Collection } from './collection';
 export type { RoastLine, RoastCard, RoastKind, PartialBucket } from './roast';

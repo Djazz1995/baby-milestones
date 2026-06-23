@@ -34,6 +34,17 @@ export type Skip = {
  */
 export type TodayStatus = 'done' | 'skipped' | 'pending' | 'off';
 
+/**
+ * Today's snapshot for one goal (§4.7). For weekly-target goals, `weekDone` /
+ * `weekTarget` drive the "N/target this week" progress UI; `weekTarget` is unset
+ * for fixed-schedule goals.
+ */
+export type GoalToday = {
+  status: TodayStatus;
+  weekDone: number;
+  weekTarget?: number;
+};
+
 /** Derived per-goal stats (computed from completions/skips, §4.7). */
 export type StreakStats = {
   current: number;

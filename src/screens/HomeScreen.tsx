@@ -10,7 +10,7 @@ import { BottomTabInset, Spacing } from '@/constants/theme';
 import { useCollections } from '@/hooks/use-collections';
 import { useGoals } from '@/hooks/use-goals';
 import { useTodayStatuses } from '@/hooks/use-today-status';
-import type { Collection, Goal, TodayStatus } from '@/models';
+import type { Collection, Goal, GoalToday, TodayStatus } from '@/models';
 
 const UNGROUPED = 'Ungrouped';
 
@@ -77,7 +77,7 @@ export function HomeScreen() {
                   )
                 : undefined
             }
-            renderItem={({ item }) => <GoalRow goal={item} status={statuses[item.id]} />}
+            renderItem={({ item }) => <GoalRow goal={item} today={statuses[item.id]} />}
             ListEmptyComponent={
               <ThemedText type="small" style={styles.center}>
                 No goals yet. Add one to get roasted.
@@ -101,8 +101,20 @@ const STATUS_META: Record<TodayStatus, { label: string; color: string } | null> 
   off: null,
 };
 
-function StatusBadge({ status }: { status?: TodayStatus }) {
-  const meta = status ? STATUS_META[status] : null;
+/** Weekly goals show N/target progress; fixed goals show today's status. */
+function TodayBadge({ today }: { today?: GoalToday }) {
+  if (!today) return null;
+  if (today.weekTarget != null) {
+    const met = today.weekDone >= today.weekTarget;
+    return (
+      <View style={[styles.badge, { backgroundColor: met ? '#30A46C' : '#3c87f7' }]}>
+        <ThemedText type="small" style={styles.badgeText}>
+          {today.weekDone}/{today.weekTarget}
+        </ThemedText>
+      </View>
+    );
+  }
+  const meta = STATUS_META[today.status];
   if (!meta) return null;
   return (
     <View style={[styles.badge, { backgroundColor: meta.color }]}>
@@ -114,12 +126,14 @@ function StatusBadge({ status }: { status?: TodayStatus }) {
 }
 
 function cadenceText(goal: Goal): string {
-  if (goal.schedule.weeklyTarget) return `${goal.schedule.weeklyTarget}× per week`;
+  if (goal.schedule.weeklyTarget) {
+    return `${goal.schedule.weeklyTarget} ${goal.schedule.weeklyTarget === 1 ? 'day' : 'days'} a week`;
+  }
   const n = goal.schedule.slots.length;
   return `${n} ${n === 1 ? 'reminder' : 'reminders'}`;
 }
 
-function GoalRow({ goal, status }: { goal: Goal; status?: TodayStatus }) {
+function GoalRow({ goal, today }: { goal: Goal; today?: GoalToday }) {
   return (
     <Link href={`/goal/${goal.id}`} asChild>
       <Pressable>
@@ -131,7 +145,7 @@ function GoalRow({ goal, status }: { goal: Goal; status?: TodayStatus }) {
               {goal.paused ? ' · paused' : ''} · {cadenceText(goal)}
             </ThemedText>
           </View>
-          <StatusBadge status={status} />
+          <TodayBadge today={today} />
           <ThemedText type="small" themeColor="textSecondary">
             ›
           </ThemedText>

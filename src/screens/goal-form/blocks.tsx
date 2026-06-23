@@ -134,18 +134,18 @@ export function ScheduleBlock({
     labelOptions?.[0].time ?? defaults.defaultTime ?? '07:00'
   );
   const [selectedLabel, setSelectedLabel] = useState<string | undefined>(labelOptions?.[0].label);
-  const [showWeeklyTimes, setShowWeeklyTimes] = useState(slots.length > 0);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [timeDraft, setTimeDraft] = useState<Date>(() => timeToDate(builderTime));
   const [error, setError] = useState<string>();
 
   function setMode(next: 'fixed' | 'weekly') {
-    if (next === 'weekly') onChange({ slots, weeklyTarget: defaults.weeklyTarget ?? 3 });
+    // Weekly goals are day-count only — no clock reminders, so clear slots.
+    if (next === 'weekly') onChange({ slots: [], weeklyTarget: defaults.weeklyTarget ?? 3 });
     else onChange({ slots });
   }
 
   function setWeekly(n: number) {
-    onChange({ slots, weeklyTarget: n });
+    onChange({ slots: [], weeklyTarget: n });
   }
 
   function toggleBuilderDay(d: number) {
@@ -166,27 +166,28 @@ export function ScheduleBlock({
       if (!next.some((x) => slotKey(x) === slotKey(slot))) next.push(slot);
     }
     next.sort((a, b) => a.day - b.day || a.time.localeCompare(b.time));
-    onChange(mode === 'weekly' ? { slots: next, weeklyTarget: value.weeklyTarget } : { slots: next });
+    onChange({ slots: next });
   }
 
   function removeSlot(slot: ScheduleSlot) {
     const next = slots.filter((x) => slotKey(x) !== slotKey(slot));
-    onChange(mode === 'weekly' ? { slots: next, weeklyTarget: value.weeklyTarget } : { slots: next });
+    onChange({ slots: next });
   }
 
-  const showBuilder = mode === 'fixed' || showWeeklyTimes;
+  // The day/time builder is fixed-schedule only; weekly is a pure day count.
+  const showBuilder = mode === 'fixed';
 
   return (
     <Field label="Schedule">
       <View style={s.chips}>
         <Chip text="Specific days & times" active={mode === 'fixed'} onPress={() => setMode('fixed')} />
-        <Chip text="X times a week" active={mode === 'weekly'} onPress={() => setMode('weekly')} />
+        <Chip text="X days a week" active={mode === 'weekly'} onPress={() => setMode('weekly')} />
       </View>
 
       {mode === 'weekly' ? (
         <>
           <ThemedText type="small" themeColor="textSecondary">
-            Hit it this many times a week, any day. The streak counts weekly hits.
+            Hit it this many days a week, any day. The streak counts weekly hits.
           </ThemedText>
           <View style={s.chips}>
             {[1, 2, 3, 4, 5, 6, 7].map((n) => (
@@ -198,15 +199,6 @@ export function ScheduleBlock({
               />
             ))}
           </View>
-          <Pressable
-            onPress={() => setShowWeeklyTimes((v) => !v)}
-            hitSlop={8}
-            style={({ pressed }) => [s.pillButton, pressed && { opacity: 0.6 }]}
-          >
-            <ThemedText type="smallBold" style={s.pillButtonText}>
-              {showWeeklyTimes ? '− Remove reminder times' : '+ Add reminder times'}
-            </ThemedText>
-          </Pressable>
         </>
       ) : null}
 

@@ -1,7 +1,7 @@
 /** Per-goal "today" status (done / skipped / pending / off). AGENTS.md §4.7. */
 
 import { supabase } from '@/lib/supabase';
-import type { Goal, TodayStatus } from '@/models';
+import type { Goal, GoalToday, TodayStatus } from '@/models';
 
 const isoDay = (d: Date): number => (d.getDay() === 0 ? 7 : d.getDay());
 
@@ -53,9 +53,9 @@ export function todayStatusFor(
 }
 
 export const statusService = {
-  /** Today's status for each goal, in one pair of queries. */
-  async getTodayStatuses(goals: Goal[]): Promise<Record<string, TodayStatus>> {
-    const out: Record<string, TodayStatus> = {};
+  /** Today's snapshot for each goal (status + weekly progress), in one pair of queries. */
+  async getTodayStatuses(goals: Goal[]): Promise<Record<string, GoalToday>> {
+    const out: Record<string, GoalToday> = {};
     if (goals.length === 0) return out;
 
     const now = new Date();
@@ -79,8 +79,12 @@ export const statusService = {
       (skipByGoal.get(r.goal_id) ?? skipByGoal.set(r.goal_id, []).get(r.goal_id)!).push(r.ts);
     }
 
+    const weekStartMs = startOfWeek(now).getTime();
     for (const g of goals) {
-      out[g.id] = todayStatusFor(g, compByGoal.get(g.id) ?? [], skipByGoal.get(g.id) ?? [], now);
+      const comps = compByGoal.get(g.id) ?? [];
+      const status = todayStatusFor(g, comps, skipByGoal.get(g.id) ?? [], now);
+      const weekDone = comps.filter((ts) => new Date(ts).getTime() >= weekStartMs).length;
+      out[g.id] = { status, weekDone, weekTarget: g.schedule.weeklyTarget };
     }
     return out;
   },
