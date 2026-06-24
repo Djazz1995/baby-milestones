@@ -42,3 +42,6 @@ example
 # generated native folders
 /ios
 /android
+
+# third-party skill (own git repo)
+.claude/skills/humanizer/

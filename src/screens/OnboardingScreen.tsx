@@ -7,6 +7,12 @@ import { Button } from '@/components/button';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
+import {
+  ESCALATION_LOCKED,
+  LOCKED_ESCALATION,
+  LOCKED_RUDENESS,
+  RUDENESS_LOCKED,
+} from '@/lib/config';
 import type { EscalationSpeed, GoalCategory, RudenessLevel, Schedule } from '@/models';
 import { goalService } from '@/services/goalService';
 import { notificationService } from '@/services/notificationService';
@@ -16,7 +22,16 @@ import { EscalationBlock, RudenessBlock } from './goal-form/blocks';
 import { GOAL_TYPES } from './goal-form/config';
 
 type Step = 'welcome' | 'consent' | 'defaults' | 'push' | 'goal';
-const ORDER: Step[] = ['welcome', 'consent', 'defaults', 'push', 'goal'];
+// The "defaults" step only has the rudeness/escalation pickers — drop it when
+// both are locked (nothing to configure).
+const SHOW_DEFAULTS = !(RUDENESS_LOCKED && ESCALATION_LOCKED);
+const ORDER: Step[] = [
+  'welcome',
+  'consent',
+  ...(SHOW_DEFAULTS ? (['defaults'] as Step[]) : []),
+  'push',
+  'goal',
+];
 
 /** First-goal habit templates (§14.1 / Phase 8) — one tap to a real goal. */
 const TEMPLATES: { key: string; category: GoalCategory; name: string }[] = [
@@ -43,8 +58,10 @@ function templateSchedule(category: GoalCategory): Schedule {
 export function OnboardingScreen() {
   const router = useRouter();
   const [step, setStep] = useState<Step>('welcome');
-  const [rudeness, setRudeness] = useState<RudenessLevel>(3);
-  const [speed, setSpeed] = useState<EscalationSpeed>('normal');
+  const [rudeness, setRudeness] = useState<RudenessLevel>(RUDENESS_LOCKED ? LOCKED_RUDENESS : 3);
+  const [speed, setSpeed] = useState<EscalationSpeed>(
+    ESCALATION_LOCKED ? LOCKED_ESCALATION : 'normal'
+  );
   const [busy, setBusy] = useState(false);
 
   const idx = ORDER.indexOf(step);
@@ -127,26 +144,30 @@ export function OnboardingScreen() {
             </>
           ) : step === 'consent' ? (
             <>
-              <ThemedText type="title">Heads up</ThemedText>
+              <ThemedText type="title">Read this first</ThemedText>
               <ThemedText type="default" themeColor="textSecondary">
-                This app uses harsh, sarcastic humor to motivate you. It’s opt-in
-                and fully under your control — you set the rudeness level, and you
-                can dial it down or turn notifications off anytime.
+                RoastMode will roast you — personally, bluntly, and on purpose. It’ll call out
+                your excuses, your flaking, and your “I’ll start Monday” energy. It’s mean because
+                that’s the point.
+              </ThemedText>
+              <ThemedText type="default" themeColor="textSecondary">
+                You might get offended. That’s the deal you’re opting into. You can mute any goal
+                or turn notifications off anytime.
               </ThemedText>
               <ThemedText type="small" themeColor="textSecondary">
-                We roast the excuse and the behavior — never you. No comments on
-                body, weight, appearance, identity, or mental health.
+                Hard lines we never cross: nothing about your body, weight, looks, identity, or
+                mental health. The roast is about your habits, not who you are.
               </ThemedText>
-              <Button title="I’m in" onPress={next} />
+              <Button title="I can take it" onPress={next} />
             </>
           ) : step === 'defaults' ? (
             <>
-              <ThemedText type="title">Set the tone</ThemedText>
+              <ThemedText type="title">Set the pace</ThemedText>
               <ThemedText type="small" themeColor="textSecondary">
-                Your default for new goals. Change it per goal later.
+                How fast should the roasts escalate when you ignore a goal?
               </ThemedText>
-              <RudenessBlock value={rudeness} onChange={setRudeness} />
-              <EscalationBlock value={speed} onChange={setSpeed} />
+              {!RUDENESS_LOCKED ? <RudenessBlock value={rudeness} onChange={setRudeness} /> : null}
+              {!ESCALATION_LOCKED ? <EscalationBlock value={speed} onChange={setSpeed} /> : null}
               <Button title="Next" onPress={saveDefaults} loading={busy} />
             </>
           ) : step === 'push' ? (

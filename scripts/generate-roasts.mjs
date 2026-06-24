@@ -24,13 +24,13 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const OUT = join(__dirname, '..', 'supabase', 'migrations', '0009_seed_roast_lines.sql');
 
 // --- Safety mirror (§9.3) — keep in sync with src/lib/safety.ts -------------
+// Ego/character jabs allowed (consent-gated); only the four hard categories block.
 const BLOCKED = [
   /\b(fat|fatso|obese|chubby|skinny|ugly|hideous|disgusting)\b/i,
   /\b(your (face|body|weight|looks|teeth|skin))\b/i,
   /\b(retard|retarded|tranny|fag|faggot|slut|whore)\b/i,
   /\b(kill yourself|kys|hang yourself|end it all|suicide|cut yourself|worthless human|you should die)\b/i,
   /\b(depress(ed|ion)|bipolar|psycho|schizo|mentally ill)\b/i,
-  /\byou(?:'?re| are)\s+(a\s+)?(loser|failure|waste|worthless|pathetic|nobody|garbage|trash)\b/i,
 ];
 const isSafe = (t) => !BLOCKED.some((re) => re.test(t));
 

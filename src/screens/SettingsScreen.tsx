@@ -10,6 +10,7 @@ import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useUser } from '@/hooks/use-user';
 import { ensureSession } from '@/lib/auth';
+import { ESCALATION_LOCKED, RUDENESS_LOCKED } from '@/lib/config';
 import type { NotificationSound } from '@/models';
 import { dataService } from '@/services/dataService';
 
@@ -90,14 +91,18 @@ export function SettingsScreen() {
           {d ? (
             <>
               <ThemedText type="smallBold">Defaults for new goals</ThemedText>
-              <RudenessBlock
-                value={d.rudenessLevel}
-                onChange={(v) => updateDefaults({ rudenessLevel: v })}
-              />
-              <EscalationBlock
-                value={d.escalationSpeed}
-                onChange={(v) => updateDefaults({ escalationSpeed: v })}
-              />
+              {!RUDENESS_LOCKED ? (
+                <RudenessBlock
+                  value={d.rudenessLevel}
+                  onChange={(v) => updateDefaults({ rudenessLevel: v })}
+                />
+              ) : null}
+              {!ESCALATION_LOCKED ? (
+                <EscalationBlock
+                  value={d.escalationSpeed}
+                  onChange={(v) => updateDefaults({ escalationSpeed: v })}
+                />
+              ) : null}
               <Field label="Notification sound">
                 <ChipRow
                   options={SOUNDS}

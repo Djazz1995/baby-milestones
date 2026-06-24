@@ -3,9 +3,22 @@
  *  Flags are read once at module load. Flip in .env + rebuild — no remote infra.
  */
 
+import type { EscalationSpeed, RudenessLevel } from '@/models';
+
 function on(v: string | undefined): boolean {
   return v === '1' || v === 'true';
 }
+
+/**
+ * Launch decision: lock every goal to the spiciest settings — Unhinged rudeness
+ * (level 4) + Unhinged escalation (fastest waves) — for maximum screenshot fuel,
+ * and hide both pickers everywhere. Flip these off later to bring the choices
+ * back; the pickers reappear automatically.
+ */
+export const RUDENESS_LOCKED = true;
+export const LOCKED_RUDENESS: RudenessLevel = 4;
+export const ESCALATION_LOCKED = true;
+export const LOCKED_ESCALATION: EscalationSpeed = 'unhinged';
 
 /**
  * Monetization master switch (§12). When OFF (default), every paid gate is open

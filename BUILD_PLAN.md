@@ -36,6 +36,18 @@ Core build (Phases 1–8 + Phase 5 server logic) is code-complete and DB-verifie
 
 **Deferred (not now):** buddy push (needs buddy↔profile linking, v1.1), home-screen widgets (Phase 8.5, v1.1), per-user timezone for the cron.
 
+### Remaining stubs (prototype) — audited Jun 2026
+
+The app runs end-to-end on the sim. What's still not "real":
+
+- [x] ~~CompletionScreen (`goal/[id]/complete`)~~ — **deleted** (was an unreachable placeholder; completion is inline on goal detail). Last placeholder screen gone — no stub screens remain.
+- [ ] **Real AI roasts** — `src/lib/ai/provider.ts` `anthropicProvider` throws "not wired"; the pool is the offline **seed corpus**. Making roasts real = the AI content pass (bake-off → wire provider → regenerate pool). *This is the product-defining gap.*
+- [ ] **`completionService.ignoredCount`** — hardcoded `0`; needs the notification engine to know scheduled-but-ignored. Minor; surfaces in stats later.
+- [~] **BillingService.purchase()** — stub tier-flip, no real IAP. **Intentional** (monetization off for launch); real IAP only when the toggle flips.
+- [~] **escalation-cron** — code complete, **not deployed** (needs Supabase Edge deploy + push creds + a real device). Hardware-gated.
+
+**To "finish the prototype":** resolve CompletionScreen (delete or build) → then the **AI content pass** so roasts are real. Everything else is intentional-deferred or hardware-gated.
+
 ---
 
 ## Phase 0 — Gates (before any app code, per PRD §0)
@@ -183,3 +195,22 @@ Glanceable habit lever — a streak you see on every unlock drives loss-aversion
 - [ ] Store assets, App Store/Play compliance pass (§9), Carrot precedent framing.
 - [ ] TestFlight / internal track beta.
 - **Done when:** submittable build.
+
+## Phase 10 — Live accountability agent (post-v1, the end goal)
+
+The vision: a conversational AI the user can talk to that holds them accountable, calls back their *specific* logged excuses, and roasts in real time. This is the "it learns you" retention moat (§5.3) — but it's a different workload from the cached pool and must be architected for cost.
+
+**Two workloads, two models (the key principle):**
+- **Batch pool (today)** — Claude Opus 4.8, generated ~weekly, shared across all users → cost trivial regardless of tier. Buy the funniest. ([[roast-model-choice]])
+- **Live chat (Phase 10)** — per-user, real-time API call per message → scales with usage. Opus too expensive here. Use **Haiku 4.5** (or Sonnet 4.6 for more wit). The `ai/provider.ts` interface already abstracts the model: configure a `batch` model + a `chat` model, swap is config not a refactor.
+
+**Cost controls for live chat (§8.4 mindset):**
+- [ ] **Prompt caching** on the static system prompt (Part A voice + rules) → ~90% cheaper per follow-up message.
+- [ ] **Short outputs** (1–2 sentence replies) → tiny output-token cost.
+- [ ] **Inject context, don't retrain** — feed goals, streaks, and the user's logged `blockers`/excuse history so the agent calls back *their* excuses (the moat). Cheap model + rich context > expensive model + none.
+- [ ] **Free-tier message caps + rate limits** — N messages/day free, more on paid.
+- [ ] **Tiered escalation** — Haiku for ~95% of chat; bump to Sonnet/Opus only for rare big moments (weekly verdict, roast of the week).
+
+**Endgame:** once thousands of Opus-quality roasts exist, they're a training set → distill/fine-tune a small cheap model on that voice → Opus-level funny at Haiku cost for the live agent at scale.
+
+- **Done when:** user can hold a short accountability conversation that references their real goal data, at a sustainable per-user cost.

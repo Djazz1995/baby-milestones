@@ -15,6 +15,7 @@ import { Button } from '@/components/button';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
+import { ESCALATION_LOCKED, RUDENESS_LOCKED } from '@/lib/config';
 import { useComplete } from '@/hooks/use-complete';
 import { useGoal } from '@/hooks/use-goal';
 import { useRoast } from '@/hooks/use-roast';
@@ -194,7 +195,9 @@ export function GoalDetailScreen({ goalId }: Props) {
             </ThemedText>
           ) : null}
           <ThemedText type="small" themeColor="textSecondary">
-            {goal.category} · rudeness {goal.rudenessLevel} · {goal.escalationSpeed}
+            {goal.category}
+            {RUDENESS_LOCKED ? '' : ` · rudeness ${goal.rudenessLevel}`}
+            {ESCALATION_LOCKED ? '' : ` · ${goal.escalationSpeed}`}
             {goal.paused ? ' · paused' : ''}
           </ThemedText>
           <ThemedText type="small" themeColor="textSecondary">

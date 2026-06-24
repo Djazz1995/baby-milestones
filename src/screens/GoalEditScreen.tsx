@@ -6,6 +6,7 @@ import { Button } from '@/components/button';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
+import { ESCALATION_LOCKED, LOCKED_ESCALATION, LOCKED_RUDENESS, RUDENESS_LOCKED } from '@/lib/config';
 import { useBilling } from '@/hooks/use-billing';
 import { useGoal } from '@/hooks/use-goal';
 import { useTheme } from '@/hooks/use-theme';
@@ -47,8 +48,10 @@ export function GoalEditScreen({ goalId }: Props) {
   const [blockers, setBlockers] = useState<string[]>([]);
   const [schedule, setSchedule] = useState<Schedule>(() => scheduleFromDefaults(GYM));
   const [measure, setMeasure] = useState<MeasureValue>({ enabled: false, target: '', unit: '' });
-  const [rudeness, setRudeness] = useState<RudenessLevel>(3);
-  const [speed, setSpeed] = useState<EscalationSpeed>('normal');
+  const [rudeness, setRudeness] = useState<RudenessLevel>(RUDENESS_LOCKED ? LOCKED_RUDENESS : 3);
+  const [speed, setSpeed] = useState<EscalationSpeed>(
+    ESCALATION_LOCKED ? LOCKED_ESCALATION : 'normal'
+  );
   const [buddyId, setBuddyId] = useState<string>();
   const [collectionId, setCollectionId] = useState<string>();
   const [saving, setSaving] = useState(false);
@@ -67,8 +70,8 @@ export function GoalEditScreen({ goalId }: Props) {
       target: existing.targetValue != null ? String(existing.targetValue) : '',
       unit: existing.unit ?? '',
     });
-    setRudeness(existing.rudenessLevel);
-    setSpeed(existing.escalationSpeed);
+    if (!RUDENESS_LOCKED) setRudeness(existing.rudenessLevel);
+    if (!ESCALATION_LOCKED) setSpeed(existing.escalationSpeed);
     setBuddyId(existing.buddyId);
     setCollectionId(existing.collectionId);
   }, [existing]);
@@ -77,8 +80,8 @@ export function GoalEditScreen({ goalId }: Props) {
   useEffect(() => {
     if (goalId || !user || appliedDefaults.current) return;
     appliedDefaults.current = true;
-    setRudeness(user.defaults.rudenessLevel);
-    setSpeed(user.defaults.escalationSpeed);
+    if (!RUDENESS_LOCKED) setRudeness(user.defaults.rudenessLevel);
+    if (!ESCALATION_LOCKED) setSpeed(user.defaults.escalationSpeed);
   }, [goalId, user]);
 
   const descriptor = GOAL_TYPES[category];
@@ -201,8 +204,12 @@ export function GoalEditScreen({ goalId }: Props) {
           />
         ) : null}
         {has('measure') ? <MeasureBlock value={measure} onChange={setMeasure} /> : null}
-        {has('rudeness') ? <RudenessBlock value={rudeness} onChange={setRudeness} /> : null}
-        {has('escalation') ? <EscalationBlock value={speed} onChange={setSpeed} /> : null}
+        {has('rudeness') && !RUDENESS_LOCKED ? (
+          <RudenessBlock value={rudeness} onChange={setRudeness} />
+        ) : null}
+        {has('escalation') && !ESCALATION_LOCKED ? (
+          <EscalationBlock value={speed} onChange={setSpeed} />
+        ) : null}
         {has('buddy') ? <BuddyBlock value={buddyId} onChange={setBuddyId} /> : null}
         {has('collection') ? <CollectionBlock value={collectionId} onChange={setCollectionId} /> : null}
 

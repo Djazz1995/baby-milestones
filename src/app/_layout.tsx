@@ -69,10 +69,6 @@ function RootNav() {
         name="goal/[id]/skip"
         options={{ presentation: 'modal', title: "I can't today" }}
       />
-      <Stack.Screen
-        name="goal/[id]/complete"
-        options={{ presentation: 'modal', title: 'Done' }}
-      />
       <Stack.Screen name="buddy" options={{ title: 'Accountability Buddy' }} />
       <Stack.Screen name="collections" options={{ title: 'Collections' }} />
       <Stack.Screen name="archived" options={{ title: 'Archived Goals' }} />

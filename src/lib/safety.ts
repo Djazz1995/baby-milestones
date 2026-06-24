@@ -1,9 +1,11 @@
 /** Post-generation safety filter + kill switch (AGENTS.md §9.3, §3.1, §6).
  *
- * The golden rule (§3.1): roast the excuse and the behavior, NEVER the person.
- * Hard limits (§6): no comments on body, weight, appearance, identity, or
- * mental-health/self-harm. This module is the single gate every roast line and
- * every user-supplied excuse passes before it reaches a notification.
+ * Policy: the harsh tone is opt-in + consent-gated (§9.1), so roasting the user's
+ * flaky CHARACTER and ego (pathetic, all-talk, serial quitter) is allowed — it's
+ * the product. We hard-block only the four categories no consent can waive and
+ * that get the app store-rejected: body/weight/appearance, identity/protected
+ * groups, mental-health, self-harm. This module is the single gate every roast
+ * line and every user-supplied excuse passes before it reaches a notification.
  *
  * Pure — no I/O, no React, no SDK. Used by:
  *   • the batch generator (post-generation rejection of model output, §9.3), and
@@ -33,11 +35,11 @@ const BLOCKED_PATTERNS: { reason: string; re: RegExp }[] = [
     re: /\b(kill yourself|kys|hang yourself|end it all|suicide|cut yourself|worthless human|you should die)\b/i,
   },
   { reason: 'mental-health', re: /\b(depress(ed|ion)|bipolar|psycho|schizo|mentally ill)\b/i },
-  // Person-worth attacks (§3.1) — "you're a loser/failure/waste" roasts the person, not the act.
-  {
-    reason: 'person-worth',
-    re: /\byou(?:'?re| are)\s+(a\s+)?(loser|failure|waste|worthless|pathetic|nobody|garbage|trash)\b/i,
-  },
+  // NOTE: ego / character jabs ("pathetic", "loser", "all talk", "serial quitter")
+  // are INTENTIONALLY allowed — the harsh tone is opt-in and consent-gated (§9.1),
+  // and going at the user's flaky character is the product. We only hard-block the
+  // four categories above (body, identity, mental-health, self-harm), which no
+  // consent waives and which get the app store-rejected.
 ];
 
 export type SafetyResult = { safe: true } | { safe: false; reason: string };

@@ -14,7 +14,6 @@ const BLOCKED = [
   /\b(retard|retarded|tranny|fag|faggot|slut|whore)\b/i,
   /\b(kill yourself|kys|hang yourself|end it all|suicide|cut yourself|worthless human|you should die)\b/i,
   /\b(depress(ed|ion)|bipolar|psycho|schizo|mentally ill)\b/i,
-  /\byou(?:'?re| are)\s+(a\s+)?(loser|failure|waste|worthless|pathetic|nobody|garbage|trash)\b/i,
 ];
 const isSafe = (t) => !BLOCKED.some((re) => re.test(t));
 const SLOT_RE = /\{(\w+)\}/g;
@@ -32,10 +31,12 @@ function assert(cond, msg) {
 
 // --- A. pure logic ----------------------------------------------------------
 function logicChecks() {
-  // §9.3: clean line passes, person/self-harm line rejected.
+  // §9.3: clean line passes; ego jab ALLOWED; hard categories rejected.
   assert(isSafe('{name}. Time to go.'), 'clean line wrongly flagged');
-  assert(!isSafe('you are a loser'), 'person-worth attack not flagged');
+  assert(isSafe('be honest, you were never going to do this'), 'character roast wrongly flagged');
+  assert(isSafe('you are all talk, serial quitter'), 'ego jab wrongly flagged');
   assert(!isSafe('just kill yourself'), 'self-harm not flagged');
+  assert(!isSafe('you fat slob'), 'body attack not flagged');
 
   // Slot eligibility: a {cue} line is skipped when no cue; {name} line used.
   const rows = [
