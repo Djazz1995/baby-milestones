@@ -158,7 +158,9 @@ The tracker fundamentals standard habit apps have, and that give the roast bette
 - [x] Post-generation safety filter (§9.3) — `src/lib/safety.ts` (blocklist: body/identity/mental-health/self-harm/person-worth) + **kill switch** (`EXPO_PUBLIC_ROAST_KILL_SWITCH` → neutral copy). Mirrored in the generator + smoke.
 - [x] Replaced placeholders — SkipScreen (`getSkip`), notificationService Wave-1 body (`lineText`), goal-detail completion verdict (`getPartial`).
 - [x] Migration `0008_roast_pool_variants.sql` — `kind`/`bucket` cols, nullable wave/tactic/category, constraints + indexes.
-- **Done when:** notifications pull real cached roast lines, filtered. — ✅ `0008` + `0009` applied to cloud; `npm run db:smoke6` passes (247 lines, all 4 kinds, all pass §9.3, wave line interpolates). tsc/lint/web-export green. UI sim run still pending.
+- [x] **Roast-only + Opus 4.8** — bake-off winner wired: `anthropicProvider` (real Opus Messages-API call, Part A system prompt) in `ai/provider.ts`; `generate-roasts.mjs` rewritten to roast-only seed (texting voice) + Opus mode (`ROAST_PROVIDER=anthropic` + key); app collapsed to roast-only (`roastService.lineText` + escalation-cron pull `tactic='roast'`). `0009` regenerated (80 lines). smoke5/smoke6 pass against the live roast-only pool.
+- [x] **Weekly auto-refresh (scaffolded, not scheduled)** — `supabase/functions/roast-refresh/index.ts`: regenerates the whole pool via Opus + §9.3 filter, writes via service-role, guards against wiping on a failed/empty gen. No-ops without `ANTHROPIC_API_KEY`. To turn on: set the key secret, `supabase functions deploy roast-refresh`, schedule weekly via pg_cron (see file header).
+- **Done when:** notifications pull real cached roast lines, filtered. — ✅ `0008`+`0009` applied; roast-only pool live; `npm run db:smoke6`/`smoke5` pass. **Pending (tomorrow):** add `ANTHROPIC_API_KEY` → run real-Opus generation; deploy + schedule `roast-refresh` for weekly freshness. tsc/lint/web-export green.
 
 ## Phase 7 — Share + monetization ✅ DONE (data path verified; UI sim run pending)
 
