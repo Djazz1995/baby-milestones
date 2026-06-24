@@ -37,17 +37,17 @@ async function main() {
   if ((logs ?? []).length !== 0) throw new Error('expected empty notification_log');
   console.log('✓ notification_log readable (escalation-state log)');
 
-  // Escalation pulls Wave 2+ lines — pool must have them.
-  const { data: wave2, error: wErr } = await sb
+  // Roast-only: escalation pulls roast-tactic lines (any wave). Pool must have them.
+  const { data: roastLines, error: wErr } = await sb
     .from('roast_lines')
     .select('text')
     .eq('kind', 'wave')
     .eq('category', 'gym')
-    .eq('level', 3)
-    .eq('wave', 2);
+    .eq('level', 4)
+    .eq('tactic', 'roast');
   if (wErr) throw wErr;
-  if ((wave2 ?? []).length === 0) throw new Error('no Wave-2 lines in pool for escalation');
-  console.log(`✓ pool has Wave-2 escalation lines (gym/L3): ${wave2.length}`);
+  if ((roastLines ?? []).length === 0) throw new Error('no roast lines in pool for escalation (apply latest 0009?)');
+  console.log(`✓ pool has roast lines (gym/L4/roast): ${roastLines.length}`);
 
   // Clean the test token so it can't receive real pushes.
   await sb.from('profiles').update({ push_token: null }).eq('id', id);

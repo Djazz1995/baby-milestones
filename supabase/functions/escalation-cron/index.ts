@@ -152,8 +152,10 @@ Deno.serve(async () => {
   );
   const digestSent = new Set(log.filter((r) => r.kind === 'digest').map((r) => r.user_id));
 
-  const waveLines = (cat: string, level: number, wave: number) =>
-    pool.filter((r) => r.kind === 'wave' && r.category === cat && r.level === level && r.wave === wave);
+  // Roast-only (v1): every escalation wave pulls a roast-tactic line; `wave`
+  // drives only cadence + dedup, not the copy tier.
+  const waveLines = (cat: string, level: number) =>
+    pool.filter((r) => r.kind === 'wave' && r.category === cat && r.level === level && r.tactic === 'roast');
   const digestLines = (level: number) => pool.filter((r) => r.kind === 'digest' && r.level === level);
 
   const messages: PushMessage[] = [];
@@ -180,7 +182,7 @@ Deno.serve(async () => {
       if (wave < 2) continue;
       if (waveSent.has(`${goal.id}:${wave}`)) continue; // already escalated this far today
 
-      const body = personalize(waveLines(goal.category, goal.rudeness_level, wave), {
+      const body = personalize(waveLines(goal.category, goal.rudeness_level), {
         name: goal.name,
         cue: goal.cue ?? undefined,
       });

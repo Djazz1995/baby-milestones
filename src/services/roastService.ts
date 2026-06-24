@@ -66,8 +66,13 @@ export const roastService = {
     };
   },
 
-  /** Raw Wave-N body text (used by local notification scheduling). */
+  /**
+   * Raw roast body text for a goal. v1 is ROAST-ONLY: every notification (the
+   * local reminder + every escalation wave) pulls a roast-tactic line, so the
+   * `wave` arg drives only cadence/dedup, not which copy tier is used.
+   */
   async lineText(goal: Goal, wave: number): Promise<string> {
+    void wave; // roast-only: content no longer varies by wave
     const neutral = goal.cue ? `${goal.cue}.` : `${goal.name}. Time to go.`;
     if (roastKillSwitchOn()) return neutral;
     const { data, error } = await supabase
@@ -76,7 +81,7 @@ export const roastService = {
       .eq('kind', 'wave')
       .eq('category', goal.category)
       .eq('level', goal.rudenessLevel)
-      .eq('wave', wave);
+      .eq('tactic', 'roast');
     if (error) throw error;
     const text = personalize(data ?? [], {
       name: goal.name,

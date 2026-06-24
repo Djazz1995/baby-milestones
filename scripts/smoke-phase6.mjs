@@ -83,14 +83,16 @@ async function poolChecks() {
   const bad = rows.find((r) => !isSafe(r.text));
   assert(!bad, `pool contains an unsafe line: ${bad?.text}`);
 
-  // A real wave line interpolates with goal context.
-  const waveRows = rows.filter((r) => r.kind === 'wave' && r.category === 'gym' && r.level === 3 && r.wave === 1);
-  assert(waveRows.length > 0, 'no gym/level3/wave1 lines in pool');
+  // Roast-only: a real roast-tactic line interpolates with goal context.
+  const waveRows = rows.filter(
+    (r) => r.kind === 'wave' && r.category === 'gym' && r.level === 4 && r.tactic === 'roast'
+  );
+  assert(waveRows.length > 0, 'no gym/level4/roast lines in pool');
   const line = personalize(waveRows, { name: 'Gym', cue: 'Shoes by the door' });
-  assert(line && !line.includes('{'), `wave line failed to interpolate: ${line}`);
+  assert(line && !line.includes('{'), `roast line failed to interpolate: ${line}`);
 
   console.log(`✓ B. pool: ${rows.length} lines, all 4 kinds present, all pass §9.3`);
-  console.log(`     sample (gym/L3/W1): "${line}"`);
+  console.log(`     sample (gym/L4/roast): "${line}"`);
 }
 
 async function main() {
