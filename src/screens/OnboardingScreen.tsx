@@ -129,7 +129,7 @@ export function OnboardingScreen() {
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           {step === 'welcome' ? (
             <>
-              <ThemedText type="title">RoastMode</ThemedText>
+              <ThemedText type="title">brute</ThemedText>
               <ThemedText type="default" themeColor="textSecondary">
                 A habit tracker with a mouth. Set a goal, get pushed, get roasted
                 if you bail.
@@ -146,7 +146,7 @@ export function OnboardingScreen() {
             <>
               <ThemedText type="title">Read this first</ThemedText>
               <ThemedText type="default" themeColor="textSecondary">
-                RoastMode will roast you — personally, bluntly, and on purpose. It’ll call out
+                brute will roast you — personally, bluntly, and on purpose. It’ll call out
                 your excuses, your flaking, and your “I’ll start Monday” energy. It’s mean because
                 that’s the point.
               </ThemedText>
@@ -174,7 +174,7 @@ export function OnboardingScreen() {
             <>
               <ThemedText type="title">Turn on the heat</ThemedText>
               <ThemedText type="default" themeColor="textSecondary">
-                RoastMode works through notifications. Allow them so it can
+                brute works through notifications. Allow them so it can
                 actually nudge you.
               </ThemedText>
               <Button title="Allow notifications" onPress={requestPush} loading={busy} />

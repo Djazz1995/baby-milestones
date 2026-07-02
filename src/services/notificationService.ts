@@ -78,7 +78,7 @@ export const notificationService = {
         const [y, m, day] = d.split('-').map(Number);
         const when = new Date(y, m - 1, day, hour, minute, 0, 0);
         if (when.getTime() <= now) continue; // skip past dates
-        await scheduleOnce({ date: when, title: 'RoastMode', body, data });
+        await scheduleOnce({ date: when, title: 'brute', body, data });
       }
       return;
     }
@@ -89,7 +89,7 @@ export const notificationService = {
         isoDay: slot.day,
         hour,
         minute,
-        title: 'RoastMode',
+        title: 'brute',
         body,
         data,
       });

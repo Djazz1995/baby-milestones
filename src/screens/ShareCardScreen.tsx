@@ -45,7 +45,7 @@ export function ShareCardScreen({ text, goalName }: Props) {
       <View style={styles.content}>
         {/* The captured card. collapsable={false} so it's a real native view. */}
         <View ref={cardRef} collapsable={false} style={styles.card}>
-          <ThemedText style={styles.brand}>🔥 RoastMode</ThemedText>
+          <ThemedText style={styles.brand}>🔥 brute</ThemedText>
           <ThemedText style={styles.cardText}>{text}</ThemedText>
           <View style={styles.cardFooter}>
             <ThemedText style={styles.watermark}>
