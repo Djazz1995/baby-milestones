@@ -68,7 +68,7 @@ export function GoalDetailScreen({ goalId }: Props) {
   const { data: stats, refetch: refetchStats } = useStreak(goalId);
   const { data: statuses, refetch: refetchStatus } = useTodayStatuses(goal ? [goal] : []);
   const { complete, completing } = useComplete();
-  const { getPartial } = useRoast();
+  const { getPartial, getWeekly } = useRoast();
   const [verdict, setVerdict] = useState<string>();
   const [amountDraft, setAmountDraft] = useState('');
 
@@ -94,12 +94,24 @@ export function GoalDetailScreen({ goalId }: Props) {
     }
     try {
       await complete(goalId, 'tap', Boolean(goal?.buddyId), amount);
-      // Partial quantified log → roast the ratio (§4.3); full/plain → win line.
+      // Pick the roast surface (§4.3, §4.7):
+      //  - quantified partial log → mock the per-session amount ratio
+      //  - weekly-frequency goal still under target after this tap → mock the
+      //    days-per-week ratio ("3 of 5 this week")
+      //  - otherwise → win line
+      const weeklyTarget = goal?.schedule.weeklyTarget;
       const partial =
         goal && typeof amount === 'number' && typeof goal.targetValue === 'number' && amount < goal.targetValue;
-      const line = partial
-        ? await getPartial(goal!, amount!).catch(() => undefined)
-        : undefined;
+      let line: string | undefined;
+      if (partial) {
+        line = await getPartial(goal!, amount!).catch(() => undefined);
+      } else if (goal && weeklyTarget && weeklyTarget > 0) {
+        // This tap counts toward the week; statuses still hold the pre-tap count.
+        const doneThisWeek = (statuses[goal.id]?.progress?.done ?? 0) + 1;
+        if (doneThisWeek < weeklyTarget) {
+          line = await getWeekly(goal, doneThisWeek, weeklyTarget).catch(() => undefined);
+        }
+      }
       setVerdict(line ?? 'Logged. The couch loses this round.');
       setAmountDraft('');
       await Promise.all([refetchStats(), refetchStatus()]);

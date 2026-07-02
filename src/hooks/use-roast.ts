@@ -35,5 +35,9 @@ export function useRoast() {
     return run(() => roastService.getPartial(goal, done));
   }, []);
 
-  return { getCard, getSkip, getPartial, loading, error };
+  const getWeekly = useCallback((goal: Goal, done: number, target: number): Promise<string> => {
+    return run(() => roastService.getWeekly(goal, done, target));
+  }, []);
+
+  return { getCard, getSkip, getPartial, getWeekly, loading, error };
 }

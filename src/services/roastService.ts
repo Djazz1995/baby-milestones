@@ -138,4 +138,26 @@ export const roastService = {
       personalize(data ?? [], { done: String(done), target: String(target), unit }) ?? neutral
     );
   },
+
+  /**
+   * Weekly-progress roast for a weekly-frequency goal (§4.7) — mocks the
+   * days-done vs days-wanted ratio (e.g. "gym 2 of 5 this week"), not a skip.
+   * `done`/`target` are DAYS. Roasts the shortfall, never the person (§3.1).
+   */
+  async getWeekly(goal: Goal, done: number, target: number): Promise<string> {
+    const neutral = `${done} of ${target} days this week. Logged.`;
+    if (roastKillSwitchOn()) return neutral;
+    const { data, error } = await supabase
+      .from('roast_lines')
+      .select('text')
+      .eq('kind', 'weekly')
+      .eq('category', goal.category)
+      .eq('level', goal.rudenessLevel)
+      .eq('bucket', ratioBucket(done, target));
+    if (error) throw error;
+    return (
+      personalize(data ?? [], { done: String(done), target: String(target), name: goal.name }) ??
+      neutral
+    );
+  },
 };
