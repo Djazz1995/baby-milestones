@@ -51,6 +51,7 @@
     "eslint-config-prettier": "^10.1.8",
     "prettier": "^3.8.4",
     "prettier-plugin-tailwindcss": "^0.5.14",
+    "sharp": "^0.35.3",
     "tailwindcss": "^3.4.19",
     "typescript": "~5.9.2"
   },
@@ -72,7 +73,8 @@
     "db:smoke6": "node --env-file=.env scripts/smoke-phase6.mjs",
     "db:smoke7": "node --env-file=.env scripts/smoke-phase7.mjs",
     "db:smoke8": "node --env-file=.env scripts/smoke-phase8.mjs",
-    "roast:generate": "node scripts/generate-roasts.mjs"
+    "roast:generate": "node scripts/generate-roasts.mjs",
+    "icons": "node scripts/gen-icons.mjs"
   },
   "private": true
 }
