@@ -1,36 +1,33 @@
 import { Stack, useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Alert, Pressable, TextInput, View } from 'react-native';
 
-import { Button } from '@/components/button';
+import { BruteFlame } from '@/components/brute-logo';
+import {
+  Card,
+  CategoryChip,
+  GhostButton,
+  Icon,
+  PrimaryButton,
+  ProgressBar,
+  Sheet,
+  StreakFlame,
+  TextButton,
+} from '@/components/kit';
+import { ScreenLayout } from '@/components/screen-layout';
 import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Spacing } from '@/constants/theme';
-import { ESCALATION_LOCKED, RUDENESS_LOCKED } from '@/lib/config';
 import { useComplete } from '@/hooks/use-complete';
 import { useGoal } from '@/hooks/use-goal';
 import { useRoast } from '@/hooks/use-roast';
 import { useStreak } from '@/hooks/use-streak';
 import { useTodayStatuses } from '@/hooks/use-today-status';
-import { useTheme } from '@/hooks/use-theme';
 import type { ScheduleSlot } from '@/models';
 import { goalService } from '@/services/goalService';
 import { notificationService } from '@/services/notificationService';
+import { tokens } from '@/theme/tokens';
+import { formatTime, scheduleLabel } from '@/utils/goal-format';
 
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-
-function slotText(s: ScheduleSlot): string {
-  return `${WEEKDAYS[s.day - 1]} ${s.label ? `${s.label} ` : ''}${s.time}`;
-}
 
 /** Is any reminder scheduled for today's weekday? */
 function isScheduledToday(slots: ScheduleSlot[]): boolean {
@@ -63,7 +60,6 @@ type Props = { goalId: string };
 
 export function GoalDetailScreen({ goalId }: Props) {
   const router = useRouter();
-  const theme = useTheme();
   const { data: goal, loading, error, refetch: refetchGoal } = useGoal(goalId);
   const { data: stats, refetch: refetchStats } = useStreak(goalId);
   const { data: statuses, refetch: refetchStatus } = useTodayStatuses(goal ? [goal] : []);
@@ -120,13 +116,231 @@ export function GoalDetailScreen({ goalId }: Props) {
     }
   }
 
-  async function onToggleArchive() {
+  async function onTogglePause() {
     if (!goal) return;
-    const updated = await goalService.setArchived(goalId, !goal.archived);
-    await notificationService.scheduleForGoal(updated); // cancels when archived
-    if (!goal.archived) router.back();
-    else refetchGoal();
+    const updated = await goalService.setPaused(goalId, !goal.paused);
+    await notificationService.scheduleForGoal(updated); // cancels when paused
+    refetchGoal();
   }
+
+  if (loading && !goal) {
+    return (
+      <ScreenLayout edges={['bottom']} scroll={false}>
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+          <ActivityIndicator color={tokens.muted} />
+        </View>
+      </ScreenLayout>
+    );
+  }
+  if (error || !goal) {
+    return (
+      <ScreenLayout edges={['bottom']} scroll={false}>
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+          <ThemedText type="body" color="muted" style={{ textAlign: 'center' }}>
+            Couldn&apos;t load goal. {error?.message ?? 'not found'}
+          </ThemedText>
+        </View>
+      </ScreenLayout>
+    );
+  }
+
+  const next = nextReminder(goal.schedule.slots);
+  const scheduledToday = isScheduledToday(goal.schedule.slots);
+  const today = statuses[goal.id];
+  const todayStatus = today?.status;
+  const quantified = typeof goal.targetValue === 'number';
+  const progress = today?.progress; // weekly or specific-dates: {done,total,kind}
+  const progressMet = progress ? progress.done >= progress.total : false;
+  // Binary goals complete once per day; block re-tapping. Quantified goals may
+  // keep logging to accumulate toward the target.
+  const completedToday = todayStatus === 'done';
+  const doneLocked = completedToday && !quantified;
+  // Not actionable today: status 'off' (fixed not scheduled, or a date that's
+  // not today) and the progress target isn't already met. Exclude paused/archived.
+  const notDueToday = !progressMet && todayStatus === 'off' && !goal.paused && !goal.archived;
+
+  const current = stats?.current ?? 0;
+  const longest = stats?.longest ?? 0;
+  const completionRate = stats ? Math.round(stats.completionRate7 * 100) : 0;
+  const streakUnitLabel = stats?.streakUnit === 'week' ? 'week streak' : 'day streak';
+
+  const doneCta = progressMet
+    ? progress?.kind === 'dates'
+      ? 'All dates done'
+      : 'Done this week'
+    : notDueToday
+      ? 'Not due today'
+      : doneLocked
+        ? 'Done today'
+        : 'Mark done';
+  const ctaDisabled = progressMet || notDueToday || doneLocked;
+
+  return (
+    <ScreenLayout
+      edges={['bottom']}
+      footer={
+        <View style={{ gap: 14 }}>
+          <PrimaryButton
+            title={doneCta}
+            icon={
+              ctaDisabled ? (
+                <Icon name="check" size={18} color={tokens.accentText} strokeWidth={2.4} />
+              ) : undefined
+            }
+            onPress={onDone}
+            loading={completing}
+            disabled={ctaDisabled}
+          />
+          <View
+            style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12 }}
+          >
+            <TextButton title="Edit" onPress={() => router.push(`/goal/${goalId}/edit`)} />
+            <ThemedText type="label" color="muted">
+              ·
+            </ThemedText>
+            <TextButton
+              title={goal.paused ? 'Resume' : 'Pause'}
+              onPress={onTogglePause}
+            />
+            {scheduledToday && !goal.paused ? (
+              <>
+                <ThemedText type="label" color="muted">
+                  ·
+                </ThemedText>
+                <TextButton
+                  title="I can't today"
+                  color={tokens.danger}
+                  onPress={() => router.push(`/goal/${goalId}/skip`)}
+                />
+              </>
+            ) : null}
+          </View>
+        </View>
+      }
+    >
+      <Stack.Screen options={{ title: goal.name }} />
+
+      {/* Title + meta row */}
+      <ThemedText type="heading" style={{ marginTop: 4 }}>
+        {goal.name}
+      </ThemedText>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 8,
+          flexWrap: 'wrap',
+          marginTop: 10,
+          marginBottom: 24,
+        }}
+      >
+        <CategoryChip category={goal.category} />
+        <ThemedText type="caption" color="muted" style={{ fontSize: 12.5 }}>
+          {goal.paused ? 'Paused' : scheduleLabel(goal)}
+        </ThemedText>
+      </View>
+
+      {/* Streak hero */}
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, marginBottom: 24 }}>
+        <BruteFlame size={52} color={current <= 0 ? tokens.off : undefined} />
+        <ThemedText
+          type="hero"
+          color={current <= 0 ? 'muted' : 'accent1'}
+          style={{ fontSize: 64 }}
+        >
+          {current}
+        </ThemedText>
+        <View style={{ flex: 1 }}>
+          <ThemedText type="bodyStrong">{streakUnitLabel}</ThemedText>
+          <ThemedText type="caption" color="muted">
+            personal best is {longest}
+          </ThemedText>
+        </View>
+      </View>
+
+      {/* Stats card */}
+      <Card style={{ flexDirection: 'row', padding: 0 }}>
+        <StatCell label="Streak" value={`${current}`} />
+        <View style={{ width: 1, backgroundColor: tokens.rim }} />
+        <StatCell label="Best" value={`${longest}`} />
+        <View style={{ width: 1, backgroundColor: tokens.rim }} />
+        <StatCell label="Done" value={stats ? `${completionRate}%` : '—'} />
+      </Card>
+
+      {/* Week block — weekly-target goals with live progress */}
+      {progress && progress.kind === 'weekly' ? (
+        <Card style={{ marginTop: 12 }}>
+          <ThemedText type="bodyStrong" style={{ marginBottom: 10 }}>
+            {progress.done} of {progress.total} this week
+          </ThemedText>
+          <ProgressBar value={progress.total ? progress.done / progress.total : 0} height={6} />
+        </Card>
+      ) : null}
+
+      {/* Next reminder */}
+      {next ? (
+        <ThemedText type="caption" color="muted" style={{ marginTop: 16, fontSize: 12.5 }}>
+          {goal.paused ? 'Paused. Next would be ' : 'Next reminder. '}
+          {WEEKDAYS[next.day - 1]}, {formatTime(next.time)}
+        </ThemedText>
+      ) : null}
+
+      {/* Quantified amount input */}
+      {quantified ? (
+        <View style={{ marginTop: 20 }}>
+          <ThemedText type="label" color="muted" style={{ marginBottom: 8 }}>
+            How many {goal.unit ?? 'units'}? (target {goal.targetValue})
+          </ThemedText>
+          <TextInput
+            value={amountDraft}
+            onChangeText={setAmountDraft}
+            placeholder={`0`}
+            placeholderTextColor={tokens.muted}
+            keyboardType="numeric"
+            style={{
+              color: tokens.fg,
+              backgroundColor: tokens.surface2,
+              borderWidth: 1,
+              borderColor: tokens.rim,
+              borderRadius: 14,
+              paddingHorizontal: 16,
+              paddingVertical: 14,
+              fontSize: 16,
+            }}
+          />
+        </View>
+      ) : null}
+
+      {/* Delete link (kept from prior screen) */}
+      <Pressable
+        onPress={onDelete}
+        hitSlop={8}
+        style={{ alignSelf: 'center', marginTop: 28, paddingVertical: 8 }}
+      >
+        <ThemedText type="label" style={{ color: tokens.danger, fontWeight: '600' }}>
+          Delete goal
+        </ThemedText>
+      </Pressable>
+
+      {/* Completion verdict */}
+      <VerdictSheet
+        visible={Boolean(verdict)}
+        streak={current}
+        verdict={verdict ?? ''}
+        onShare={() =>
+          router.push({
+            pathname: '/share/[cardId]',
+            params: {
+              cardId: 'done',
+              text: verdict ?? `Another one done. ${goal.name}`,
+              goalName: goal.name,
+            },
+          })
+        }
+        onClose={() => setVerdict(undefined)}
+      />
+    </ScreenLayout>
+  );
 
   function onDelete() {
     Alert.alert('Delete goal?', 'This removes the goal and its history.', [
@@ -146,248 +360,51 @@ export function GoalDetailScreen({ goalId }: Props) {
       },
     ]);
   }
-
-  if (loading && !goal) {
-    return (
-      <ThemedView style={styles.center}>
-        <ActivityIndicator />
-      </ThemedView>
-    );
-  }
-  if (error || !goal) {
-    return (
-      <ThemedView style={styles.center}>
-        <ThemedText type="small">Couldn’t load goal: {error?.message ?? 'not found'}</ThemedText>
-      </ThemedView>
-    );
-  }
-
-  const next = nextReminder(goal.schedule.slots);
-  const scheduledToday = isScheduledToday(goal.schedule.slots);
-  const today = statuses[goal.id];
-  const todayStatus = today?.status;
-  const quantified = typeof goal.targetValue === 'number';
-  const progress = today?.progress; // weekly or specific-dates: {done,total,kind}
-  const progressMet = progress ? progress.done >= progress.total : false;
-  // Binary goals complete once per day; block re-tapping. Quantified goals may
-  // keep logging to accumulate toward the target.
-  const completedToday = todayStatus === 'done';
-  const doneLocked = completedToday && !quantified;
-  // Not actionable today: status 'off' (fixed not scheduled, or a date that's
-  // not today) and the progress target isn't already met. Exclude paused/archived.
-  const notDueToday =
-    !progressMet && todayStatus === 'off' && !goal.paused && !goal.archived;
-  const todayLabel =
-    todayStatus === 'done'
-      ? { text: 'Done today', color: '#30A46C' }
-      : todayStatus === 'skipped'
-        ? { text: 'Skipped today', color: '#E5484D' }
-        : todayStatus === 'pending'
-          ? { text: 'Due today', color: '#3c87f7' }
-          : null;
-
-  return (
-    <ThemedView style={styles.container}>
-      <Stack.Screen
-        options={{
-          title: goal.name,
-          headerRight: () => (
-            <Pressable onPress={() => router.push(`/goal/${goalId}/edit`)} hitSlop={12}>
-              <Text style={styles.headerBtnText}>Edit</Text>
-            </Pressable>
-          ),
-        }}
-      />
-      <ScrollView contentContainerStyle={styles.content}>
-        <View>
-          <ThemedText type="title">{goal.name}</ThemedText>
-          {todayLabel ? (
-            <ThemedText type="smallBold" style={{ color: todayLabel.color }}>
-              {todayLabel.text}
-            </ThemedText>
-          ) : null}
-          <ThemedText type="small" themeColor="textSecondary">
-            {goal.category}
-            {RUDENESS_LOCKED ? '' : ` · rudeness ${goal.rudenessLevel}`}
-            {ESCALATION_LOCKED ? '' : ` · ${goal.escalationSpeed}`}
-            {goal.paused ? ' · paused' : ''}
-          </ThemedText>
-          <ThemedText type="small" themeColor="textSecondary">
-            {goal.schedule.dates?.length
-              ? `${goal.schedule.dates.length} dates${goal.schedule.time ? ` · ${goal.schedule.time}` : ''}`
-              : goal.schedule.weeklyTarget
-                ? `${goal.schedule.weeklyTarget} ${goal.schedule.weeklyTarget === 1 ? 'day' : 'days'} a week`
-                : goal.schedule.slots.length > 0
-                  ? goal.schedule.slots.map(slotText).join(', ')
-                  : 'No reminders set'}
-          </ThemedText>
-          {progress ? (
-            <ThemedText type="smallBold" style={{ color: progressMet ? '#30A46C' : '#3c87f7' }}>
-              {progress.kind === 'dates'
-                ? `${progress.done}/${progress.total} dates done`
-                : `This week: ${progress.done}/${progress.total} done`}
-            </ThemedText>
-          ) : null}
-          {typeof goal.targetValue === 'number' ? (
-            <ThemedText type="small" themeColor="textSecondary">
-              Target: {goal.targetValue} {goal.unit ?? ''}
-            </ThemedText>
-          ) : null}
-          {goal.cue ? (
-            <ThemedText type="small" themeColor="textSecondary">
-              Cue: {goal.cue}
-            </ThemedText>
-          ) : null}
-          {goal.blockers.length > 0 ? (
-            <ThemedText type="small" themeColor="textSecondary">
-              Excuses on file: {goal.blockers.join(', ')}
-            </ThemedText>
-          ) : null}
-          {goal.buddyId ? (
-            <ThemedText type="small" themeColor="textSecondary">
-              👁 A buddy sees your wins and bails.
-            </ThemedText>
-          ) : null}
-        </View>
-
-        {next ? (
-          <ThemedView type="backgroundElement" style={styles.nextBox}>
-            <ThemedText type="small" themeColor="textSecondary">
-              {goal.paused ? 'Paused — next would be' : 'Next reminder'}
-            </ThemedText>
-            <ThemedText type="smallBold">{slotText(next)}</ThemedText>
-          </ThemedView>
-        ) : null}
-
-        <View style={styles.statsRow}>
-          <Stat
-            label={stats?.streakUnit === 'week' ? 'Streak (weeks)' : 'Current streak'}
-            value={stats ? `${stats.current}` : '—'}
-          />
-          <Stat label="Longest" value={stats ? `${stats.longest}` : '—'} />
-          <Stat
-            label="7d rate"
-            value={stats ? `${Math.round(stats.completionRate7 * 100)}%` : '—'}
-          />
-        </View>
-
-        {verdict ? (
-          <ThemedText type="smallBold" style={{ color: '#30A46C' }}>
-            {verdict}
-          </ThemedText>
-        ) : null}
-
-        {quantified ? (
-          <View style={styles.amountRow}>
-            <TextInput
-              value={amountDraft}
-              onChangeText={setAmountDraft}
-              placeholder={`How many ${goal.unit ?? 'units'}? (target ${goal.targetValue})`}
-              placeholderTextColor={theme.textSecondary}
-              keyboardType="numeric"
-              style={[
-                styles.amountInput,
-                { color: theme.text, backgroundColor: theme.backgroundElement },
-              ]}
-            />
-          </View>
-        ) : null}
-
-        {progressMet ? (
-          <Button
-            title={progress?.kind === 'dates' ? 'All dates done ✓' : 'Done this week ✓'}
-            disabled
-            style={styles.doneHero}
-          />
-        ) : notDueToday ? (
-          <Button title="Not due today" disabled style={styles.doneHero} />
-        ) : doneLocked ? (
-          <Button title="Done today ✓" disabled style={styles.doneHero} />
-        ) : (
-          <Button title="Done ✓" onPress={onDone} loading={completing} style={styles.doneHero} />
-        )}
-        {scheduledToday && !goal.paused ? (
-          <Button
-            title="I can’t today"
-            variant="secondary"
-            onPress={() => router.push(`/goal/${goalId}/skip`)}
-          />
-        ) : null}
-        {completedToday || verdict ? (
-          <Button
-            title="Share"
-            variant="secondary"
-            onPress={() =>
-              router.push({
-                pathname: '/share/[cardId]',
-                params: {
-                  cardId: 'done',
-                  text: verdict ?? `Another one done. ${goal.name} ✅`,
-                  goalName: goal.name,
-                },
-              })
-            }
-          />
-        ) : null}
-        <Button
-          title={goal.archived ? 'Unarchive' : 'Archive'}
-          variant="secondary"
-          onPress={onToggleArchive}
-        />
-
-        <Pressable onPress={onDelete} hitSlop={8} style={styles.deleteLink}>
-          <ThemedText type="small" style={{ color: '#E5484D' }}>
-            Delete goal
-          </ThemedText>
-        </Pressable>
-      </ScrollView>
-    </ThemedView>
-  );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function StatCell({ label, value }: { label: string; value: string }) {
   return (
-    <ThemedView type="backgroundElement" style={styles.stat}>
-      <ThemedText type="subtitle">{value}</ThemedText>
-      <ThemedText type="small" themeColor="textSecondary" style={styles.statLabel}>
+    <View style={{ flex: 1, alignItems: 'center', paddingVertical: 18, gap: 6 }}>
+      <ThemedText type="stat">{value}</ThemedText>
+      <ThemedText type="caption" color="muted">
         {label}
       </ThemedText>
-    </ThemedView>
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  content: { padding: Spacing.three, gap: Spacing.three, paddingBottom: Spacing.six },
-  statsRow: { flexDirection: 'row', gap: Spacing.two },
-  stat: {
-    flex: 1,
-    padding: Spacing.three,
-    borderRadius: Spacing.three,
-    alignItems: 'center',
-    gap: Spacing.one,
-  },
-  statLabel: { textAlign: 'center' },
-  nextBox: {
-    padding: Spacing.three,
-    borderRadius: Spacing.three,
-    gap: Spacing.half,
-  },
-  headerBtnText: {
-    fontSize: 17,
-    fontWeight: '600',
-    color: '#3c87f7',
-    textAlign: 'center',
-  },
-  doneHero: { minHeight: 60 },
-  amountRow: { flexDirection: 'row' },
-  amountInput: {
-    flex: 1,
-    borderRadius: Spacing.two,
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.three,
-    fontSize: 16,
-  },
-  deleteLink: { alignSelf: 'center', paddingVertical: Spacing.three },
-});
+function VerdictSheet({
+  visible,
+  streak,
+  verdict,
+  onShare,
+  onClose,
+}: {
+  visible: boolean;
+  streak: number;
+  verdict: string;
+  onShare: () => void;
+  onClose: () => void;
+}) {
+  return (
+    <Sheet visible={visible} onClose={onClose}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+        <StreakFlame count={streak} size={22} textSize={22} />
+      </View>
+      <ThemedText type="heading" color="accent1">
+        Streak {streak}
+      </ThemedText>
+      <ThemedText type="heading" style={{ textAlign: 'center' }}>
+        {verdict}
+      </ThemedText>
+      <View style={{ width: '100%', gap: 12, marginTop: 4 }}>
+        <PrimaryButton
+          title="Share"
+          icon={<Icon name="share" size={18} color={tokens.accentText} strokeWidth={2.2} />}
+          onPress={onShare}
+        />
+        <GhostButton title="Done" onPress={onClose} />
+      </View>
+    </Sheet>
+  );
+}

@@ -1,16 +1,24 @@
 import { useFocusEffect } from 'expo-router';
-import { useCallback, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useCallback, useMemo, useState } from 'react';
+import { Pressable, View } from 'react-native';
 
+import { BruteFlame } from '@/components/brute-logo';
+import { ScreenLayout } from '@/components/screen-layout';
 import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Spacing } from '@/constants/theme';
+import {
+  AppHeader,
+  Card,
+  ConsistencyGrid,
+  Icon,
+  SectionHeader,
+  StreakFlame,
+  type CellState,
+  type GridRow,
+} from '@/components/kit';
 import { useGoals } from '@/hooks/use-goals';
 import { useWeekOverview } from '@/hooks/use-week-overview';
-import type { WeekDay } from '@/services/statsService';
+import { tokens } from '@/theme/tokens';
 
-const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 function startOfWeek(d: Date): Date {
@@ -29,35 +37,19 @@ function weekLabel(ref: Date): string {
   return `${left} – ${right}`;
 }
 
-function startOfDay(d: Date): Date {
-  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
-}
-
-const LEGEND = [
-  { color: '#30A46C', label: 'Done' },
-  { color: 'rgba(60,135,247,0.35)', label: 'Upcoming' },
-  { color: 'rgba(48,164,108,0.4)', label: 'Partial' },
-  { color: 'rgba(229,72,77,0.35)', label: 'Missed' },
-];
-
-/** `cellDate` = the calendar date of this grid column; `today` = now. */
-function dayTint(d: WeekDay, cellDate: Date, today: Date, settled: boolean): string {
-  if (d.due === 0) return 'transparent';
-  if (d.done >= d.due) return '#30A46C'; // all done (any day)
-  // Today + future due-days haven't been missed yet → neutral "upcoming".
-  if (startOfDay(cellDate).getTime() >= startOfDay(today).getTime())
-    return 'rgba(60,135,247,0.12)';
-  // Past, not fully done. While a week-switch is still loading, the grid data
-  // lags the selected week — show neutral so upcoming days don't flash red.
-  if (!settled) return 'rgba(60,135,247,0.12)';
-  return d.done === 0 ? 'rgba(229,72,77,0.25)' : 'rgba(48,164,108,0.4)'; // missed / partial
+/** This-week completion rate from the aggregate day grid: done / due. */
+function weekRate(grid: { done: number; due: number }[]): number | null {
+  const due = grid.reduce((n, d) => n + d.due, 0);
+  if (due === 0) return null;
+  const done = grid.reduce((n, d) => n + Math.min(d.done, d.due), 0);
+  return Math.round((done / due) * 100);
 }
 
 export function StatsScreen() {
   const { data: goals, refetch } = useGoals();
   const [weekRef, setWeekRef] = useState(() => new Date());
   const [showHelp, setShowHelp] = useState(false);
-  const { data, loading, refetch: refetchOverview } = useWeekOverview(goals, weekRef);
+  const { data, refetch: refetchOverview } = useWeekOverview(goals, weekRef);
 
   useFocusEffect(
     useCallback(() => {
@@ -70,154 +62,161 @@ export function StatsScreen() {
     setWeekRef((r) => new Date(r.getFullYear(), r.getMonth(), r.getDate() + delta * 7));
   const today = new Date();
   const isThisWeek = sameWeek(weekRef, today);
-  const weekStart = startOfWeek(weekRef);
-  const cellDate = (day: number) =>
-    new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() + (day - 1));
+
+  const rate = useMemo(() => weekRate(data.grid), [data.grid]);
+  const overallStreak = useMemo(
+    () => data.streaks.reduce((max, s) => Math.max(max, s.stats.current), 0),
+    [data.streaks]
+  );
+
+  // Consistency grid: one row per goal, 7 CellState cells (Mon→Sun).
+  const gridRows: GridRow[] = useMemo(
+    () => data.streaks.map((s) => ({ label: s.goal.name, cells: s.cells as CellState[] })),
+    [data.streaks]
+  );
 
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea} edges={['top']}>
-        <ThemedText type="subtitle" style={styles.title}>
-          Stats
+    <ScreenLayout>
+      <AppHeader
+        right={
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+            <BruteFlame size={14} />
+            <ThemedText type="bodyStrong" color="accent1">
+              {overallStreak}
+            </ThemedText>
+          </View>
+        }
+      />
+
+      {/* Hero: this-week completion rate */}
+      <View style={{ alignItems: 'center', marginTop: 8, marginBottom: 26 }}>
+        <ThemedText type="eyebrow" color="muted">
+          This week
         </ThemedText>
+        <ThemedText type="hero" color="accent1" style={{ marginTop: 8 }}>
+          {rate === null ? '–' : `${rate}%`}
+        </ThemedText>
+        <ThemedText
+          type="body"
+          color="muted"
+          style={{ marginTop: 6, textAlign: 'center', maxWidth: 280 }}
+        >
+          {rate === null
+            ? 'Nothing due this week. Convenient.'
+            : 'Better than last week. Low bar.'}
+        </ThemedText>
+      </View>
 
-        <ScrollView contentContainerStyle={styles.content}>
-          <View style={styles.weekNav}>
-            <Pressable onPress={() => stepWeek(-1)} hitSlop={12} style={styles.navBtn}>
-              <ThemedText style={styles.navArrow}>‹</ThemedText>
-            </Pressable>
-            <ThemedText type="smallBold">{isThisWeek ? 'This week' : weekLabel(weekRef)}</ThemedText>
-            <Pressable
-              onPress={() => stepWeek(1)}
-              hitSlop={12}
-              disabled={isThisWeek}
-              style={styles.navBtn}
-            >
-              <ThemedText style={[styles.navArrow, isThisWeek && styles.navArrowOff]}>›</ThemedText>
-            </Pressable>
-          </View>
-          <View style={styles.grid}>
-            {data.grid.map((d) => (
-              <View key={d.day} style={styles.gridCol}>
-                <ThemedText type="small" themeColor="textSecondary">
-                  {WEEKDAYS[d.day - 1]}
-                </ThemedText>
-                <View style={[styles.cell, { backgroundColor: dayTint(d, cellDate(d.day), today, !loading) }]}>
-                  <ThemedText type="small">{d.due > 0 ? `${d.done}/${d.due}` : '–'}</ThemedText>
-                </View>
-              </View>
-            ))}
-          </View>
-          <View style={styles.legend}>
-            {LEGEND.map((l) => (
-              <View key={l.label} style={styles.legendItem}>
-                <View style={[styles.legendSwatch, { backgroundColor: l.color }]} />
-                <ThemedText type="small" themeColor="textSecondary">
-                  {l.label}
-                </ThemedText>
-              </View>
-            ))}
-          </View>
+      {/* Week nav */}
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: 12,
+        }}
+      >
+        <Pressable onPress={() => stepWeek(-1)} hitSlop={12}>
+          <Icon name="chevronLeft" size={20} color={tokens.fg} strokeWidth={2.2} />
+        </Pressable>
+        <ThemedText type="bodyStrong">{isThisWeek ? 'This week' : weekLabel(weekRef)}</ThemedText>
+        <Pressable onPress={() => stepWeek(1)} hitSlop={12} disabled={isThisWeek}>
+          <Icon
+            name="chevron"
+            size={20}
+            color={isThisWeek ? tokens.off : tokens.fg}
+            strokeWidth={2.2}
+          />
+        </Pressable>
+      </View>
 
-          <ThemedText type="smallBold" style={{ marginTop: Spacing.three }}>
-            Streaks
+      {gridRows.length > 0 ? (
+        <ConsistencyGrid rows={gridRows} />
+      ) : (
+        <Card>
+          <ThemedText type="body" color="muted" style={{ textAlign: 'center' }}>
+            No goals yet.
           </ThemedText>
-          <ThemedText type="small" themeColor="textSecondary">
-            Days in a row you hit a goal. Flexible goals count by week.
+        </Card>
+      )}
+
+      {/* Streaks */}
+      <SectionHeader label="Streaks" />
+      <ThemedText type="caption" color="muted" style={{ marginTop: -4, marginBottom: 12 }}>
+        Days in a row you hit a goal. Flexible goals count by week.
+      </ThemedText>
+
+      {data.streaks.length === 0 ? (
+        <ThemedText type="body" color="muted">
+          No goals yet.
+        </ThemedText>
+      ) : (
+        data.streaks.map(({ goal, stats, weekDone }) => {
+          const unit = stats.streakUnit === 'week' ? 'week' : 'day';
+          const context =
+            stats.streakUnit === 'week'
+              ? `${weekDone}/${goal.schedule.weeklyTarget} this week`
+              : `Best: ${stats.longest} ${stats.longest === 1 ? 'day' : 'days'}`;
+          return (
+            <Card key={goal.id} style={styleRow}>
+              <View style={{ flex: 1, marginRight: 12 }}>
+                <ThemedText type="bodyStrong" numberOfLines={1}>
+                  {goal.name}
+                </ThemedText>
+                <ThemedText type="caption" color="muted">
+                  {context}. {stats.current === 1 ? unit : `${unit}s`} in a row.
+                </ThemedText>
+              </View>
+              <StreakFlame count={stats.current} />
+            </Card>
+          );
+        })
+      )}
+
+      {/* How streaks work */}
+      <Pressable
+        onPress={() => setShowHelp((v) => !v)}
+        hitSlop={8}
+        style={{ alignSelf: 'flex-start', paddingVertical: 12, marginTop: 4 }}
+      >
+        <ThemedText type="caption" color="accent1">
+          {showHelp ? 'Hide how streaks work' : 'How streaks work'}
+        </ThemedText>
+      </Pressable>
+      {showHelp ? (
+        <View
+          style={{
+            backgroundColor: tokens.surface2,
+            borderWidth: 1,
+            borderColor: tokens.rim,
+            borderRadius: 14,
+            padding: 16,
+            gap: 4,
+          }}
+        >
+          <ThemedText type="bodyStrong">Day streak</ThemedText>
+          <ThemedText type="caption" color="muted">
+            Fixed-schedule and specific-date goals. Counts scheduled days done in a row. Days the
+            goal isn&apos;t scheduled don&apos;t count against you. Miss a scheduled day, back to 0.
           </ThemedText>
-
-          {data.streaks.length === 0 ? (
-            <ThemedText type="small" themeColor="textSecondary">
-              No goals yet.
-            </ThemedText>
-          ) : (
-            data.streaks.map(({ goal, stats, weekDone }) => {
-              const unit = stats.streakUnit === 'week' ? 'week' : 'day';
-              const context =
-                stats.streakUnit === 'week'
-                  ? `${weekDone}/${goal.schedule.weeklyTarget} this week`
-                  : `Best: ${stats.longest} ${stats.longest === 1 ? 'day' : 'days'}`;
-              return (
-                <ThemedView key={goal.id} type="backgroundElement" style={styles.row}>
-                  <View style={{ flex: 1 }}>
-                    <ThemedText type="smallBold">{goal.name}</ThemedText>
-                    <ThemedText type="small" themeColor="textSecondary">
-                      {context}
-                    </ThemedText>
-                  </View>
-                  <View style={styles.streakBox}>
-                    <ThemedText type="subtitle" style={stats.current === 0 ? styles.streakZero : undefined}>
-                      {stats.current > 0 ? `🔥 ${stats.current}` : '0'}
-                    </ThemedText>
-                    <ThemedText type="small" themeColor="textSecondary">
-                      {stats.current > 0
-                        ? `${stats.current === 1 ? unit : `${unit}s`} in a row`
-                        : `${unit} streak`}
-                    </ThemedText>
-                  </View>
-                </ThemedView>
-              );
-            })
-          )}
-
-          <Pressable onPress={() => setShowHelp((v) => !v)} hitSlop={8} style={styles.helpToggle}>
-            <ThemedText type="small" style={styles.helpToggleText}>
-              {showHelp ? 'Hide' : 'How streaks work'} {showHelp ? '⌃' : '⌄'}
-            </ThemedText>
-          </Pressable>
-          {showHelp ? (
-            <ThemedView type="backgroundElement" style={styles.help}>
-              <ThemedText type="smallBold">Day streak</ThemedText>
-              <ThemedText type="small" themeColor="textSecondary">
-                Fixed-schedule & specific-date goals. Counts scheduled days done in a row. Days the
-                goal isn’t scheduled don’t count against you. Miss a scheduled day → back to 0.
-              </ThemedText>
-              <ThemedText type="smallBold" style={{ marginTop: Spacing.two }}>
-                Week streak
-              </ThemedText>
-              <ThemedText type="small" themeColor="textSecondary">
-                “X days a week” goals. Counts weeks you hit the target in a row. This week counts
-                once you reach the target. Miss a week → back to 0.
-              </ThemedText>
-            </ThemedView>
-          ) : null}
-        </ScrollView>
-      </SafeAreaView>
-    </ThemedView>
+          <ThemedText type="bodyStrong" style={{ marginTop: 10 }}>
+            Week streak
+          </ThemedText>
+          <ThemedText type="caption" color="muted">
+            &ldquo;X days a week&rdquo; goals. Counts weeks you hit the target in a row. This week
+            counts once you reach the target. Miss a week, back to 0.
+          </ThemedText>
+        </View>
+      ) : null}
+    </ScreenLayout>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  safeArea: { flex: 1, paddingHorizontal: Spacing.three },
-  title: { paddingVertical: Spacing.three },
-  content: { gap: Spacing.two, paddingBottom: 120 },
-  weekNav: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  navBtn: { paddingHorizontal: Spacing.three },
-  navArrow: { fontSize: 24, fontWeight: '600', color: '#3c87f7' },
-  navArrowOff: { opacity: 0.25 },
-  grid: { flexDirection: 'row', gap: Spacing.one },
-  gridCol: { flex: 1, alignItems: 'center', gap: Spacing.half },
-  cell: {
-    width: '100%',
-    aspectRatio: 1,
-    borderRadius: Spacing.two,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: Spacing.three,
-    borderRadius: Spacing.three,
-    gap: Spacing.two,
-  },
-  streakBox: { alignItems: 'flex-end', minWidth: 92 },
-  streakZero: { opacity: 0.4 },
-  legend: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.three, marginTop: Spacing.half },
-  legendItem: { flexDirection: 'row', alignItems: 'center', gap: Spacing.half },
-  legendSwatch: { width: 12, height: 12, borderRadius: 3 },
-  helpToggle: { alignSelf: 'flex-start', paddingVertical: Spacing.two, marginTop: Spacing.one },
-  helpToggleText: { color: '#3c87f7', fontWeight: '600' },
-  help: { padding: Spacing.three, borderRadius: Spacing.three, gap: Spacing.half },
-});
+const styleRow = {
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  paddingVertical: 13,
+  paddingHorizontal: 16,
+  marginBottom: 10,
+} as const;

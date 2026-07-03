@@ -1,14 +1,14 @@
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 
-import { Button } from '@/components/button';
+import { ScreenLayout } from '@/components/screen-layout';
 import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Spacing } from '@/constants/theme';
+import { CATEGORY_LABEL, DangerButton, GhostButton } from '@/components/kit';
 import { useGoal } from '@/hooks/use-goal';
 import { useRoast } from '@/hooks/use-roast';
 import { useSkip } from '@/hooks/use-skip';
+import { tokens, tint } from '@/theme/tokens';
 
 const REASONS = ['No time', 'Too tired', 'Not feeling it', 'Sick', 'Other'];
 
@@ -46,7 +46,7 @@ export function SkipScreen({ goalId }: Props) {
   function pickReason(r: string) {
     setReason(r);
     setStep('confirm');
-    // Last-chance roast shown BEFORE committing — a motivator to back out (§4.5).
+    // Last-chance roast shown BEFORE committing. a motivator to back out (§4.5).
     getSkip(goal?.rudenessLevel ?? 3, r)
       .then(setRoast)
       .catch(() => setRoast('Sure this is the move? The streak won’t hold itself.'));
@@ -62,77 +62,130 @@ export function SkipScreen({ goalId }: Props) {
     }
   }
 
+  const subtitle = goal
+    ? `${goal.name} · ${CATEGORY_LABEL[goal.category]}`
+    : undefined;
+
+  // Footer swaps per step; friction (countdown-locked skip) preserved.
+  const footer =
+    step === 'reason' ? (
+      <GhostButton title="Never mind" onPress={() => router.back()} />
+    ) : step === 'confirm' ? (
+      <View style={{ gap: 12 }}>
+        <GhostButton title="Never mind" onPress={() => router.back()} />
+        <DangerButton
+          title={countdown > 0 ? `Skip in ${countdown}…` : 'Skip anyway'}
+          disabled={countdown > 0 || skipping}
+          onPress={confirmSkip}
+        />
+      </View>
+    ) : (
+      <View style={{ gap: 12 }}>
+        <GhostButton
+          title="Share this"
+          onPress={() =>
+            router.push({
+              pathname: '/share/[cardId]',
+              params: { cardId: 'skip', text: roast, goalName: goal?.name ?? '' },
+            })
+          }
+        />
+        <DangerButton title="Close" onPress={() => router.back()} />
+      </View>
+    );
+
   return (
-    <ThemedView style={styles.container}>
-      <View style={styles.content}>
-        {step === 'reason' ? (
-          <>
-            <ThemedText type="subtitle">Why are you bailing?</ThemedText>
-            <ThemedText type="small" themeColor="textSecondary">
-              Pick a reason. It gets logged and counts against your streak.
-            </ThemedText>
-            <View style={styles.reasons}>
-              {REASONS.map((r) => (
-                <Pressable key={r} onPress={() => pickReason(r)}>
-                  <ThemedView type="backgroundElement" style={styles.reasonRow}>
-                    <ThemedText type="default">{r}</ThemedText>
-                  </ThemedView>
-                </Pressable>
-              ))}
-            </View>
-            <Button title="Never mind, I’ll do it" onPress={() => router.back()} />
-          </>
-        ) : step === 'confirm' ? (
-          <>
-            <ThemedText type="subtitle">You sure?</ThemedText>
+    <ScreenLayout edges={['bottom']} footer={footer}>
+      <ThemedText type="heading" style={{ marginTop: 8 }}>
+        {step === 'done' ? 'Skipped.' : 'Bailing already?'}
+      </ThemedText>
+      {subtitle ? (
+        <ThemedText type="caption" color="muted" style={{ marginTop: 4 }}>
+          {subtitle}
+        </ThemedText>
+      ) : null}
+
+      {step === 'reason' ? (
+        <>
+          <ThemedText type="body" color="muted" style={{ marginTop: 16 }}>
+            Pick a reason. It gets logged and counts against your streak.
+          </ThemedText>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 18 }}>
+            {REASONS.map((r) => (
+              <ReasonChip key={r} label={r} selected={reason === r} onPress={() => pickReason(r)} />
+            ))}
+          </View>
+        </>
+      ) : step === 'confirm' ? (
+        <>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 18 }}>
+            {REASONS.map((r) => (
+              <ReasonChip key={r} label={r} selected={reason === r} onPress={() => pickReason(r)} />
+            ))}
+          </View>
+          <View
+            style={{
+              marginTop: 22,
+              padding: 18,
+              borderRadius: 20,
+              backgroundColor: tint(tokens.danger, 0.09),
+              borderWidth: 1,
+              borderColor: tint(tokens.danger, 0.22),
+            }}
+          >
             {roast ? (
-              <ThemedText type="default">{roast}</ThemedText>
+              <ThemedText type="subheading" style={{ fontSize: 17 }}>
+                {roast}
+              </ThemedText>
             ) : (
-              <ThemedText type="small" themeColor="textSecondary">
-                Skipping “{reason}”. This breaks your streak.
+              <ThemedText type="subheading" style={{ fontSize: 17 }}>
+                <ThemedText type="subheading" style={{ fontSize: 17 }} color="danger">
+                  “{reason}.”
+                </ThemedText>{' '}
+                This breaks your streak.
               </ThemedText>
             )}
-            {error ? (
-              <ThemedText type="small" style={{ color: '#E5484D' }}>
-                {error}
-              </ThemedText>
-            ) : null}
-            <Button
-              title={countdown > 0 ? `Skip in ${countdown}…` : 'Skip anyway'}
-              variant="danger"
-              disabled={countdown > 0}
-              loading={skipping}
-              onPress={confirmSkip}
-            />
-            <Button title="Actually, no — I’ll do it" onPress={() => router.back()} />
-          </>
-        ) : (
-          <>
-            <ThemedText type="subtitle">Skipped.</ThemedText>
-            <ThemedText type="small" themeColor="textSecondary">
-              Logged. Counts against your streak. Get it tomorrow.
+          </View>
+          {error ? (
+            <ThemedText type="caption" color="danger" style={{ marginTop: 12 }}>
+              {error}
             </ThemedText>
-            <Button
-              title="Share this"
-              variant="secondary"
-              onPress={() =>
-                router.push({
-                  pathname: '/share/[cardId]',
-                  params: { cardId: 'skip', text: roast, goalName: goal?.name ?? '' },
-                })
-              }
-            />
-            <Button title="Close" onPress={() => router.back()} />
-          </>
-        )}
-      </View>
-    </ThemedView>
+          ) : null}
+        </>
+      ) : (
+        <ThemedText type="body" color="muted" style={{ marginTop: 16 }}>
+          Logged. Counts against your streak. Get it tomorrow.
+        </ThemedText>
+      )}
+    </ScreenLayout>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  content: { flex: 1, padding: Spacing.three, gap: Spacing.three, justifyContent: 'center' },
-  reasons: { gap: Spacing.two },
-  reasonRow: { padding: Spacing.three, borderRadius: Spacing.three },
-});
+/** Selectable reason pill — tokens only (not a CTA button). */
+function ReasonChip({
+  label,
+  selected,
+  onPress,
+}: {
+  label: string;
+  selected: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      style={{
+        paddingVertical: 10,
+        paddingHorizontal: 16,
+        borderRadius: 999,
+        backgroundColor: selected ? tint(tokens.accent1, 0.08) : tokens.surface,
+        borderWidth: selected ? 1.5 : 1,
+        borderColor: selected ? tokens.accent1 : tokens.rim,
+      }}
+    >
+      <ThemedText type="body" color={selected ? 'accent1' : 'fg'}>
+        {label}
+      </ThemedText>
+    </Pressable>
+  );
+}

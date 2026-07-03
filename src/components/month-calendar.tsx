@@ -54,7 +54,7 @@ export function MonthCalendar({ selected, onToggle, minDate }: Props) {
         <Pressable onPress={() => setView(new Date(view.getFullYear(), view.getMonth() - 1, 1))} hitSlop={12} style={styles.navBtn}>
           <ThemedText style={styles.navArrow}>‹</ThemedText>
         </Pressable>
-        <ThemedText type="smallBold">
+        <ThemedText type="bodyStrong">
           {MONTHS[view.getMonth()]} {view.getFullYear()}
         </ThemedText>
         <Pressable onPress={() => setView(new Date(view.getFullYear(), view.getMonth() + 1, 1))} hitSlop={12} style={styles.navBtn}>
@@ -64,7 +64,7 @@ export function MonthCalendar({ selected, onToggle, minDate }: Props) {
 
       <View style={styles.weekdayRow}>
         {WEEKDAYS.map((w) => (
-          <ThemedText key={w} type="small" themeColor="textSecondary" style={styles.weekdayCell}>
+          <ThemedText key={w} type="caption" color="muted" style={styles.weekdayCell}>
             {w}
           </ThemedText>
         ))}
@@ -86,7 +86,7 @@ export function MonthCalendar({ selected, onToggle, minDate }: Props) {
               >
                 <View style={[styles.cellInner, isSel && styles.cellSelected, isToday && !isSel && styles.cellToday]}>
                   <ThemedText
-                    type="small"
+                    type="caption"
                     style={[isSel && styles.cellTextSel, (!inMonth || disabled) && styles.cellTextDim]}
                   >
                     {d.getDate()}

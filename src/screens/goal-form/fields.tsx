@@ -1,111 +1,131 @@
-/** Shared goal-form primitives: Field wrapper, chips, input styling. */
+/** Shared goal-form primitives: Field wrapper, selectable category pill,
+ *  themed input style. All presentation from design tokens (no raw hex). */
 
-import { Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import { Pressable, StyleSheet, View, type StyleProp, type TextStyle } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Spacing } from '@/constants/theme';
-import { useTheme } from '@/hooks/use-theme';
+import { CATEGORY_LABEL } from '@/components/kit';
+import type { GoalCategory } from '@/models';
+import { tokens } from '@/theme/tokens';
 
-const ACCENT = '#3c87f7';
-
-export function Field({ label, children }: { label: string; children: React.ReactNode }) {
+/** A labelled field group. Label is a lowercase muted `label` per the mock. */
+export function Field({
+  label,
+  children,
+  gap = 10,
+}: {
+  label: string;
+  children: React.ReactNode;
+  gap?: number;
+}) {
   return (
-    <View style={fieldStyles.field}>
-      <ThemedText type="smallBold">{label}</ThemedText>
+    <View style={{ gap }}>
+      <ThemedText type="label" color="muted">
+        {label}
+      </ThemedText>
       {children}
     </View>
   );
 }
 
-export function Chip({
-  text,
+/** A single selectable category pill (a form control, not the read-only CategoryChip). */
+export function CategoryPill({
+  category,
   active,
   onPress,
 }: {
-  text: string;
+  category: GoalCategory;
   active: boolean;
   onPress: () => void;
 }) {
   return (
-    <Pressable onPress={onPress}>
-      <ThemedView
-        type={active ? 'backgroundSelected' : 'backgroundElement'}
-        style={[fieldStyles.chip, active && { borderColor: ACCENT, borderWidth: 1 }]}
+    <Pressable
+      onPress={onPress}
+      style={[
+        fieldStyles.catPill,
+        active
+          ? { backgroundColor: tokens.accentSolid, borderColor: tokens.accentSolid }
+          : { backgroundColor: tokens.surface, borderColor: tokens.rim },
+      ]}
+    >
+      <ThemedText
+        type="eyebrow"
+        style={{ color: active ? tokens.accentText : tokens.muted }}
       >
-        <ThemedText type="small" themeColor={active ? 'text' : 'textSecondary'}>
-          {text}
-        </ThemedText>
-      </ThemedView>
+        {CATEGORY_LABEL[category]}
+      </ThemedText>
     </Pressable>
   );
 }
 
-export function ChipRow<T>({
+/** A horizontal wrap of selectable category pills. */
+export function CategoryPillRow({
   options,
   selected,
   onSelect,
-  label,
-  style,
 }: {
-  options: readonly T[];
-  selected: T;
-  onSelect: (v: T) => void;
-  label: (v: T) => string;
-  style?: StyleProp<ViewStyle>;
+  options: readonly GoalCategory[];
+  selected: GoalCategory;
+  onSelect: (c: GoalCategory) => void;
 }) {
   return (
-    <View style={[fieldStyles.chips, style]}>
-      {options.map((o) => (
-        <Chip key={String(o)} text={label(o)} active={o === selected} onPress={() => onSelect(o)} />
+    <View style={fieldStyles.wrap}>
+      {options.map((c) => (
+        <CategoryPill key={c} category={c} active={c === selected} onPress={() => onSelect(c)} />
       ))}
     </View>
   );
 }
 
-/** Themed TextInput style (matches the rest of the form). */
-export function useInputStyle() {
-  const theme = useTheme();
-  return [fieldStyles.input, { color: theme.text, backgroundColor: theme.backgroundElement }];
+/** Themed TextInput style: surface-2 fill, 1px rim, radius 14, padding 16. */
+export function useInputStyle(): StyleProp<TextStyle> {
+  return fieldStyles.input;
 }
 
 export const fieldStyles = StyleSheet.create({
-  field: { gap: Spacing.two },
   input: {
-    borderRadius: Spacing.two,
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.three,
-    fontSize: 16,
-  },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
-  chip: {
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.two,
-    borderRadius: Spacing.five,
-  },
-  entryRow: { flexDirection: 'row', gap: Spacing.two, alignItems: 'center' },
-  addBtn: { paddingHorizontal: Spacing.three, minHeight: 44 },
-  pillButton: {
-    alignSelf: 'flex-start',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.two,
-    borderRadius: Spacing.five,
+    backgroundColor: tokens.surface2,
     borderWidth: 1,
-    borderColor: ACCENT,
+    borderColor: tokens.rim,
+    borderRadius: 14,
+    padding: 16,
+    fontSize: 16,
+    color: tokens.fg,
   },
-  pillButtonText: { color: ACCENT },
-  timeBox: { justifyContent: 'center', minHeight: 48 },
-  modalBackdrop: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.4)' },
-  modalSheet: {
-    paddingBottom: Spacing.five,
-    paddingHorizontal: Spacing.three,
-    borderTopLeftRadius: Spacing.four,
-    borderTopRightRadius: Spacing.four,
+  wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  catPill: {
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    borderRadius: 999,
+    borderWidth: 1,
   },
-  modalHeader: {
+  // A generic tappable "surface2" row (time rows, buddy row, etc.).
+  row: {
+    backgroundColor: tokens.surface2,
+    borderWidth: 1,
+    borderColor: tokens.rim,
+    borderRadius: 14,
+    padding: 16,
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: Spacing.two,
+  },
+  dashedRow: {
+    borderWidth: 1,
+    borderColor: tokens.rim,
+    borderStyle: 'dashed',
+    borderRadius: 14,
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+  },
+  dayToggle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
   },
 });

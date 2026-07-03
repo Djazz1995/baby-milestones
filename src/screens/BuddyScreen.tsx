@@ -1,16 +1,15 @@
 import { useState } from 'react';
-import { Alert, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { Alert, TextInput, View } from 'react-native';
 
-import { Button } from '@/components/button';
+import { ScreenLayout } from '@/components/screen-layout';
 import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Spacing } from '@/constants/theme';
+import { Card, PrimaryButton, TextButton } from '@/components/kit';
 import { useBuddies } from '@/hooks/use-buddies';
-import { useTheme } from '@/hooks/use-theme';
 import { buddyService } from '@/services/buddyService';
+import type { Buddy } from '@/models';
+import { tokens } from '@/theme/tokens';
 
 export function BuddyScreen() {
-  const theme = useTheme();
   const { data, loading, refetch } = useBuddies();
   const [contact, setContact] = useState('');
   const [adding, setAdding] = useState(false);
@@ -47,74 +46,88 @@ export function BuddyScreen() {
   }
 
   return (
-    <ThemedView style={styles.container}>
-      <View style={styles.content}>
-        <ThemedText type="small" themeColor="textSecondary">
-          A buddy gets told when you finish — or bail. Shame works when witnessed.
+    <ScreenLayout
+      edges={['bottom']}
+      footer={<PrimaryButton title="Invite a buddy" onPress={onInvite} loading={adding} />}
+    >
+      <ThemedText type="body" color="muted" style={{ lineHeight: 22, marginTop: 4, marginBottom: 20 }}>
+        They see when you show up, and when you bail. Shame works better with an audience.
+      </ThemedText>
+
+      <TextInput
+        value={contact}
+        onChangeText={setContact}
+        placeholder="name, phone, or email"
+        placeholderTextColor={tokens.muted}
+        autoCapitalize="none"
+        style={{
+          height: 52,
+          borderRadius: 16,
+          borderWidth: 1,
+          borderColor: tokens.rim,
+          backgroundColor: tokens.surface,
+          paddingHorizontal: 16,
+          color: tokens.fg,
+          fontSize: 15,
+          marginBottom: 20,
+        }}
+      />
+
+      {error ? (
+        <ThemedText type="caption" style={{ color: tokens.danger, marginBottom: 16 }}>
+          {error}
         </ThemedText>
+      ) : null}
 
-        <View style={styles.addRow}>
-          <TextInput
-            value={contact}
-            onChangeText={setContact}
-            placeholder="name, phone, or email"
-            placeholderTextColor={theme.textSecondary}
-            autoCapitalize="none"
-            style={[
-              styles.input,
-              { color: theme.text, backgroundColor: theme.backgroundElement, flex: 1 },
-            ]}
-          />
-          <Button title="Invite" variant="secondary" onPress={onInvite} loading={adding} />
-        </View>
+      {loading && data.length === 0 ? null : data.length === 0 ? (
+        <ThemedText type="body" color="muted" style={{ marginBottom: 16 }}>
+          No buddies yet.
+        </ThemedText>
+      ) : (
+        data.map((b) => (
+          <BuddyRow key={b.id} buddy={b} onRemove={() => onRemove(b.id, b.contact)} />
+        ))
+      )}
 
-        {error ? (
-          <ThemedText type="small" style={{ color: '#E5484D' }}>
-            {error}
-          </ThemedText>
-        ) : null}
-
-        {loading && data.length === 0 ? null : data.length === 0 ? (
-          <ThemedText type="small" themeColor="textSecondary">
-            No buddies yet.
-          </ThemedText>
-        ) : (
-          data.map((b) => (
-            <ThemedView key={b.id} type="backgroundElement" style={styles.row}>
-              <View style={{ flex: 1 }}>
-                <ThemedText type="smallBold">{b.contact}</ThemedText>
-                <ThemedText type="small" themeColor="textSecondary">
-                  {b.inviteStatus}
-                </ThemedText>
-              </View>
-              <Pressable onPress={() => onRemove(b.id, b.contact)} hitSlop={8}>
-                <ThemedText type="small" style={{ color: '#E5484D' }}>
-                  Remove
-                </ThemedText>
-              </Pressable>
-            </ThemedView>
-          ))
-        )}
-      </View>
-    </ThemedView>
+      <ThemedText
+        type="caption"
+        color="muted"
+        style={{ lineHeight: 18, marginTop: 12 }}
+      >
+        Buddies get notified on completions and skips, nothing in between. They don&apos;t see your
+        excuses, just the result.
+      </ThemedText>
+    </ScreenLayout>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  content: { padding: Spacing.three, gap: Spacing.three },
-  addRow: { flexDirection: 'row', gap: Spacing.two, alignItems: 'center' },
-  input: {
-    borderRadius: Spacing.two,
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.three,
-    fontSize: 16,
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: Spacing.three,
-    borderRadius: Spacing.three,
-    gap: Spacing.two,
-  },
-});
+function BuddyRow({ buddy, onRemove }: { buddy: Buddy; onRemove: () => void }) {
+  const initial = (buddy.contact.trim()[0] ?? '?').toUpperCase();
+  return (
+    <Card style={{ flexDirection: 'row', gap: 14, alignItems: 'center', marginBottom: 12 }}>
+      <View
+        style={{
+          width: 52,
+          height: 52,
+          borderRadius: 26,
+          backgroundColor: tokens.surface2,
+          borderWidth: 1,
+          borderColor: tokens.rim,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <ThemedText type="heading">{initial}</ThemedText>
+      </View>
+      <View style={{ flex: 1 }}>
+        <ThemedText type="subheading" numberOfLines={1}>
+          {buddy.contact}
+        </ThemedText>
+        <ThemedText type="caption" color="muted" style={{ marginTop: 2 }}>
+          {buddy.inviteStatus === 'pending' ? 'invite pending' : 'watching your goals'}
+        </ThemedText>
+      </View>
+      <TextButton title="remove" color={tokens.muted} onPress={onRemove} />
+    </Card>
+  );
+}

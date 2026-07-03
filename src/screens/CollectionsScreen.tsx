@@ -1,16 +1,14 @@
 import { useState } from 'react';
-import { Alert, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { Alert, Pressable, TextInput, View } from 'react-native';
 
-import { Button } from '@/components/button';
+import { ScreenLayout } from '@/components/screen-layout';
 import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Spacing } from '@/constants/theme';
+import { Card, GhostButton, TextButton } from '@/components/kit';
 import { useCollections } from '@/hooks/use-collections';
-import { useTheme } from '@/hooks/use-theme';
 import { collectionService } from '@/services/collectionService';
+import { tokens } from '@/theme/tokens';
 
 export function CollectionsScreen() {
-  const theme = useTheme();
   const { data, loading, refetch } = useCollections();
   const [name, setName] = useState('');
   const [adding, setAdding] = useState(false);
@@ -18,10 +16,16 @@ export function CollectionsScreen() {
   const [editingId, setEditingId] = useState<string>();
   const [editDraft, setEditDraft] = useState('');
 
-  const inputStyle = [
-    styles.input,
-    { color: theme.text, backgroundColor: theme.backgroundElement },
-  ];
+  const inputStyle = {
+    color: tokens.fg,
+    backgroundColor: tokens.surface2,
+    borderWidth: 1,
+    borderColor: tokens.rim,
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 13,
+    fontSize: 16,
+  } as const;
 
   async function onCreate() {
     const v = name.trim();
@@ -71,38 +75,40 @@ export function CollectionsScreen() {
   }
 
   return (
-    <ThemedView style={styles.container}>
-      <View style={styles.content}>
-        <ThemedText type="small" themeColor="textSecondary">
-          Group goals under a bigger ambition, e.g. “Run a marathon”. Deleting one keeps its goals.
-        </ThemedText>
+    <ScreenLayout edges={['bottom']}>
+      <ThemedText type="body" color="muted" style={{ marginTop: 8 }}>
+        Group goals under a bigger ambition, e.g. “Run a marathon”. Deleting one keeps its goals.
+      </ThemedText>
 
-        <View style={styles.addRow}>
-          <TextInput
-            value={name}
-            onChangeText={setName}
-            onSubmitEditing={onCreate}
-            placeholder="New collection"
-            placeholderTextColor={theme.textSecondary}
-            returnKeyType="done"
-            style={[...inputStyle, { flex: 1 }]}
-          />
-          <Button title="Add" variant="secondary" onPress={onCreate} loading={adding} />
+      <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center', marginTop: 18 }}>
+        <TextInput
+          value={name}
+          onChangeText={setName}
+          onSubmitEditing={onCreate}
+          placeholder="New collection"
+          placeholderTextColor={tokens.muted}
+          returnKeyType="done"
+          style={[inputStyle, { flex: 1 }]}
+        />
+        <View style={{ width: 96 }}>
+          <GhostButton title="Add" onPress={onCreate} loading={adding} />
         </View>
+      </View>
 
-        {error ? (
-          <ThemedText type="small" style={{ color: '#E5484D' }}>
-            {error}
-          </ThemedText>
-        ) : null}
+      {error ? (
+        <ThemedText type="caption" color="danger" style={{ marginTop: 12 }}>
+          {error}
+        </ThemedText>
+      ) : null}
 
-        {loading && data.length === 0 ? null : data.length === 0 ? (
-          <ThemedText type="small" themeColor="textSecondary">
-            No collections yet.
-          </ThemedText>
-        ) : (
-          data.map((c) => (
-            <ThemedView key={c.id} type="backgroundElement" style={styles.row}>
+      {loading && data.length === 0 ? null : data.length === 0 ? (
+        <ThemedText type="body" color="muted" style={{ marginTop: 24, textAlign: 'center' }}>
+          No collections yet.
+        </ThemedText>
+      ) : (
+        <View style={{ gap: 10, marginTop: 18 }}>
+          {data.map((c) => (
+            <Card key={c.id} style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
               {editingId === c.id ? (
                 <TextInput
                   value={editDraft}
@@ -111,44 +117,21 @@ export function CollectionsScreen() {
                   onBlur={() => saveEdit(c.id)}
                   autoFocus
                   returnKeyType="done"
-                  style={[...inputStyle, { flex: 1 }]}
+                  style={[inputStyle, { flex: 1 }]}
                 />
               ) : (
                 <Pressable style={{ flex: 1 }} onPress={() => startEdit(c.id, c.name)}>
-                  <ThemedText type="smallBold">{c.name}</ThemedText>
-                  <ThemedText type="small" themeColor="textSecondary">
+                  <ThemedText type="bodyStrong">{c.name}</ThemedText>
+                  <ThemedText type="caption" color="muted" style={{ marginTop: 2 }}>
                     Tap to rename
                   </ThemedText>
                 </Pressable>
               )}
-              <Pressable onPress={() => onRemove(c.id, c.name)} hitSlop={8}>
-                <ThemedText type="small" style={{ color: '#E5484D' }}>
-                  Delete
-                </ThemedText>
-              </Pressable>
-            </ThemedView>
-          ))
-        )}
-      </View>
-    </ThemedView>
+              <TextButton title="Delete" color={tokens.danger} onPress={() => onRemove(c.id, c.name)} />
+            </Card>
+          ))}
+        </View>
+      )}
+    </ScreenLayout>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  content: { padding: Spacing.three, gap: Spacing.three },
-  addRow: { flexDirection: 'row', gap: Spacing.two, alignItems: 'center' },
-  input: {
-    borderRadius: Spacing.two,
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.three,
-    fontSize: 16,
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: Spacing.three,
-    borderRadius: Spacing.three,
-    gap: Spacing.two,
-  },
-});

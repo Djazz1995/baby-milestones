@@ -7,6 +7,18 @@ import { ShareCardScreen } from '@/screens/ShareCardScreen';
  * v1); the roast `text` + `goalName` ride in as query params.
  */
 export default function ShareCardRoute() {
-  const { text, goalName } = useLocalSearchParams<{ text: string; goalName?: string }>();
-  return <ShareCardScreen text={text ?? ''} goalName={goalName} />;
+  const { text, goalName, day, streak } = useLocalSearchParams<{
+    text: string;
+    goalName?: string;
+    day?: string;
+    streak?: string;
+  }>();
+  return (
+    <ShareCardScreen
+      text={text ?? ''}
+      goalName={goalName}
+      day={day ? Number(day) : undefined}
+      streak={streak ? Number(streak) : undefined}
+    />
+  );
 }

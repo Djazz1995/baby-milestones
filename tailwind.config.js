@@ -1,3 +1,5 @@
+const { tokens } = require('./src/theme/tokens.js');
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: process.env.DARK_MODE ? process.env.DARK_MODE : 'class',
@@ -18,7 +20,28 @@ module.exports = {
   ],
   theme: {
     extend: {
+      borderRadius: {
+        card: '20px',
+        input: '14px',
+        button: '16px',
+      },
       colors: {
+        // brute brand tokens — single source is src/theme/tokens.js.
+        // Status colors (success/info) intentionally omitted here to avoid
+        // clobbering gluestack's success-*/info-* scales; the shared status
+        // components read those hexes from tokens.js directly.
+        bg: tokens.bg,
+        surface: tokens.surface,
+        'surface-2': tokens.surface2,
+        rim: tokens.rim,
+        fg: tokens.fg,
+        muted: tokens.muted,
+        'accent-1': tokens.accent1,
+        'accent-2': tokens.accent2,
+        'accent-solid': tokens.accentSolid,
+        'accent-text': tokens.accentText,
+        danger: tokens.danger,
+        off: tokens.off,
         primary: {
           0: 'rgb(var(--color-primary-0)/<alpha-value>)',
           50: 'rgb(var(--color-primary-50)/<alpha-value>)',

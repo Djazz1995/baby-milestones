@@ -1,21 +1,21 @@
 import { Icon, Label, NativeTabs } from 'expo-router/unstable-native-tabs';
-import { useColorScheme } from 'react-native';
 
-import { Colors } from '@/constants/theme';
+import { tokens } from '@/theme/tokens';
 
+/**
+ * The ONE bottom tab navigator: Home · Agenda · Stats · Settings. Dark bar,
+ * accent-1 active tint, native SF Symbol icons. Identical on every tab screen.
+ */
 export default function AppTabs() {
-  const scheme = useColorScheme();
-  const colors = Colors[scheme ?? 'light'];
-
   return (
     <NativeTabs
-      backgroundColor={colors.background}
-      indicatorColor={colors.backgroundElement}
-      labelStyle={{ color: colors.text }}
+      backgroundColor={tokens.bg}
+      tintColor={tokens.accent1}
+      labelStyle={{ color: tokens.muted }}
     >
       <NativeTabs.Trigger name="index">
         <Label>Home</Label>
-        <Icon src={require('@/assets/images/tabIcons/home.png')} />
+        <Icon sf="house.fill" />
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger name="agenda">

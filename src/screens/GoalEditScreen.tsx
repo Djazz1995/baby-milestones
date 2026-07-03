@@ -1,19 +1,18 @@
 import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { ScrollView, StyleSheet, TextInput } from 'react-native';
+import { TextInput, View } from 'react-native';
 
-import { Button } from '@/components/button';
+import { ScreenLayout } from '@/components/screen-layout';
 import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Spacing } from '@/constants/theme';
+import { PrimaryButton } from '@/components/kit';
 import { ESCALATION_LOCKED, LOCKED_ESCALATION, LOCKED_RUDENESS, RUDENESS_LOCKED } from '@/lib/config';
 import { useBilling } from '@/hooks/use-billing';
 import { useGoal } from '@/hooks/use-goal';
-import { useTheme } from '@/hooks/use-theme';
 import { useUser } from '@/hooks/use-user';
 import type { EscalationSpeed, GoalCategory, RudenessLevel, Schedule } from '@/models';
 import { goalService } from '@/services/goalService';
 import { notificationService } from '@/services/notificationService';
+import { tokens } from '@/theme/tokens';
 
 import {
   BlockersBlock,
@@ -27,7 +26,7 @@ import {
   type MeasureValue,
 } from './goal-form/blocks';
 import { CATEGORIES, GOAL_TYPES, scheduleFromDefaults } from './goal-form/config';
-import { ChipRow, Field, useInputStyle } from './goal-form/fields';
+import { CategoryPillRow, Field } from './goal-form/fields';
 
 const GYM = GOAL_TYPES.gym.defaults;
 
@@ -35,8 +34,6 @@ type Props = { goalId?: string };
 
 export function GoalEditScreen({ goalId }: Props) {
   const router = useRouter();
-  const theme = useTheme();
-  const inputStyle = useInputStyle();
   const { data: existing } = useGoal(goalId);
   const { data: user } = useUser();
   const { canAddGoal, canUseRudeness, canUseBuddy } = useBilling();
@@ -165,30 +162,29 @@ export function GoalEditScreen({ goalId }: Props) {
   }
 
   return (
-    <ThemedView style={styles.container}>
-      <ScrollView
-        contentContainerStyle={styles.content}
-        keyboardShouldPersistTaps="handled"
-        keyboardDismissMode="interactive"
-        automaticallyAdjustKeyboardInsets
-      >
-        <Field label="Name">
+    <ScreenLayout
+      edges={['bottom']}
+      footer={
+        <PrimaryButton
+          title={goalId ? 'Save' : 'Create goal'}
+          onPress={onSave}
+          loading={saving}
+        />
+      }
+    >
+      <View style={{ gap: 22, paddingTop: 8 }}>
+        <Field label="goal name">
           <TextInput
             value={name}
             onChangeText={setName}
-            placeholder={descriptor.defaults.namePlaceholder ?? 'Gym'}
-            placeholderTextColor={theme.textSecondary}
-            style={inputStyle}
+            placeholder={descriptor.defaults.namePlaceholder ?? 'Read 20 pages'}
+            placeholderTextColor={tokens.off}
+            style={{ fontSize: 22, fontWeight: '700', color: tokens.fg, paddingVertical: 4 }}
           />
         </Field>
 
-        <Field label="Category">
-          <ChipRow
-            options={CATEGORIES}
-            selected={category}
-            onSelect={onSelectCategory}
-            label={(c) => c}
-          />
+        <Field label="category">
+          <CategoryPillRow options={CATEGORIES} selected={category} onSelect={onSelectCategory} />
         </Field>
 
         {has('cue') ? (
@@ -214,24 +210,11 @@ export function GoalEditScreen({ goalId }: Props) {
         {has('collection') ? <CollectionBlock value={collectionId} onChange={setCollectionId} /> : null}
 
         {error ? (
-          <ThemedText type="small" style={{ color: '#E5484D' }}>
+          <ThemedText type="caption" color="danger">
             {error}
           </ThemedText>
         ) : null}
-
-        <Button
-          title={goalId ? 'Save Changes' : 'Create Goal'}
-          onPress={onSave}
-          loading={saving}
-          style={styles.save}
-        />
-      </ScrollView>
-    </ThemedView>
+      </View>
+    </ScreenLayout>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  content: { padding: Spacing.three, gap: Spacing.four, paddingBottom: Spacing.six },
-  save: { marginTop: Spacing.two },
-});

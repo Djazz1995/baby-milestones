@@ -1,54 +1,44 @@
-import { Link, useFocusEffect } from 'expo-router';
-import { useCallback, useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useMemo } from 'react';
+import { View } from 'react-native';
 
-import { ymd } from '@/components/month-calendar';
+import { BruteFlame } from '@/components/brute-logo';
+import { GoalCard } from '@/components/goal-card';
+import { ScreenLayout } from '@/components/screen-layout';
 import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Spacing } from '@/constants/theme';
+import { AppHeader, Card, CategoryChip, StreakFlame } from '@/components/kit';
+import { ymd } from '@/components/month-calendar';
+import { useGoalStreaks } from '@/hooks/use-goal-streaks';
 import { useGoals } from '@/hooks/use-goals';
 import { useTodayStatuses } from '@/hooks/use-today-status';
-import type { Goal, TodayStatus } from '@/models';
+import type { Goal } from '@/models';
+import { tokens } from '@/theme/tokens';
+import { formatTime } from '@/utils/goal-format';
 
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-const MONTHS = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
-];
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+/** How many days forward the agenda spans. */
+const HORIZON = 14;
+
 const isoDay = (d: Date): number => (d.getDay() === 0 ? 7 : d.getDay());
 
 function startOfDay(d: Date): Date {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate());
 }
-function startOfMonth(d: Date): Date {
-  return new Date(d.getFullYear(), d.getMonth(), 1);
-}
-function addMonths(d: Date, n: number): Date {
-  return new Date(d.getFullYear(), d.getMonth() + n, 1);
-}
 function sameDay(a: Date, b: Date): boolean {
   return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 }
-
-/** 6 weeks × 7 days (Mon-first) covering the month containing `view`. */
-function monthWeeks(view: Date): Date[][] {
-  const first = startOfMonth(view);
-  const offset = (first.getDay() + 6) % 7; // Mon=0 … Sun=6 before the 1st
-  const start = new Date(first.getFullYear(), first.getMonth(), 1 - offset);
-  const cells = Array.from(
-    { length: 42 },
-    (_, i) => new Date(start.getFullYear(), start.getMonth(), start.getDate() + i)
-  );
-  return Array.from({ length: 6 }, (_, w) => cells.slice(w * 7, w * 7 + 7));
+function addDays(d: Date, n: number): Date {
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
 }
 
-type DayEntry = { goal: Goal; times: string[]; kind: 'fixed' | 'weekly' | 'dates' };
+type DayEntry = { goal: Goal; times: string[] };
 
 /**
- * Goals due on a given date: fixed slots on that weekday, weekly goals any day,
- * specific-dates goals on their picked dates. Excludes goals on dates before
- * they were created (no time travel).
+ * Goals due on a given date: fixed slots on that weekday, weekly-target goals
+ * any day, specific-dates goals on their picked dates. Excludes goals on dates
+ * before they were created (no time travel).
  */
 function goalsForDay(goals: Goal[], date: Date): DayEntry[] {
   const day = isoDay(date);
@@ -57,208 +47,173 @@ function goalsForDay(goals: Goal[], date: Date): DayEntry[] {
   const out: DayEntry[] = [];
   for (const g of goals) {
     if (g.paused || g.archived) continue;
-    if (dayFloor < startOfDay(new Date(g.createdAt)).getTime()) continue; // before the goal existed
+    if (dayFloor < startOfDay(new Date(g.createdAt)).getTime()) continue;
     if (g.schedule.dates?.length) {
       if (g.schedule.dates.includes(dateYmd)) {
-        out.push({ goal: g, times: g.schedule.time ? [g.schedule.time] : [], kind: 'dates' });
+        out.push({ goal: g, times: g.schedule.time ? [g.schedule.time] : [] });
       }
     } else if (g.schedule.weeklyTarget) {
-      out.push({ goal: g, times: [], kind: 'weekly' });
+      out.push({ goal: g, times: [] });
     } else {
       const times = g.schedule.slots.filter((s) => s.day === day).map((s) => s.time);
-      if (times.length > 0) out.push({ goal: g, times, kind: 'fixed' });
+      if (times.length > 0) out.push({ goal: g, times });
     }
   }
-  return out;
+  // Earliest time first; untimed (weekly) goals sink to the bottom.
+  return out.sort((a, b) => (a.times[0] ?? '99:99').localeCompare(b.times[0] ?? '99:99'));
 }
 
-const STATUS_COLOR: Record<TodayStatus, string | null> = {
-  done: '#30A46C',
-  skipped: '#E5484D',
-  pending: '#3c87f7',
-  off: null,
-};
+function dayHeading(d: Date, today: Date): string {
+  const label = `${WEEKDAYS[isoDay(d) - 1]} ${MONTHS[d.getMonth()]} ${d.getDate()}`;
+  if (sameDay(d, today)) return `Today · ${label}`;
+  if (sameDay(d, addDays(today, 1))) return `Tomorrow · ${label}`;
+  return label;
+}
 
 export function AgendaScreen() {
+  const router = useRouter();
   const { data: goals, refetch } = useGoals();
   const { data: statuses, refetch: refetchStatuses } = useTodayStatuses(goals);
-  const [selected, setSelected] = useState(() => new Date());
-  const [view, setView] = useState(() => startOfMonth(new Date()));
+  const { data: streaks, refetch: refetchStreaks } = useGoalStreaks(goals);
 
   useFocusEffect(
     useCallback(() => {
       refetch();
       refetchStatuses();
-    }, [refetch, refetchStatuses])
+      refetchStreaks();
+    }, [refetch, refetchStatuses, refetchStreaks]),
   );
 
-  const today = new Date();
-  const weeks = useMemo(() => monthWeeks(view), [view]);
-  const entries = useMemo(() => goalsForDay(goals, selected), [goals, selected]);
-  const isSelectedToday = sameDay(selected, today);
-  // Days that have any goal — drives the dot under the date.
-  const daysWithGoals = useMemo(() => {
-    const set = new Set<string>();
-    for (const week of weeks) {
-      for (const d of week) {
-        if (goalsForDay(goals, d).length > 0) set.add(startOfDay(d).toDateString());
-      }
-    }
-    return set;
-  }, [weeks, goals]);
+  const today = useMemo(() => startOfDay(new Date()), []);
 
-  function pickDay(d: Date) {
-    setSelected(d);
-    if (d.getMonth() !== view.getMonth()) setView(startOfMonth(d));
-  }
+  // The complete agenda: every day from today forward (within the horizon)
+  // that has at least one scheduled goal, each with its goals.
+  const sections = useMemo(() => {
+    const out: { date: Date; entries: DayEntry[] }[] = [];
+    for (let i = 0; i < HORIZON; i++) {
+      const d = addDays(today, i);
+      const entries = goalsForDay(goals, d);
+      if (entries.length > 0) out.push({ date: d, entries });
+    }
+    return out;
+  }, [goals, today]);
+
+  const bestStreak = useMemo(() => {
+    const values = Object.values(streaks);
+    return values.length ? Math.max(...values) : 0;
+  }, [streaks]);
 
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea} edges={['top']}>
-        <ThemedText type="subtitle" style={styles.title}>
-          Agenda
+    <ScreenLayout>
+      <AppHeader
+        right={
+          bestStreak > 0 ? (
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 5,
+                backgroundColor: tokens.surface2,
+                borderWidth: 1,
+                borderColor: tokens.rim,
+                borderRadius: 999,
+                paddingTop: 6,
+                paddingBottom: 6,
+                paddingLeft: 8,
+                paddingRight: 12,
+              }}
+            >
+              <BruteFlame size={14} />
+              <ThemedText type="bodyStrong" color="accent1">
+                {bestStreak}
+              </ThemedText>
+            </View>
+          ) : undefined
+        }
+      />
+
+      <ThemedText type="title" style={{ fontSize: 28, marginBottom: 4 }}>
+        Agenda
+      </ThemedText>
+      <ThemedText type="caption" color="muted" style={{ fontSize: 13, marginBottom: 18 }}>
+        The next two weeks. No hiding.
+      </ThemedText>
+
+      {sections.length === 0 ? (
+        <ThemedText type="body" color="muted" style={{ textAlign: 'center', marginTop: 40 }}>
+          Nothing on the books. Suspicious.
         </ThemedText>
+      ) : (
+        sections.map(({ date, entries }) => {
+          const isToday = sameDay(date, today);
+          return (
+            <View key={ymd(date)} style={{ marginBottom: 8 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 14, marginBottom: 12 }}>
+                <ThemedText type="subheading" color={isToday ? 'accent1' : 'fg'}>
+                  {dayHeading(date, today)}
+                </ThemedText>
+                <View style={{ flex: 1, height: 1, backgroundColor: tokens.rim }} />
+              </View>
 
-        <View style={styles.monthHeader}>
-          <Pressable onPress={() => setView(addMonths(view, -1))} hitSlop={12} style={styles.navBtn}>
-            <ThemedText style={styles.navArrow}>‹</ThemedText>
-          </Pressable>
-          <ThemedText type="smallBold">
-            {MONTHS[view.getMonth()]} {view.getFullYear()}
-          </ThemedText>
-          <Pressable onPress={() => setView(addMonths(view, 1))} hitSlop={12} style={styles.navBtn}>
-            <ThemedText style={styles.navArrow}>›</ThemedText>
-          </Pressable>
-        </View>
-
-        <View style={styles.weekdayRow}>
-          {WEEKDAYS.map((w) => (
-            <ThemedText key={w} type="small" themeColor="textSecondary" style={styles.weekdayCell}>
-              {w}
-            </ThemedText>
-          ))}
-        </View>
-
-        {weeks.map((week, wi) => (
-          <View key={wi} style={styles.weekRow}>
-            {week.map((d) => {
-              const inMonth = d.getMonth() === view.getMonth();
-              const isToday = sameDay(d, today);
-              const isSel = sameDay(d, selected);
-              const hasGoals = daysWithGoals.has(startOfDay(d).toDateString());
-              return (
-                <Pressable key={d.toISOString()} onPress={() => pickDay(d)} style={styles.cell}>
-                  <View style={[styles.cellInner, isSel && styles.cellSelected, isToday && !isSel && styles.cellToday]}>
-                    <ThemedText
-                      type="small"
-                      style={[
-                        isSel && styles.cellTextSel,
-                        !inMonth && styles.cellTextDim,
-                      ]}
-                    >
-                      {d.getDate()}
-                    </ThemedText>
-                  </View>
-                  <View style={[styles.cellDot, hasGoals && inMonth ? styles.cellDotOn : null]} />
-                </Pressable>
-              );
-            })}
-          </View>
-        ))}
-
-        <ThemedText type="smallBold" style={styles.dayLabel}>
-          {isSelectedToday ? 'Today' : `${WEEKDAYS[isoDay(selected) - 1]} ${selected.getDate()} ${MONTHS[selected.getMonth()]}`}
-        </ThemedText>
-
-        <ScrollView contentContainerStyle={styles.list}>
-          {entries.length === 0 ? (
-            <ThemedText type="small" themeColor="textSecondary" style={styles.empty}>
-              Nothing due this day.
-            </ThemedText>
-          ) : (
-            entries.map(({ goal, times, kind }) => {
-              const t = statuses[goal.id];
-              let badge: { color: string; text: string } | null = null;
-              if (t?.progress) {
-                const { done, total } = t.progress;
-                badge = { color: done >= total ? '#30A46C' : '#3c87f7', text: `${done}/${total}` };
-              } else if (isSelectedToday && t?.status) {
-                const color = STATUS_COLOR[t.status];
-                if (color) {
-                  badge = {
-                    color,
-                    text: t.status === 'done' ? 'Done' : t.status === 'skipped' ? 'Skipped' : 'Today',
-                  };
-                }
-              }
-              const subtitle =
-                kind === 'weekly'
-                  ? `${goal.schedule.weeklyTarget} ${goal.schedule.weeklyTarget === 1 ? 'day' : 'days'} a week`
-                  : times.length > 0
-                    ? times.join(', ')
-                    : 'any time';
-              return (
-                <Link key={goal.id} href={`/goal/${goal.id}`} asChild>
-                  <Pressable>
-                    <ThemedView type="backgroundElement" style={styles.row}>
-                      <View style={{ flex: 1 }}>
-                        <ThemedText type="smallBold">{goal.name}</ThemedText>
-                        <ThemedText type="small" themeColor="textSecondary">
-                          {subtitle}
-                        </ThemedText>
-                      </View>
-                      {badge ? (
-                        <View style={[styles.badge, { backgroundColor: badge.color }]}>
-                          <ThemedText type="small" style={styles.badgeText}>
-                            {badge.text}
-                          </ThemedText>
-                        </View>
-                      ) : null}
-                    </ThemedView>
-                  </Pressable>
-                </Link>
-              );
-            })
-          )}
-        </ScrollView>
-      </SafeAreaView>
-    </ThemedView>
+              {entries.map(({ goal, times }) =>
+                isToday ? (
+                  <GoalCard
+                    key={goal.id}
+                    goal={goal}
+                    today={statuses[goal.id]}
+                    streak={streaks[goal.id]}
+                    onPress={() => router.push(`/goal/${goal.id}`)}
+                  />
+                ) : (
+                  <UpcomingRow
+                    key={goal.id}
+                    goal={goal}
+                    times={times}
+                    streak={streaks[goal.id]}
+                    onPress={() => router.push(`/goal/${goal.id}`)}
+                  />
+                ),
+              )}
+            </View>
+          );
+        })
+      )}
+    </ScreenLayout>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  safeArea: { flex: 1, paddingHorizontal: Spacing.three },
-  title: { paddingVertical: Spacing.three },
-  monthHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: Spacing.two,
-  },
-  navBtn: { paddingHorizontal: Spacing.three },
-  navArrow: { fontSize: 24, fontWeight: '600', color: '#3c87f7' },
-  weekdayRow: { flexDirection: 'row', marginBottom: Spacing.one },
-  weekdayCell: { flex: 1, textAlign: 'center' },
-  weekRow: { flexDirection: 'row' },
-  cell: { flex: 1, alignItems: 'center', paddingVertical: Spacing.one, gap: 2 },
-  cellInner: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  cellSelected: { backgroundColor: '#3c87f7' },
-  cellToday: { borderWidth: 1, borderColor: '#3c87f7' },
-  cellTextSel: { color: '#fff', fontWeight: '700' },
-  cellTextDim: { opacity: 0.3 },
-  cellDot: { width: 4, height: 4, borderRadius: 2, backgroundColor: 'transparent' },
-  cellDotOn: { backgroundColor: '#3c87f7' },
-  dayLabel: { marginTop: Spacing.three, marginBottom: Spacing.one },
-  list: { gap: Spacing.two, paddingBottom: Spacing.six },
-  empty: { textAlign: 'center', marginTop: Spacing.four },
-  row: { flexDirection: 'row', alignItems: 'center', padding: Spacing.three, borderRadius: Spacing.three, gap: Spacing.two },
-  badge: { paddingHorizontal: Spacing.two, paddingVertical: Spacing.half, borderRadius: Spacing.five },
-  badgeText: { color: '#fff', fontWeight: '600' },
-});
+/** A preview row for an upcoming (non-today) day: name, category, and time(s). */
+function UpcomingRow({
+  goal,
+  times,
+  streak,
+  onPress,
+}: {
+  goal: Goal;
+  times: string[];
+  streak?: number;
+  onPress: () => void;
+}) {
+  const timeLabel =
+    times.length > 0 ? times.map(formatTime).join(' · ') : goal.schedule.weeklyTarget ? 'Any time' : '';
+  return (
+    <Card onPress={onPress} style={{ marginBottom: 10, paddingVertical: 14 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+        <View style={{ flex: 1 }}>
+          <ThemedText type="subheading" style={{ fontSize: 15, marginBottom: 7 }}>
+            {goal.name}
+          </ThemedText>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <CategoryChip category={goal.category} />
+            {timeLabel ? (
+              <ThemedText type="caption" color="muted" style={{ fontSize: 12 }}>
+                {timeLabel}
+              </ThemedText>
+            ) : null}
+          </View>
+        </View>
+        {streak != null ? <StreakFlame count={streak} size={14} textSize={15} /> : null}
+      </View>
+    </Card>
+  );
+}

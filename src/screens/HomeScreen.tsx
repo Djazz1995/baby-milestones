@@ -1,34 +1,35 @@
-import { Link, useFocusEffect, useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useMemo } from 'react';
-import { ActivityIndicator, Pressable, SectionList, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View } from 'react-native';
 
-import { Button } from '@/components/button';
+import { BruteLogo } from '@/components/brute-logo';
+import { GoalCard } from '@/components/goal-card';
+import { ScreenLayout } from '@/components/screen-layout';
 import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { BottomTabInset, Spacing } from '@/constants/theme';
+import { AppHeader, Card, Icon, PrimaryButton, SectionHeader } from '@/components/kit';
 import { useCollections } from '@/hooks/use-collections';
+import { useGoalStreaks } from '@/hooks/use-goal-streaks';
 import { useGoals } from '@/hooks/use-goals';
 import { useTodayStatuses } from '@/hooks/use-today-status';
-import type { Collection, Goal, GoalToday, TodayStatus } from '@/models';
+import type { Collection, Goal } from '@/models';
+import { tokens } from '@/theme/tokens';
 
 const UNGROUPED = 'Ungrouped';
 
-/** Groups goals by collection name; only adds headers when collections exist. */
+/** Groups goals by collection name; Ungrouped ("Your Goals") sorts last. */
 function buildSections(goals: Goal[], collections: Collection[]) {
   const nameById = new Map(collections.map((c) => [c.id, c.name]));
-  // Section order: each collection (creation order), then Ungrouped last.
   const order = [...collections.map((c) => c.name), UNGROUPED];
   const byTitle = new Map<string, Goal[]>();
   for (const g of goals) {
     const title = (g.collectionId && nameById.get(g.collectionId)) || UNGROUPED;
-    const list = byTitle.get(title) ?? [];
-    list.push(g);
-    byTitle.set(title, list);
+    (byTitle.get(title) ?? byTitle.set(title, []).get(title)!).push(g);
   }
-  return order
-    .filter((title) => byTitle.has(title))
-    .map((title) => ({ title, data: byTitle.get(title)! }));
+  return order.filter((t) => byTitle.has(t)).map((title) => ({ title, data: byTitle.get(title)! }));
+}
+
+function todayLabel(): string {
+  return new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
 }
 
 export function HomeScreen() {
@@ -36,151 +37,129 @@ export function HomeScreen() {
   const { data: goals, loading, error, refetch } = useGoals();
   const { data: collections, refetch: refetchCollections } = useCollections();
   const { data: statuses, refetch: refetchStatuses } = useTodayStatuses(goals);
+  const { data: streaks, refetch: refetchStreaks } = useGoalStreaks(goals);
 
-  // Refresh when returning from create/edit/detail.
   useFocusEffect(
     useCallback(() => {
       refetch();
       refetchCollections();
       refetchStatuses();
-    }, [refetch, refetchCollections, refetchStatuses])
+      refetchStreaks();
+    }, [refetch, refetchCollections, refetchStatuses, refetchStreaks]),
   );
 
   const sections = useMemo(() => buildSections(goals, collections), [goals, collections]);
-  const showHeaders = collections.length > 0;
+  const isEmpty = !loading && goals.length === 0 && !error;
+
+  if (isEmpty) {
+    return (
+      <ScreenLayout scroll={false}>
+        <AppHeader />
+        <EmptyState onCreate={() => router.push('/goal/new')} />
+      </ScreenLayout>
+    );
+  }
 
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea} edges={['top']}>
-        <View style={styles.header}>
-          <ThemedText type="subtitle">Your Goals</ThemedText>
-        </View>
+    <ScreenLayout>
+      <AppHeader />
 
-        {loading && goals.length === 0 ? (
-          <ActivityIndicator style={styles.center} />
-        ) : error ? (
-          <ThemedText type="small" style={styles.center}>
-            Couldn’t load goals: {error.message}
-          </ThemedText>
-        ) : (
-          <SectionList
-            sections={sections}
-            keyExtractor={(g) => g.id}
-            contentContainerStyle={styles.list}
-            stickySectionHeadersEnabled={false}
-            renderSectionHeader={
-              showHeaders
-                ? ({ section }) => (
-                    <ThemedText type="smallBold" themeColor="textSecondary" style={styles.section}>
-                      {section.title}
-                    </ThemedText>
-                  )
-                : undefined
-            }
-            renderItem={({ item }) => <GoalRow goal={item} today={statuses[item.id]} />}
-            ListEmptyComponent={
-              <ThemedText type="small" style={styles.center}>
-                No goals yet. Add one to get roasted.
-              </ThemedText>
-            }
-          />
-        )}
+      <ThemedText type="greeting" style={{ marginTop: 2, marginBottom: 4 }}>
+        {goals.length} {goals.length === 1 ? 'goal' : 'goals'} today.{'\n'}Let&apos;s see if you actually
+        show up.
+      </ThemedText>
+      <ThemedText type="caption" color="muted" style={{ fontSize: 14, marginBottom: 18 }}>
+        {todayLabel()}
+      </ThemedText>
 
-        <View style={styles.footer}>
-          <Button title="+ New Goal" onPress={() => router.push('/goal/new')} />
-        </View>
-      </SafeAreaView>
-    </ThemedView>
+      <PrimaryButton
+        title="New goal"
+        icon={<Icon name="plus" size={18} color={tokens.accentText} strokeWidth={2.3} />}
+        onPress={() => router.push('/goal/new')}
+      />
+
+      {loading && goals.length === 0 ? (
+        <LoadingCards />
+      ) : error ? (
+        <ThemedText type="body" color="muted" style={{ textAlign: 'center', marginTop: 40 }}>
+          Couldn’t load goals. {error.message}
+        </ThemedText>
+      ) : (
+        sections.map((section) => (
+          <View key={section.title}>
+            <SectionHeader
+              label={section.title === UNGROUPED ? 'Your Goals' : section.title}
+              collection={section.title !== UNGROUPED}
+            />
+            {section.data.map((goal) => (
+              <GoalCard
+                key={goal.id}
+                goal={goal}
+                today={statuses[goal.id]}
+                streak={streaks[goal.id]}
+                onPress={() => router.push(`/goal/${goal.id}`)}
+              />
+            ))}
+          </View>
+        ))
+      )}
+    </ScreenLayout>
   );
 }
 
-const STATUS_META: Record<TodayStatus, { label: string; color: string } | null> = {
-  done: { label: 'Done', color: '#30A46C' },
-  skipped: { label: 'Skipped', color: '#E5484D' },
-  pending: { label: 'Today', color: '#3c87f7' },
-  off: null,
-};
-
-/** Weekly/date goals show N/total progress; fixed goals show today's status. */
-function TodayBadge({ today }: { today?: GoalToday }) {
-  if (!today) return null;
-  if (today.progress) {
-    const { done, total } = today.progress;
-    const met = done >= total;
-    return (
-      <View style={[styles.badge, { backgroundColor: met ? '#30A46C' : '#3c87f7' }]}>
-        <ThemedText type="small" style={styles.badgeText}>
-          {done}/{total}
-        </ThemedText>
-      </View>
-    );
-  }
-  const meta = STATUS_META[today.status];
-  if (!meta) return null;
+function EmptyState({ onCreate }: { onCreate: () => void }) {
   return (
-    <View style={[styles.badge, { backgroundColor: meta.color }]}>
-      <ThemedText type="small" style={styles.badgeText}>
-        {meta.label}
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8, paddingBottom: 60 }}>
+      <View
+        style={{
+          width: 84,
+          height: 84,
+          borderRadius: 24,
+          backgroundColor: tokens.surface,
+          borderWidth: 1,
+          borderColor: tokens.rim,
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginBottom: 28,
+        }}
+      >
+        <BruteLogo size={40} outline />
+      </View>
+      <ThemedText type="title" style={{ fontSize: 26, textAlign: 'center', marginBottom: 10 }}>
+        Zero goals.{'\n'}
+        <ThemedText type="title" style={{ fontSize: 26 }} color="accent1">
+          Zero effort.
+        </ThemedText>
       </ThemedText>
+      <ThemedText
+        type="body"
+        color="muted"
+        style={{ fontSize: 14.5, lineHeight: 22, textAlign: 'center', maxWidth: 270, marginBottom: 30 }}
+      >
+        Bold strategy, showing up to an app with nothing to show up for. Give me something to hold you to.
+      </ThemedText>
+      <View style={{ width: '100%', maxWidth: 300 }}>
+        <PrimaryButton
+          title="Create your first goal"
+          icon={<Icon name="plus" size={18} color={tokens.accentText} strokeWidth={2.3} />}
+          onPress={onCreate}
+        />
+      </View>
     </View>
   );
 }
 
-function cadenceText(goal: Goal): string {
-  if (goal.schedule.dates?.length) {
-    const n = goal.schedule.dates.length;
-    return `${n} ${n === 1 ? 'date' : 'dates'}`;
-  }
-  if (goal.schedule.weeklyTarget) {
-    return `${goal.schedule.weeklyTarget} ${goal.schedule.weeklyTarget === 1 ? 'day' : 'days'} a week`;
-  }
-  const n = goal.schedule.slots.length;
-  return `${n} ${n === 1 ? 'reminder' : 'reminders'}`;
-}
-
-function GoalRow({ goal, today }: { goal: Goal; today?: GoalToday }) {
+/** Lightweight skeleton while the first load resolves. */
+function LoadingCards() {
   return (
-    <Link href={`/goal/${goal.id}`} asChild>
-      <Pressable>
-        <ThemedView type="backgroundElement" style={styles.row}>
-          <View style={{ flex: 1 }}>
-            <ThemedText type="smallBold">{goal.name}</ThemedText>
-            <ThemedText type="small" themeColor="textSecondary">
-              {goal.category}
-              {goal.paused ? ' · paused' : ''} · {cadenceText(goal)}
-            </ThemedText>
-          </View>
-          <TodayBadge today={today} />
-          <ThemedText type="small" themeColor="textSecondary">
-            ›
-          </ThemedText>
-        </ThemedView>
-      </Pressable>
-    </Link>
+    <View style={{ marginTop: 22 }}>
+      {[0, 1, 2].map((i) => (
+        <Card key={i} style={{ marginBottom: 12 }}>
+          <View style={{ height: 14, width: '55%', borderRadius: 6, backgroundColor: tokens.surface2, marginBottom: 12 }} />
+          <View style={{ height: 11, width: '35%', borderRadius: 6, backgroundColor: tokens.surface2 }} />
+          <View style={{ height: 20, width: 70, borderRadius: 999, backgroundColor: tokens.surface2, marginTop: 16 }} />
+        </Card>
+      ))}
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  safeArea: { flex: 1, paddingHorizontal: Spacing.three },
-  header: {
-    paddingVertical: Spacing.three,
-  },
-  center: { textAlign: 'center', marginTop: Spacing.five },
-  list: { gap: Spacing.two, paddingBottom: Spacing.three },
-  section: { marginTop: Spacing.three, marginBottom: Spacing.one, textTransform: 'uppercase' },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: Spacing.three,
-    borderRadius: Spacing.three,
-    gap: Spacing.two,
-  },
-  footer: { paddingTop: Spacing.three, paddingBottom: BottomTabInset + Spacing.three },
-  badge: {
-    paddingHorizontal: Spacing.two,
-    paddingVertical: Spacing.half,
-    borderRadius: Spacing.five,
-  },
-  badgeText: { color: '#ffffff', fontWeight: '600' },
-});
