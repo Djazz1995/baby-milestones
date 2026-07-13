@@ -1,1 +1,13 @@
-@AGENTS.md
+# Baby Milestones
+
+Private baby timeline & memory app. React Native + Expo + NativeWind, gluestack-ui v3.
+Backend: **Payload CMS + Postgres** (the RN app consumes Payload's REST/GraphQL API).
+
+## Docs
+- Product spec → @PRD.md (screens, functionalities, phases 1–4)
+- Architecture → @ARCHITECTURE.md (layered `screens → hooks → services → lib`; models-only above services)
+
+## Stack notes
+- Verify every Expo API against https://docs.expo.dev/versions/v54.0.0/ before coding.
+- Style with NativeWind classes on the gluestack v3 token scale — no hardcoded hex.
+- No Supabase. Data reads/writes go through the service layer → Payload API.

@@ -1,5 +1,5 @@
 /**
- * brute design tokens — the ONE source of truth for color.
+ * Design tokens — the ONE source of truth for color.
  *
  * Consumed two ways so a value is never written twice:
  *   1. tailwind.config.js `require()`s this and maps each key to a NativeWind

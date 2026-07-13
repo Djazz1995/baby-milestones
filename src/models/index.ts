@@ -1,17 +1,9 @@
-/** Barrel for all data models. See AGENTS.md §15.2. */
+/**
+ * Barrel for all data models (ARCHITECTURE.md §3).
+ *
+ * RoastMode models removed. Add Baby Milestones models here as they are built:
+ * Baby, AgeDisplay, Moment, Media, Milestone, Family, Membership, Reaction,
+ * Comment, Recap, User, NotificationPayload, Paginated<T>.
+ */
 
-export type {
-  Goal,
-  GoalCategory,
-  RudenessLevel,
-  EscalationSpeed,
-  Schedule,
-  ScheduleSlot,
-} from './goal';
-export type { EscalationWave, EscalationTactic } from './escalation';
-export type { Completion, CompletionSource, Skip, StreakStats, TodayStatus, GoalToday } from './completion';
-export type { Buddy, BuddyInviteStatus } from './buddy';
-export type { Collection } from './collection';
-export type { RoastLine, RoastCard, RoastKind, PartialBucket } from './roast';
-export type { User, UserDefaults, UserTier, NotificationSound } from './user';
-export type { NotificationPayload } from './notification';
+export {};

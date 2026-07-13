@@ -1,19 +1,17 @@
 import { useEffect, useRef } from 'react';
 import { Animated, View } from 'react-native';
 
-import { BruteLogo } from '@/components/brute-logo';
 import { ThemedText } from '@/components/themed-text';
 import { tokens } from '@/theme/tokens';
 
 /**
  * The in-app loading screen (NOT the launch splash — that's the static native
- * expo-splash-screen). Logo lockup, a soft glow, three pulsing dots, and the
- * behavior-not-person loading line.
+ * expo-splash-screen). Wordmark, a soft glow, and three pulsing dots.
  */
 export function LoadingScreen({ error }: { error?: string }) {
   return (
     <View style={{ flex: 1, backgroundColor: tokens.bg, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32 }}>
-      {/* soft radial-ish glow behind the mark */}
+      {/* soft radial-ish glow */}
       <View
         style={{
           position: 'absolute',
@@ -24,21 +22,17 @@ export function LoadingScreen({ error }: { error?: string }) {
           opacity: 0.1,
         }}
       />
-      <BruteLogo size={96} />
       <ThemedText type="hero" style={{ fontSize: 42, marginTop: 22 }}>
-        brute
+        Baby Milestones
       </ThemedText>
 
       {error ? (
         <ThemedText type="body" color="muted" style={{ marginTop: 34, textAlign: 'center' }}>
-          Couldn’t start a session. {error}
+          Couldn’t load. {error}
         </ThemedText>
       ) : (
         <View style={{ marginTop: 34, alignItems: 'center', gap: 16 }}>
           <PulsingDots />
-          <ThemedText type="body" color="muted" style={{ fontSize: 14 }}>
-            loading your excuses…
-          </ThemedText>
         </View>
       )}
     </View>

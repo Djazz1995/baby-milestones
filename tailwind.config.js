@@ -26,7 +26,7 @@ module.exports = {
         button: '16px',
       },
       colors: {
-        // brute brand tokens — single source is src/theme/tokens.js.
+        // Brand tokens — single source is src/theme/tokens.js.
         // Status colors (success/info) intentionally omitted here to avoid
         // clobbering gluestack's success-*/info-* scales; the shared status
         // components read those hexes from tokens.js directly.

@@ -1,5 +1,5 @@
 {
-  "name": "brute",
+  "name": "baby-milestones",
   "main": "expo-router/entry",
   "version": "1.0.0",
   "dependencies": {
@@ -8,7 +8,6 @@
     "@gluestack-ui/utils": "^3.0.21",
     "@legendapp/motion": "^2.5.3",
     "@react-native-community/datetimepicker": "8.4.4",
-    "@supabase/supabase-js": "^2.108.2",
     "babel-preset-expo": "~54.0.10",
     "expo": "~54.0.0",
     "expo-constants": "~18.0.13",
@@ -63,18 +62,7 @@
     "web": "expo start --web",
     "lint": "expo lint",
     "format": "prettier --write .",
-    "format:check": "prettier --check .",
-    "db:smoke": "node --env-file=.env scripts/smoke-supabase.mjs",
-    "db:smoke3": "node --env-file=.env scripts/smoke-phase3.mjs",
-    "db:smoke4": "node --env-file=.env scripts/smoke-phase4.mjs",
-    "db:smoke4_5": "node --env-file=.env scripts/smoke-phase4_5.mjs",
-    "db:smoke4_6": "node --env-file=.env scripts/smoke-phase4_6.mjs",
-    "db:smoke5": "node --env-file=.env scripts/smoke-phase5.mjs",
-    "db:smoke6": "node --env-file=.env scripts/smoke-phase6.mjs",
-    "db:smoke7": "node --env-file=.env scripts/smoke-phase7.mjs",
-    "db:smoke8": "node --env-file=.env scripts/smoke-phase8.mjs",
-    "roast:generate": "node scripts/generate-roasts.mjs",
-    "icons": "node scripts/gen-icons.mjs"
+    "format:check": "prettier --check ."
   },
   "private": true
 }

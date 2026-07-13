@@ -1,20 +1,20 @@
 {
   "expo": {
-    "name": "brute",
-    "slug": "brute",
+    "name": "Baby Milestones",
+    "slug": "baby-milestones",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "brute",
+    "scheme": "babymilestones",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "bundleIdentifier": "com.brute.app",
+      "bundleIdentifier": "com.babymilestones.app",
       "infoPlist": {
         "UIBackgroundModes": ["remote-notification"]
       }
     },
     "android": {
-      "package": "com.brute.app",
+      "package": "com.babymilestones.app",
       "adaptiveIcon": {
         "backgroundColor": "#17131c",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
