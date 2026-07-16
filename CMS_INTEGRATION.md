@@ -130,4 +130,21 @@ Babies: **Liam** (born) + **Sofie** (pregnancy) in De Vries; **Oliver** in Smith
 - Media = upload → attach → deliver via signed `/api/media/file/...`.
 - All data reads/writes go through the app's **service layer** → Payload API (per ARCHITECTURE.md), never direct from screens.
 
+---
+
+## 11. Pending backend work (not yet in the CMS — blocks these app phases)
+
+The app has specced features whose backends **do not exist in `baby-milestones-cms` yet**. Each blocks the matching app phase — add to the CMS build plan before wiring the app feature.
+
+| Needed | Shape | Blocks |
+|---|---|---|
+| **Subscription** | `families.subscription` (plan `free`/`premium`, status, renewsAt, source) + a **RevenueCat webhook** endpoint that writes it. Server **enforces free-tier caps**: storage bytes + AI stories/mo. | App A4.5 paywall (Phase 1) |
+| **AI Story endpoint** | `POST /api/ai/story` `{ babyId, momentId?, bullets, tone, locale }` → `{ draft }`. Server owns the vendor key + prompt; **persists nothing**; EU residency + no-train. User-triggered but server-side. | App A5 |
+| **Prompts** | `prompts` collection — localized (nl/en), keyed to baby **phase + age bucket**. | App A6.1 |
+| **Recaps** | `recaps` collection (`period` week/month/**year**, narrative, `narrationAudioUrl`, `translations` per-locale, `highlightMoments`, cover) + a **scheduled job** (weekly/monthly/yearly) that batches moments → narrative → **TTS** → **translation**. `RecapService` only reads. | App A7 |
+| **Events** | `events` collection (`baby→`, title, date, cover) + `moments.event→` optional relationship. | App A8 |
+| **Emoji reactions** | `reactions.emoji` optional field (beyond a single like). | App A10 (P2) |
+
+All generation is **server-side / batch** except the user-triggered `/api/ai/story` (server still owns the key + prompt). EU residency + no-train terms apply throughout (children's data). **Deliberately out of scope:** any cross-family / shared-circle backend — parked (see BUILD_PLAN).
+
 > Full backend spec lives in the CMS repo: `PRD.md`, `BUILD_PLAN.md`, `DEPLOYMENT.md` (there). This file is the app-facing summary — update it when the CMS contract changes.

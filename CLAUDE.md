@@ -13,3 +13,5 @@ Backend: **Payload CMS + Postgres** (the RN app consumes Payload's REST/GraphQL 
 - Verify every Expo API against https://docs.expo.dev/versions/v54.0.0/ before coding.
 - Style with NativeWind classes on the gluestack v3 token scale — no hardcoded hex.
 - No Supabase. Data reads/writes go through the service layer → Payload API.
+- Phase-2+ native deps need a **custom dev build** (not Expo Go): RevenueCat/IAP (paywall, A4.5), `expo-media-library` (auto-import, A6.2), share extension / `expo-share-intent` (share-into-app, A6.3). Verify each against Expo SDK 54.
+- AI is server-side/batch behind `ai/provider.ts` — except **on-demand Story Assist** (user-triggered, async, optional; via the CMS `/api/ai/story` endpoint). Never block the capture path on AI.

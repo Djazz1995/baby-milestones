@@ -32,10 +32,11 @@ To be the private, calm, European alternative to posting your child on public so
 
 ### 1.4 Differentiators (why this over European competitors)
 
-1. **AI narrative recaps** — humanized weekly/monthly stories, not just a photo grid.
-2. **Grandparent mode + web app** — the least tech-savvy family member is a first-class user, no app install required.
-3. **Pregnancy-through-childhood continuity** — one timeline from due date to years old.
-4. **Privacy & GDPR-native** — encrypted at rest and in transit, EU data residency, no public feed, no ad targeting.
+1. **AI that writes the story** — per-moment **Story Assist** (jot bullets → warm prose, on demand) *plus* humanized **weekly / monthly / yearly recaps** with **audio narration** and **per-member translation**. A narrated archive, not a photo grid. **No competitor does this** (Tinybeans, Qeepsake, BackThen, Bebememo all lack per-moment or recap narration).
+2. **Effortless capture** — age-keyed prompts, camera-roll auto-import, and share-into-app from the OS share sheet, so logging costs almost nothing (closes the friction gap vs Qeepsake prompts / Bebememo auto-import).
+3. **Grandparent mode + web app** — the least tech-savvy family member is a first-class user, no app install required.
+4. **Pregnancy-through-childhood continuity** — one timeline from due date to years old, with bump timelapse + weekly "size of baby".
+5. **Privacy & GDPR-native, Dutch-first** — encrypted at rest and in transit, EU data residency, no public feed, no ad targeting; nl + en at parity (BackThen is English-only, US/CN apps store abroad).
 
 ---
 
@@ -66,12 +67,14 @@ To be the private, calm, European alternative to posting your child on public so
 ## 4. Core Data Concepts
 
 - **Baby / Child profile** — the subject. name, dueDate?, birthDate?, birthWeight?, birthLength?, parents[], displayFormat, photo. A family can have multiple children (Phase 2).
-- **Moment** — one timeline entry. type (photo | video | voice | text), media, caption/body, capturedAt, authorId, milestoneId?, reactions, comments, tags[] (Phase 3), location? (Phase 3).
+- **Moment** — one timeline entry. type (photo | video | voice | text), media, caption/body, capturedAt, authorId, milestoneId?, eventId? (Phase 2), reactions, comments, tags[] (Phase 3), location? (Phase 3).
 - **Milestone** — a named developmental event (first smile, first tooth…). Attached to a moment when logged. Standard set in Phase 1; custom milestones in Phase 4.
 - **Family / Membership** — the invited people and their roles.
-- **Reaction** — a like on a moment.
+- **Event** (Phase 2) — a named occasion (birthday, holiday, first trip) grouping moments; family members contribute their own photos to it.
+- **Reaction** — a like (Phase 1) or an emoji reaction (Phase 2) on a moment.
 - **Comment** — threaded text under a moment.
-- **Recap** (Phase 2) — an AI-generated narrative over a time window.
+- **Recap** (Phase 2) — an AI-generated narrative over a time window (**weekly / monthly / yearly**), carrying **audio narration** and **per-locale translations**.
+- **Entitlement** (Phase 1) — the family's subscription plan + caps (storage, AI quota); source of truth server-side (§12).
 
 ---
 
@@ -122,13 +125,22 @@ Grouped by flow. Phase tag = when it ships. Deferred screens are listed but not 
 
 ### 6.5 Phase 2 additions
 
-15. **Recaps** — weekly/monthly AI narrative cards; browse past recaps.
+15. **Recaps** — weekly / monthly / **yearly** AI narrative cards, each with **audio narration** and **per-member translation**; browse past recaps.
 16. **Memory search** — conversational search ("show me her first steps", "beach photos") over the archive.
 17. **Grandparent mode** — simplified, large-text timeline variant; togglable per device/user.
 18. **Calendar view** — moments arranged by date; jump to a day.
 19. **"On this day"** — resurfaced memories from prior years on the same date.
 20. **Child switcher** — multiple child profiles under one family.
 21. **Web app** — full timeline + view/comment in the browser (grandparent-friendly; no install).
+
+Also this cycle (Phase 2, see BUILD_PLAN A5–A9):
+- **AI Story Assist** — inside Add moment: bullets → editable AI story, tone picker (sweet/funny/simple/poetic); on-demand, optional.
+- **Capture prompts** — age-keyed nudge card / push → pre-filled Add moment.
+- **Photo auto-import** — camera-roll suggestion + batch-add review (opt-in).
+- **Share-to-app** — OS share sheet → quick-capture sheet.
+- **Events** — event cards + event detail (family contributes photos to one occasion).
+- **Pregnancy delight** — bump timelapse + "size of baby" weekly card.
+- **Emoji reactions** — beyond a single like.
 
 ### 6.6 Phase 3 additions
 
@@ -139,6 +151,8 @@ Grouped by flow. Phase tag = when it ships. Deferred screens are listed but not 
 26. **Map view** — moments plotted by location; per-moment location tagging.
 27. **Photo book / yearbook export** — print-ready layout.
 
+Also this cycle (Phase 3, see BUILD_PLAN A11): **year-in-review reel** (auto video montage from the yearly recap, share to socials) · **voice → moment** (record → transcribe → caption / AI-Story bullets).
+
 ### 6.7 Phase 4 additions
 
 28. **Custom milestones** — user-defined milestone types.
@@ -146,6 +160,9 @@ Grouped by flow. Phase tag = when it ships. Deferred screens are listed but not 
 30. **Advanced privacy controls** — per-moment visibility.
 31. **PDF/digital baby book export**.
 32. Settings gains **FR/DE language**, **AI tone personalisation**, **auto-milestone detection** review surface.
+33. **Annual interview / time-capsule** — friendbook-style yearly questions per birthday.
+34. **Letters to the future** — parent notes delivered on a set future date (e.g. 18th birthday).
+35. **Family poll** — a poll inside the family group (could-have).
 
 ---
 
@@ -167,12 +184,18 @@ Grouped by flow. Phase tag = when it ships. Deferred screens are listed but not 
 - **Encryption at rest and in transit**
 - **GDPR-native** data storage (EU residency, export & delete)
 - **Basic milestone tracker** (8 standard milestones listed in §6.2)
+- **Subscription & paywall** — capped free tier + Premium (€5.99/mo · €49/yr); storage + AI gated, core loop free (§12, BUILD_PLAN A4.5)
 
 ### Phase 2 — AI & Grandparent Differentiation
 
 *Goal: activate the features that separate this from every European competitor.*
 
-- Weekly & monthly **AI narrative recaps** (humanized)
+- **Per-moment AI Story Assist** — bullets → warm prose, on demand, tone options (the headline differentiator)
+- Weekly / monthly / **yearly AI narrative recaps** (humanized) with **audio narration** + **per-member translation**
+- **Frictionless capture** — age-keyed prompts (push) · camera-roll auto-import · share-into-app (OS share sheet)
+- **Events** — named occasions with whole-family photo contribution
+- **Pregnancy delight** — bump timelapse + "size of baby" weekly card
+- **Emoji reactions** — beyond a single like
 - **Conversational memory search**
 - **Grandparent mode** — simplified UI, large text
 - **Web app** — grandparents need no app
@@ -188,6 +211,8 @@ Grouped by flow. Phase tag = when it ships. Deferred screens are listed but not 
 *Goal: drive sharing, retention, word-of-mouth.*
 
 - Instagram Stories/Reels & TikTok export with milestone templates
+- **Year-in-review reel** — auto video montage from the yearly recap
+- **Voice → moment** — record → transcribe → caption / AI-Story bullets
 - AI-generated social captions
 - Standard share (WhatsApp, download)
 - Pregnancy journal (pre-birth capture)
@@ -210,13 +235,18 @@ Grouped by flow. Phase tag = when it ships. Deferred screens are listed but not 
 - Custom milestones
 - Advanced visibility controls (per-moment privacy)
 - AI tone personalisation — recaps adapt to how you write over time
+- **Annual interview / time-capsule** — friendbook-style yearly questions per birthday
+- **Letters to the future** — parent notes delivered on a set future date
+- **Family poll** (could-have) — a poll inside the family group
 
 ---
 
 ## 8. AI Features (Phase 2+)
 
-- **Recaps** — batch job summarizes a week/month of moments into a warm narrative. Runs server-side (Payload job / cron), never blocking the capture path. Humanized tone; avoids listy, robotic phrasing.
+- **Story Assist** (Phase 2) — **per-moment, on-demand**: a parent jots bullets, the app returns editable warm prose (tone options: sweet/funny/simple/poetic; locale-native; facts-only, no invented events). The **one user-triggered** generation — explicit, async, optional; the moment always saves without it. Runs via a CMS endpoint; never on the capture hot path. This is distinct from recaps (multi-moment, batch).
+- **Recaps** — batch job summarizes a **week / month / year** of moments into a warm narrative, and adds **TTS audio narration** + **per-locale translation** (one recap, each member's language). Runs server-side (Payload job / cron), never blocking the capture path. Humanized tone; avoids listy, robotic phrasing.
 - **Memory search** — natural-language query over the family's own archive (captions, milestones, dates, later tags/location). Scoped strictly to that family's data.
+- **Voice → moment** (Phase 3) — record speech → transcribe → caption / Story-Assist bullets.
 - **Social captions** (Phase 3) — draft captions for export.
 - **Auto milestone detection** (Phase 4) — vision suggests a milestone from a photo; **always parent-confirmed before it's logged** (no silent auto-tagging).
 - **Provider-swappable** — generation lives behind a thin interface; the vendor is a config choice, and prompts/data residency are checked against §10 for EU users.
@@ -254,14 +284,48 @@ Grouped by flow. Phase tag = when it ships. Deferred screens are listed but not 
 
 ---
 
-## 12. Open Questions
+## 12. Monetization & Pricing
 
-- **Monetization** — free tier limits (children, storage, AI recaps?) vs paid; gift cards (Phase 4) imply a purchasable SKU. To confirm.
-- **Storage economics** — full-quality photo+video per family is the main cost driver; caps/tiers to be modeled.
-- **Video length limits** — max duration/size per moment for Phase 1.
+Revenue **from launch** — a **capped free tier + one paid subscription**, shipped in Phase 1 (A4.5). "Build an audience first" governs *physical* revenue (print, gifts), **not** the subscription — charging from family #1 gives revenue signal and margin discipline early. Storage and AI are the only real cost drivers, so **both sit behind the paywall**; the core capture→timeline→react loop is always free (it's the hook).
+
+### 12.1 Tiers
+
+| | **Free** (capped — the hook) | **Premium** — €5.99/mo or €49/yr |
+| --- | --- | --- |
+| Core loop (timeline, milestones, family view, like/comment) | ✅ | ✅ |
+| Storage | **~2–3GB (~500 photos)** hard cap | Unlimited (fair use) + video |
+| AI Story | **5 / month** | Unlimited |
+| Recaps | **Monthly only** | Weekly + monthly + yearly, **+ TTS narration + translation** |
+| Bump timelapse · create events | — | ✅ |
+
+One **family** subscription covers all members (both parents, grandparents).
+
+### 12.2 Enforcement
+
+- **Payload is the source of truth** for entitlement; the app mirrors it and never decides. A RevenueCat webhook writes plan status onto the `family`.
+- Free-tier **storage + AI caps are enforced server-side**; the UI shows soft, value-framed upgrade prompts **at the cap boundary** (storage full, AI quota hit, "unlock weekly recaps") — never nag walls.
+
+### 12.3 Unit economics (targets)
+
+- **Variable cost ~€0.60 / paid family / month** (Hetzner storage ≈ €0.18 + egress + gated AI ≈ €0.40) → **~85–90% gross margin**. EU/Hetzner storage is the margin moat: video, which strains competitors' free tiers on US S3, barely dents cost here.
+- **Break-even: ~20 subs** (infra) · **~820 subs** (founder salary). NL-only executed = **€100–300k ARR**; EU expansion = **€1–5M ARR**.
+- **Growth is organic** — the social-export/watermark loop keeps CAC ≈ €0–5 (LTV:CAC 20:1+). Paid acquisition (pricey baby keywords) is avoided; the model doesn't rely on it.
+
+### 12.4 Later revenue (post user-base)
+
+Physical, high-margin, emotional purchases — deferred until there's an audience: **print photo books · wall art / canvas / calendars · gift cards · gift subscription** (baby-shower angle = cheap acquisition).
+
+---
+
+## 13. Open Questions
+
+- **Video length limits** — max duration/size per moment for Phase 1 (200MB cap set; confirm UX for over-limit).
 - **Auth model** — email-only vs social sign-in for Phase 1.
+- **Recap yearly trigger** — birthday vs calendar Jan 1 (A7.2).
 - **Email digest provider** (Phase 2) — transactional email vendor + EU residency.
 - **Auto-milestone detection UX** (Phase 4) — how aggressively to suggest without feeling creepy.
+
+_Resolved this cycle: monetization model + free-tier caps (§12); storage economics (§12.3 — Hetzner makes full-quality video viable)._
 
 ---
 

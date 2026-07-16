@@ -47,7 +47,7 @@ src/
 
 - Screens import **models** (for typing) and call **hooks**. They never import `services` or `lib`.
 - Services are plain TS. They return the model directly and **throw** on error.
-- Hooks (`useTimeline`, `useMoment(id)`, `useBaby`, `useFamily`, `useMilestones`, `useComments`, `useReactions`, `useSession`, `useUser`, `useRecaps`, `useSearch`) wrap services, hold loading/error, and catch.
+- Hooks (`useTimeline`, `useMoment(id)`, `useBaby`, `useFamily`, `useMilestones`, `useComments`, `useReactions`, `useSession`, `useUser`, `useRecaps`, `useSearch`, and Phase-2 `useStoryDraft`, `usePrompts`, `useImport`, `useEvents`, `useEntitlement`) wrap services, hold loading/error, and catch.
 - `lib` wraps the Payload API client + vendor SDKs so providers stay swappable.
 - Style with **NativeWind classes on the gluestack v3 token scale** — no hardcoded hex. Recolor = single token swap.
 
@@ -62,15 +62,18 @@ Only what the UI needs — no Payload doc internals, no relationship ids, no `_s
 | `Baby` | id, familyId, **name?** (optional in pregnancy — may be a bump nickname or empty; **required at birth**), **gender?** (girl \| boy \| surprise — optional, neutral, no gendered UI), dueDate?, birthDate?, birthWeight?, birthLength?, parents[], displayFormat, photo? | §4, §5 |
 | `AgeDisplay` | phase (pregnancy \| born), value, unit, label (e.g. "8 months old") | §5 |
 | `DisplayFormat` | enum: weeks \| months \| yearsMonths | §5 |
-| `Moment` | id, babyId, type, **media[] (ordered, images+videos mixed)**, voiceNote?, caption?, body?, capturedAt, authorId, milestoneId?, **weightGrams?**, **lengthCm?** (optional measurements captured with the moment → feed the growth chart), reactionCount, commentCount, tags[]?, location? | §4, §6.2 |
+| `Moment` | id, babyId, type, **media[] (ordered, images+videos mixed)**, voiceNote?, caption?, body?, capturedAt, authorId, milestoneId?, **eventId?** (Phase 2 — groups under a shared Event), **weightGrams?**, **lengthCm?** (optional measurements captured with the moment → feed the growth chart), reactionCount, commentCount, tags[]?, location? | §4, §6.2 |
 | `MomentType` | enum: media \| voice \| text — **derived from content, not user-chosen**: media[] non-empty → `media`; else voiceNote → `voice`; else `text`. (`media` = 1+ images/videos, mixed; a single photo = `media` with one item.) | §4 |
 | `Media` | id, kind (image\|video\|audio), url, thumbUrl?, width?, height?, durationSec? — `url`/`thumbUrl` are **signed proxy paths** built from the CMS `sizes` (thumbnail/card/full) | §4 (Payload media, signed delivery) |
 | `Milestone` | id, key, label, loggedMomentId?, loggedAt? | §4, §6.2 |
 | `Family` | id, name, memberCount | §3 |
 | `Membership` | id, familyId, userId, role (owner\|viewer\|contributor), inviteStatus | §3 |
-| `Reaction` | id, momentId, userId, createdAt | §4 |
+| `Reaction` | id, momentId, userId, **emoji?** (Phase 2 — beyond a single like), createdAt | §4 |
 | `Comment` | id, momentId, authorId, body, createdAt | §4 |
-| `Recap` | id, babyId, period (week\|month), rangeStart, rangeEnd, narrative, coverMomentId? | §8 (Phase 2) |
+| `Recap` | id, babyId, period (week\|month\|**year**), rangeStart, rangeEnd, narrative, **narrationAudioUrl?** (TTS), **translations?** (per-locale narrative), **highlightMomentIds[]**, coverMomentId? | §8 (Phase 2) |
+| `Event` | id, babyId, title, date, coverMomentId?, momentCount — **a named occasion grouping moments**; family members contribute | §6.2 (Phase 2) |
+| `Prompt` | id, key, text (localized), phase/ageBucket — an age-keyed capture nudge | §6.2 (Phase 2) |
+| `Entitlement` | plan (free\|premium), status, renewsAt, caps (storageBytes, aiStoriesPerMonth) — the family's subscription state | §12 (Phase 1) |
 | `SearchResult` | momentId, snippet, score | §8 (Phase 2) |
 | `GrowthPoint` | momentId, measuredAt, weightGrams?, lengthCm? — **derived from moments** that carry a measurement (+ the birth stats as the first point); no separate stored entity | §6.6 (Phase 3) |
 | `User` | id, email, displayName, locale, defaults (displayFormat, darkMode) | §7 |
@@ -95,7 +98,12 @@ Each service calls `lib` (the Payload API client, media signed-URL builder, AI),
 | `FamilyService` | family + invites + roles | `members(familyId)→Membership[]`, `invite(contact, role)→Membership`, `setRole`, `revoke`, `approveContribution(momentId)` (Phase 2) |
 | `ReactionService` | likes | `like(momentId)→Reaction`, `unlike(momentId)` |
 | `CommentService` | comments | `list(momentId)→Comment[]`, `add(momentId, body)→Comment`, `delete(id)` |
-| `RecapService` | read AI recaps | `list(babyId)→Recap[]`, `get(id)→Recap` (reads batch-generated docs; **no live AI call**) |
+| `RecapService` | read AI recaps | `list(babyId)→Recap[]`, `get(id)→Recap` (reads batch-generated docs — weekly/monthly/yearly, incl. narration audio + per-locale translation; **no live AI call**) |
+| `StoryService` | on-demand AI story | `draft(input)→string` — per-moment bullets → warm prose; **user-triggered, async, optional**; server owns the vendor via the CMS `/api/ai/story` endpoint. **Not on the capture hot path** — the moment saves without it (Phase 2). |
+| `PromptService` | capture prompts | `today(babyId)→Prompt` — localized, age-keyed nudge; delivered via push (Phase 2). |
+| `ImportService` | photo auto-import | on-device camera-roll grouping (`expo-media-library`); confirmed day-groups → moments. **Opt-in; nothing uploads without confirm** (Phase 2). |
+| `EventService` | events | `list/create/get`; `MomentService.create` accepts an `eventId` to group a moment under an Event (Phase 2). |
+| `EntitlementService` | subscription gating | `get()→Entitlement`; the UI gates features on plan + caps. **Payload is the source of truth** — a RevenueCat webhook writes plan status onto the family; the app mirrors, never decides (§12, Phase 1). |
 | `SearchService` | memory search | `query(babyId, text)→SearchResult[]` (Phase 2) |
 | `GrowthService` | growth chart data | `points(babyId)→GrowthPoint[]` — reads moments with `weightGrams`/`lengthCm` (+ birth stats), maps to points; measurements are written via `MomentService` on the moment, not a separate `add` (Phase 3) |
 | `ShareService` | export cards / social | `buildCard(momentOrRecap)→Media`, `export(target)` (Phase 3) |
@@ -115,16 +123,20 @@ Each service calls `lib` (the Payload API client, media signed-URL builder, AI),
 | `payload.ts` | Payload REST/GraphQL client | typed `fetch` wrapper: base URL from `EXPO_PUBLIC_PAYLOAD_API_URL`, attaches the auth token, GET/POST/PATCH/DELETE. The **only** module that knows the API shape. |
 | `auth.ts` | Payload auth endpoints | login / me / refresh; token persisted via `expo-secure-store`. |
 | `media.ts` | signed media proxy | builds `/api/media/file/:filename` URLs + picks a `sizes` variant (thumbnail 320² / card 768w / full 1600w). Delivery is a 302 → ~2h presigned URL (follow redirects); access-gated by Payload family scope. No secret keys in the client. |
-| `notifications.ts` | `expo-notifications` | local + push scheduling, tap deep-link routing. |
-| `ai/provider.ts` | `generateRecap(context)` / `searchMemories(query)` interface | **swappable vendor; server-side/batch only** — the app never calls it live (Phase 2). EU residency checked per §9. |
+| `notifications.ts` | `expo-notifications` | local + push scheduling, tap deep-link routing (+ capture prompts, Phase 2). |
+| `ai/provider.ts` | `generateStory` / `generateRecap` / `translateRecap` / TTS / `searchMemories` interface | **swappable vendor.** `generateStory` is **on-demand** (user-triggered, via the CMS `/api/ai/story` endpoint); recaps + translation + TTS are **server-side/batch** — the app never calls them live. EU residency + no-train per §9. |
+| `mediaLibrary.ts` | `expo-media-library` | read the camera roll for auto-import; permission-gated, opt-in, on-device grouping (Phase 2). |
+| `shareIntent.ts` | share extension / `expo-share-intent` | receive media shared **into** the app from the OS share sheet → quick-capture. Needs a custom dev build (Phase 2). |
+| `billing.ts` | RevenueCat / `expo-in-app-purchases` | subscriptions; entitlement resolved from a Payload field written by the RevenueCat webhook (§12). Needs a custom dev build (Phase 1). |
 
 ---
 
 ## 6. Where AI lives (Phase 2+)
 
-Mirrors Shoply's "no live inference on the hot path" discipline:
+Mirrors Shoply's "no live inference on the hot path" discipline — with **one deliberate, contained exception** (AI Story Assist):
 
-- **Recaps** generate in a **batch job** (a Payload job / cron or companion service) → write `Recap` docs. `RecapService` only **reads** them. The capture and timeline paths never wait on AI.
+- **AI Story Assist** (Phase 2) is the **only user-triggered** generation. It's **explicit, async, and optional**: the parent taps "Write my story", the call runs behind a loading state via the CMS `/api/ai/story` endpoint, and **the moment always saves without it** (AI down / offline / over-quota → plain editable caption). `StoryService` never blocks capture. This is an *assist*, not a step in the hot path.
+- **Recaps** generate in a **batch job** (a Payload job / cron or companion service) → write `Recap` docs (weekly/monthly/yearly, incl. **TTS narration audio** + **per-locale translations**). `RecapService` only **reads** them. The capture and timeline paths never wait on AI.
 - **Memory search** runs server-side (a Payload endpoint) against the family's own data; `SearchService` calls that endpoint, maps results to `SearchResult`.
 - `ai/provider.ts` is the **only** place a vendor SDK is named; swapping providers is a config change, not a refactor. Prompts + data residency are validated against PRD §9 for EU users.
 - **Auto-milestone detection** (Phase 4) suggests; the parent confirms before `MilestoneService.log` writes anything.
@@ -194,7 +206,7 @@ After **A2** the capture→timeline loop is demoable; after **A5** a real family
 - **Layered:** `screens → hooks → services → lib`; models flow up; UI never in services/hooks/lib; services throw, hooks catch.
 - **Models only above the service layer** — no Payload doc shapes, no collection field names in screens/components.
 - **Mappers are pure** — doc→model translation, media URL resolution, derived fields.
-- **No live AI on the hot path** — recaps/search are batch/server-side behind `ai/provider.ts`.
+- **No live AI on the hot path** — recaps/search/translation/TTS are batch/server-side behind `ai/provider.ts`. The one **user-triggered** generation (AI Story Assist) is explicit, async, and optional — the moment always saves without it.
 - **Payload access control is the access boundary** — never trust the client; scope every query to family + role.
 - **Tokens, not hardcoded values** — NativeWind + gluestack v3 token scale; recolor = one swap.
 - **Privacy is a Phase-1 feature, not a Phase-4 cleanup** — encryption, GDPR export/delete, EU residency ship in the MVP.
