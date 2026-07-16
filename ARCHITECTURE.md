@@ -59,11 +59,11 @@ Only what the UI needs — no Payload doc internals, no relationship ids, no `_s
 
 | Model | Core fields | PRD |
 | --- | --- | --- |
-| `Baby` | id, familyId, name, dueDate?, birthDate?, birthWeight?, birthLength?, parents[], displayFormat, photo? | §4, §5 |
+| `Baby` | id, familyId, **name?** (optional in pregnancy — may be a bump nickname or empty; **required at birth**), **gender?** (girl \| boy \| surprise — optional, neutral, no gendered UI), dueDate?, birthDate?, birthWeight?, birthLength?, parents[], displayFormat, photo? | §4, §5 |
 | `AgeDisplay` | phase (pregnancy \| born), value, unit, label (e.g. "8 months old") | §5 |
 | `DisplayFormat` | enum: weeks \| months \| yearsMonths | §5 |
-| `Moment` | id, babyId, type, media?, caption?, body?, capturedAt, authorId, milestoneId?, reactionCount, commentCount, tags[]?, location? | §4, §6.2 |
-| `MomentType` | enum: photo \| video \| voice \| text | §4 |
+| `Moment` | id, babyId, type, **media[] (ordered, images+videos mixed)**, voiceNote?, caption?, body?, capturedAt, authorId, milestoneId?, reactionCount, commentCount, tags[]?, location? | §4, §6.2 |
+| `MomentType` | enum: media \| voice \| text — **derived from content, not user-chosen**: media[] non-empty → `media`; else voiceNote → `voice`; else `text`. (`media` = 1+ images/videos, mixed; a single photo = `media` with one item.) | §4 |
 | `Media` | id, kind (image\|video\|audio), url, thumbUrl?, width?, height?, durationSec? | §4 (ImageKit) |
 | `Milestone` | id, key, label, loggedMomentId?, loggedAt? | §4, §6.2 |
 | `Family` | id, name, memberCount | §3 |
@@ -88,7 +88,7 @@ Each service calls `lib` (the Payload API client, ImageKit, AI), applies the cur
 | Service | Responsibility | Key methods → returns |
 | --- | --- | --- |
 | `BabyService` | baby profile CRUD, birth transition | `get(id)→Baby`, `create/update`, `recordBirth(id, {date,weight,length})→Baby` (also creates the transition Moment) |
-| `AgeService` | pregnancy/age computation | `compute(baby, today)→AgeDisplay` (pure; no I/O) |
+| `AgeService` | pregnancy/age computation | `compute(baby, atDate)→AgeDisplay` (pure; no I/O). Fed `today` for the header's live age; fed `moment.capturedAt` for a moment's **age-at-capture** (pre-birth → pregnancy weeks). Same fn, different date. |
 | `MomentService` | timeline CRUD + media | `list(babyId, cursor)→Paginated<Moment>`, `get(id)→Moment`, `create(input)→Moment`, `delete(id)` |
 | `MediaService` | upload + ImageKit URLs | `upload(file)→Media` (to Payload media collection / ImageKit), `urlFor(path, transform)→string` |
 | `MilestoneService` | standard + logging | `list(babyId)→Milestone[]`, `log(babyId, key, moment)→Milestone` |

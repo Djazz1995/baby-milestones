@@ -1,0 +1,822 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Baby Milestones — Phase 1 Mockups</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.24.0/dist/tabler-icons.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#DDE6E2;font-family:'Inter',sans-serif;color:#1C2B27;padding:32px 20px 64px}
+  .page{max-width:1100px;margin:0 auto}
+  .page > header{margin-bottom:8px}
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:30px;margin:0}
+  .sub{color:#6B7B76;font-size:14px;margin:6px 0 0}
+  h2{font-family:'Fraunces',serif;font-weight:600;font-size:20px;margin:40px 0 4px}
+  .note{color:#6B7B76;font-size:13px;margin:0 0 18px}
+  .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:22px}
+  .row.five{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+  .phone{background:#F1F5F4;border-radius:34px;padding:12px;box-shadow:0 12px 30px rgba(28,43,39,.14)}
+  .screen{background:#F1F5F4;border-radius:26px;overflow:hidden;position:relative;height:560px}
+  .screen.sm{height:500px;border-radius:24px}
+  .screen.white{background:#fff}
+  .serif{font-family:'Fraunces',serif}
+  .status{display:flex;justify-content:space-between;align-items:center;padding:12px 18px 4px;font-size:12px;color:#1C2B27;font-weight:500}
+  .status.sm{padding:10px 16px 2px;font-size:11px}
+  .card{background:#fff;border-radius:24px;box-shadow:0 8px 24px rgba(28,43,39,.06)}
+  .primary{background:#0F766E;color:#fff;border:none;border-radius:18px;padding:14px;width:100%;font-family:'Inter';font-size:15px;font-weight:500}
+  .primary.sm{border-radius:16px;padding:13px;font-size:14px}
+  .secondary{background:#D3E6E1;color:#0B5C55;border:none;border-radius:18px;padding:14px;width:100%;font-family:'Inter';font-size:15px;font-weight:500}
+  .ghost{background:none;color:#6B7B76;border:none;padding:11px;width:100%;font-size:13px;font-family:'Inter'}
+  .cap{text-align:center;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#6B7B76;margin-top:10px}
+  .pill{border-radius:999px;padding:6px 14px;font-size:12px;font-weight:500;display:inline-block}
+  .pill.sm{padding:5px 12px;font-size:11px}
+  .av{border-radius:50%;background:#0F766E;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600}
+  .field{background:#F1F5F4;border-radius:13px;padding:12px 14px;color:#1C2B27;font-size:13px}
+  .lbl{font-size:11px;color:#6B7B76;margin-bottom:5px}
+  .dots{display:flex;gap:5px;justify-content:center}
+  .dot{width:6px;height:6px;border-radius:50%;background:#C3D3CD}
+  .dot.on{background:#0F766E;width:16px;border-radius:999px}
+  .num{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#0F766E;color:#fff;font-size:11px;font-weight:600;margin-right:6px}
+  .flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:14px 0 18px;font-size:12px}
+  .flow i{color:#6B7B76}
+  .swatches{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0 8px}
+  .sw{display:flex;align-items:center;gap:8px;font-size:12px;color:#6B7B76}
+  .chip{width:22px;height:22px;border-radius:7px;border:1px solid rgba(28,43,39,.08)}
+  .pc-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+  .wd{text-align:center;font-size:11px;color:#9AA8A2;padding-bottom:8px}
+  .pc-cell{aspect-ratio:1;border-radius:11px;position:relative;display:flex;align-items:flex-start;justify-content:flex-start}
+  .pc-empty{color:#B4C0BA;font-size:12px;align-items:center;justify-content:center}
+  .pc-date{font-size:10px;font-weight:500;padding:3px 5px;line-height:1}
+  .pc-date.on-photo{color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.45)}
+  .pc-sel{box-shadow:0 0 0 2px #0F766E,0 0 0 4px #fff}
+  .pc-multi{position:absolute;bottom:4px;right:4px;background:rgba(255,255,255,.9);color:#0B5C55;font-size:9px;font-weight:500;border-radius:999px;padding:1px 5px}
+  .drow{display:flex;gap:11px;align-items:center;padding:11px 0;border-top:1px solid #EFF3F1}
+  .dthumb{width:44px;height:44px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#0B5C55}
+  .s-body{padding:6px 18px 0}
+  .s-gl{font-size:11px;color:#9AA8A2;text-transform:uppercase;letter-spacing:.06em;margin:16px 4px 7px;font-weight:500}
+  .s-grp{background:#fff;border-radius:18px;box-shadow:0 6px 16px rgba(28,43,39,.05);overflow:hidden}
+  .s-row{display:flex;align-items:center;gap:12px;padding:13px 14px;border-top:1px solid #F1F4F2}
+  .s-row:first-child{border-top:none}
+  .s-ri{width:30px;height:30px;border-radius:9px;background:#E8F0ED;color:#0F766E;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+  .s-rl{flex:1;font-size:14px;color:#1C2B27}
+  .s-rv{font-size:13px;color:#9AA8A2}
+  .s-chev{color:#C3D0CA;font-size:16px}
+  .s-tog{width:42px;height:25px;border-radius:999px;background:#0F766E;position:relative;flex-shrink:0}
+  .s-tog.off{background:#D8E0DC}
+  .s-tog::after{content:"";position:absolute;top:3px;right:3px;width:19px;height:19px;border-radius:50%;background:#fff}
+  .s-tog.off::after{right:auto;left:3px}
+  .s-pill{border-radius:999px;padding:3px 10px;font-size:11px;font-weight:500;display:inline-block}
+  .io-tabbar{position:absolute;left:14px;right:14px;bottom:14px;height:62px;border-radius:26px;background:rgba(247,250,249,.72);backdrop-filter:blur(22px) saturate(1.3);-webkit-backdrop-filter:blur(22px) saturate(1.3);border:1px solid rgba(255,255,255,.6);box-shadow:0 8px 30px rgba(28,43,39,.12);display:flex;align-items:center;justify-content:space-around;padding:0 10px}
+  .io-tab{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;color:#94A29C}
+  .io-tab.on{color:#0F766E}
+  .io-tab i{font-size:22px}
+  .io-nav{height:44px;display:flex;align-items:center;justify-content:center;position:relative;border-bottom:1px solid rgba(28,43,39,.08);background:rgba(247,250,249,.8);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+  .io-back{position:absolute;left:12px;display:flex;align-items:center;gap:1px;color:#0F766E;font-size:16px}
+  .io-navtitle{font-size:16px;font-weight:600;color:#1C2B27}
+  .io-navright{position:absolute;right:14px;color:#0F766E;font-size:20px}
+  .wave{display:flex;align-items:center;gap:3px;flex:1;height:28px;overflow:hidden}
+  .wave i{display:block;width:3px;border-radius:2px;background:#0F766E}
+  .mm-dots{position:absolute;bottom:10px;left:0;right:0;display:flex;gap:5px;justify-content:center}
+  .mm-dots i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.6)}
+  .mm-dots i.on{background:#fff;width:16px;border-radius:999px}
+  .mm-count{position:absolute;background:rgba(28,43,39,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);color:#fff;border-radius:999px;font-weight:500}
+  .mm-thumb{width:74px;height:74px;border-radius:16px;position:relative;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .mm-thx{position:absolute;top:4px;right:4px;width:18px;height:18px;border-radius:50%;background:rgba(28,43,39,.6);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px}
+  .mi{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .mi.done{background:#0F766E;color:#fff}
+  .mi.todo{border:2px solid #D8E0DC;color:#C3D0CA}
+  .sk{background:#E7ECEA;border-radius:8px}
+  .ring{width:56px;height:56px;border-radius:50%;background:conic-gradient(#0F766E 55%,#DCE4E0 0);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <h1>Baby Milestones — Phase 1</h1>
+    <p class="sub">Calm, rounded, teal-green. White cards on a soft canvas. Serif (Fraunces) for baby name + age only; Inter elsewhere. iOS-first native chrome: liquid-glass tab bar (expo-glass-effect) + native stack back buttons. Spec: design/DESIGN_SYSTEM.md, FLOWS.md, SCREENS_P1.md, ONBOARDING.md.</p>
+    <div class="swatches">
+      <span class="sw"><span class="chip" style="background:#0F766E"></span>accent #0F766E</span>
+      <span class="sw"><span class="chip" style="background:#D3E6E1"></span>accentSoft #D3E6E1</span>
+      <span class="sw"><span class="chip" style="background:#F1F5F4"></span>canvas #F1F5F4</span>
+      <span class="sw"><span class="chip" style="background:#fff"></span>surface #FFF</span>
+      <span class="sw"><span class="chip" style="background:#1C2B27"></span>text #1C2B27</span>
+      <span class="sw"><span class="chip" style="background:#E5735F"></span>like #E5735F</span>
+    </div>
+  </header>
+
+  <h2>Core screens</h2>
+  <p class="note">The capture → timeline → react loop, plus create-baby.</p>
+  <div class="row">
+
+    <div>
+      <div class="phone"><div class="screen">
+        <div class="status"><span>9:41</span><span><i class="ti ti-wifi"></i> <i class="ti ti-battery-3"></i></span></div>
+        <div style="padding:6px 18px 0;display:flex;align-items:center;justify-content:space-between">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="av" style="width:44px;height:44px;font-size:15px">L</div>
+            <div><div style="font-size:12px;color:#6B7B76">Liam</div><div class="serif" style="font-size:20px;color:#1C2B27;font-weight:600">8 months old</div></div>
+          </div>
+          <div class="av" style="width:40px;height:40px;background:#fff;color:#0F766E;box-shadow:0 4px 12px rgba(28,43,39,.08)"><i class="ti ti-settings" style="font-size:18px"></i></div>
+        </div>
+        <div style="padding:14px 18px 0;display:flex;align-items:center;gap:8px">
+          <div class="card" style="flex:1;border-radius:999px;padding:11px 16px;box-shadow:0 4px 14px rgba(28,43,39,.05);display:flex;align-items:center;gap:8px;color:#6B7B76;font-size:14px"><i class="ti ti-search"></i> Search moments</div>
+          <div class="av" style="width:42px;height:42px;background:#fff;color:#0F766E;box-shadow:0 4px 12px rgba(28,43,39,.06)"><i class="ti ti-adjustments-horizontal" style="font-size:18px"></i></div>
+        </div>
+        <div style="padding:16px 18px 0">
+          <div class="card" style="overflow:hidden">
+            <div style="height:140px;background:#9FE1CB;position:relative">
+              <span class="pill" style="position:absolute;top:12px;left:12px;background:#fff;color:#0B5C55"><i class="ti ti-star" style="font-size:12px"></i> First smile</span>
+              <span class="mm-count" style="top:12px;right:12px;padding:5px 11px;font-size:12px"><i class="ti ti-photo" style="font-size:11px"></i> 2/5</span>
+              <span style="position:absolute;bottom:12px;left:12px;background:rgba(28,43,39,.5);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);color:#fff;border-radius:999px;padding:4px 9px;font-size:11px;font-weight:500"><i class="ti ti-microphone" style="font-size:11px"></i> 0:12</span>
+              <div class="mm-dots"><i></i><i class="on"></i><i></i><i></i><i></i></div>
+            </div>
+            <div style="padding:12px 14px">
+              <span style="display:inline-block;background:#D3E6E1;color:#0B5C55;border-radius:999px;padding:3px 10px;font-size:11px;font-weight:500;margin-bottom:8px">3 months old</span>
+              <div style="font-size:14px;color:#1C2B27;line-height:1.4">That grin at breakfast — melted us.</div>
+              <div style="display:flex;align-items:center;gap:8px;margin-top:10px;color:#6B7B76;font-size:12px">
+                <div class="av" style="width:22px;height:22px;font-size:10px">A</div> Anna · 2h
+                <span style="margin-left:auto;color:#E5735F"><i class="ti ti-heart"></i> 4</span>
+                <span><i class="ti ti-message-circle"></i> 2</span>
+              </div>
+            </div>
+          </div>
+          <div class="card" style="margin-top:14px;padding:14px;background:#E8F0ED;box-shadow:none">
+            <span style="display:inline-block;background:#D3E6E1;color:#0B5C55;border-radius:999px;padding:4px 11px;font-size:11px;font-weight:500;margin-bottom:10px">8 weeks old</span>
+            <div style="font-size:14px;color:#1C2B27;line-height:1.45">Slept through the night for the first time. We did too.</div>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:10px;color:#6B7B76;font-size:12px">
+              <div class="av" style="width:22px;height:22px;font-size:10px">M</div> Mark · yesterday
+              <span style="margin-left:auto;color:#E5735F"><i class="ti ti-heart"></i> 6</span>
+              <span><i class="ti ti-message-circle"></i> 1</span>
+            </div>
+          </div>
+        </div>
+        <div class="av" style="position:absolute;bottom:86px;right:20px;width:54px;height:54px;box-shadow:0 8px 20px rgba(15,118,110,.4)"><i class="ti ti-plus" style="font-size:24px"></i></div>
+        <div class="io-tabbar">
+          <div class="io-tab on"><i class="ti ti-photo"></i><span>Timeline</span></div>
+          <div class="io-tab"><i class="ti ti-star"></i><span>Milestones</span></div>
+          <div class="io-tab"><i class="ti ti-users"></i><span>Family</span></div>
+        </div>
+      </div></div>
+      <div class="cap">Timeline · liquid-glass tab bar</div>
+    </div>
+
+    <div>
+      <div class="phone"><div class="screen white">
+        <div class="status"><span>9:41</span><span><i class="ti ti-wifi"></i> <i class="ti ti-battery-3"></i></span></div>
+        <div class="io-nav">
+          <span class="io-back"><i class="ti ti-chevron-left" style="font-size:20px"></i> Timeline</span>
+          <span class="io-navtitle">Moment</span>
+          <span class="io-navright"><i class="ti ti-dots"></i></span>
+        </div>
+        <div style="height:200px;background:#9FE1CB;margin:14px 18px 0;border-radius:24px;position:relative">
+          <span class="pill" style="position:absolute;top:12px;left:12px;background:#fff;color:#0B5C55"><i class="ti ti-star" style="font-size:12px"></i> First smile</span>
+          <span class="mm-count" style="top:12px;right:12px;padding:5px 11px;font-size:12px"><i class="ti ti-photo" style="font-size:11px"></i> 2/5</span>
+          <div class="mm-dots"><i></i><i class="on"></i><i></i><i></i><i></i></div>
+        </div>
+        <div style="display:flex;gap:7px;padding:12px 18px 0">
+          <div style="width:44px;height:44px;border-radius:11px;background:#9FE1CB"></div>
+          <div style="width:44px;height:44px;border-radius:11px;background:#BFD9B4;box-shadow:0 0 0 2px #0F766E"></div>
+          <div style="width:44px;height:44px;border-radius:11px;background:#C9B8A8;position:relative"><i class="ti ti-player-play" style="position:absolute;inset:0;margin:auto;color:#fff;font-size:15px;display:flex;align-items:center;justify-content:center"></i></div>
+          <div style="width:44px;height:44px;border-radius:11px;background:#D8C1A8"></div>
+          <div style="width:44px;height:44px;border-radius:11px;background:#A7D9C6"></div>
+        </div>
+        <div style="padding:14px 18px 0">
+          <span style="display:inline-block;background:#D3E6E1;color:#0B5C55;border-radius:999px;padding:3px 10px;font-size:11px;font-weight:500;margin-bottom:8px">3 months old</span>
+          <div style="font-size:15px;color:#1C2B27;line-height:1.5">That grin at breakfast — completely melted us.</div>
+          <div style="display:flex;align-items:center;gap:12px;background:#EAF3EF;border-radius:18px;padding:12px 14px;margin-top:12px">
+            <div class="av" style="width:40px;height:40px"><i class="ti ti-player-play" style="font-size:18px"></i></div>
+            <div class="wave" style="height:30px"><i style="height:9px"></i><i style="height:18px"></i><i style="height:26px"></i><i style="height:13px"></i><i style="height:22px"></i><i style="height:10px"></i><i style="height:28px"></i><i style="height:15px"></i><i style="height:20px"></i><i style="height:8px"></i><i style="height:24px"></i><i style="height:12px"></i><i style="height:19px"></i><i style="height:9px"></i><i style="height:23px"></i><i style="height:11px"></i></div>
+            <span style="font-size:13px;color:#0B5C55;font-weight:500">0:12</span>
+          </div>
+          <div style="font-size:11px;color:#9AA8A2;margin:6px 2px 0"><i class="ti ti-microphone" style="font-size:11px"></i> Anna’s voice note</div>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:14px">
+            <div class="av" style="width:30px;height:30px;font-size:12px">A</div>
+            <div style="font-size:13px;color:#1C2B27;font-weight:500">Anna<span style="color:#6B7B76;font-weight:400"> · 14 Mar</span></div>
+          </div>
+          <div style="display:flex;gap:22px;margin-top:14px;padding:12px 0;border-top:1px solid #E3EAE7;border-bottom:1px solid #E3EAE7;color:#1C2B27;font-size:14px">
+            <span style="color:#E5735F"><i class="ti ti-heart"></i> 4</span>
+            <span><i class="ti ti-message-circle"></i> 2</span>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:14px">
+            <div class="av" style="width:26px;height:26px;font-size:11px;background:#E5735F">O</div>
+            <div><span style="font-size:13px;font-weight:500;color:#1C2B27">Oma</span> <span style="font-size:11px;color:#6B7B76">1h</span><div style="font-size:13px;color:#1C2B27">Oh that face! ❤</div></div>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:12px">
+            <div class="av" style="width:26px;height:26px;font-size:11px">M</div>
+            <div><span style="font-size:13px;font-weight:500;color:#1C2B27">Mark</span> <span style="font-size:11px;color:#6B7B76">40m</span><div style="font-size:13px;color:#1C2B27">Best breakfast ever.</div></div>
+          </div>
+        </div>
+        <div style="position:absolute;bottom:16px;left:18px;right:18px;background:#F1F5F4;border-radius:999px;padding:12px 16px;color:#6B7B76;font-size:13px;display:flex;align-items:center;gap:8px">Add a comment… <i class="ti ti-send" style="margin-left:auto;color:#0F766E"></i></div>
+      </div></div>
+      <div class="cap">Moment detail</div>
+    </div>
+
+    <div>
+      <div class="phone"><div class="screen">
+        <div style="filter:brightness(.97);opacity:.5">
+          <div class="status"><span>9:41</span><span><i class="ti ti-wifi"></i></span></div>
+          <div style="padding:10px 18px"><div class="serif" style="font-size:20px;color:#1C2B27;font-weight:600">8 months old</div></div>
+        </div>
+        <div style="position:absolute;inset:0;background:rgba(28,43,39,.35)"></div>
+        <div style="position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:28px 28px 0 0;padding:14px 18px 20px">
+          <div style="width:42px;height:5px;background:#E3EAE7;border-radius:999px;margin:0 auto 14px"></div>
+          <div class="serif" style="font-size:19px;color:#1C2B27;font-weight:600;margin-bottom:14px">Add a moment</div>
+          <div style="font-size:12px;color:#6B7B76;margin-bottom:8px">Photos &amp; videos · drag to reorder</div>
+          <div style="display:flex;gap:9px;overflow:hidden">
+            <div class="mm-thumb" style="background:#9FE1CB"><span class="mm-thx"><i class="ti ti-x"></i></span><span style="position:absolute;bottom:4px;left:5px;background:rgba(28,43,39,.5);color:#fff;font-size:9px;border-radius:999px;padding:1px 6px">cover</span></div>
+            <div class="mm-thumb" style="background:#BFD9B4"><span class="mm-thx"><i class="ti ti-x"></i></span></div>
+            <div class="mm-thumb" style="background:#C9B8A8"><span class="mm-thx"><i class="ti ti-x"></i></span><i class="ti ti-player-play" style="position:absolute;color:#fff;font-size:20px"></i></div>
+            <div class="mm-thumb" style="background:#F1F5F4;border:1.5px dashed #C3D0CA;color:#0F766E"><i class="ti ti-plus" style="font-size:22px"></i></div>
+          </div>
+          <div style="background:#F1F5F4;border-radius:16px;padding:14px 16px;margin-top:12px;color:#6B7B76;font-size:14px;min-height:56px">Write something… <span style="color:#B4C0BA">(or just a caption)</span></div>
+          <div style="display:flex;align-items:center;gap:8px;background:#EAF3EF;border:1px solid #D3E6E1;border-radius:16px;padding:12px 14px;margin-top:10px;color:#0B5C55;font-size:14px;font-weight:500"><i class="ti ti-microphone"></i> Add a voice note <span style="margin-left:auto;font-weight:400;color:#9AA8A2;font-size:12px">optional</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 4px 0;color:#1C2B27;font-size:14px"><span><i class="ti ti-star" style="color:#0F766E"></i> Attach milestone</span><i class="ti ti-chevron-right" style="color:#6B7B76"></i></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 4px 16px;color:#1C2B27;font-size:14px"><span><i class="ti ti-calendar" style="color:#0F766E"></i> Today</span><i class="ti ti-chevron-right" style="color:#6B7B76"></i></div>
+          <button class="primary">Post</button>
+        </div>
+      </div></div>
+      <div class="cap">Add moment</div>
+    </div>
+
+    <div>
+      <div class="phone"><div class="screen white">
+        <div class="status"><span>9:41</span><span><i class="ti ti-wifi"></i> <i class="ti ti-battery-3"></i></span></div>
+        <div style="padding:14px 20px 0">
+          <div class="serif" style="font-size:24px;color:#1C2B27;font-weight:600;line-height:1.25">Tell us about<br>your baby</div>
+          <div style="background:#F1F5F4;border-radius:16px;padding:5px;display:flex;margin-top:18px">
+            <div style="flex:1;text-align:center;padding:10px;color:#6B7B76;font-size:14px">Expecting</div>
+            <div style="flex:1;text-align:center;padding:10px;background:#0F766E;color:#fff;border-radius:12px;font-size:14px;font-weight:500">Born</div>
+          </div>
+          <div style="margin-top:16px">
+            <div class="lbl">Birth date</div>
+            <div class="field">14 March 2026</div>
+          </div>
+          <div style="display:flex;gap:12px;margin-top:12px">
+            <div style="flex:1"><div class="lbl">Weight</div><div class="field">3.4 kg</div></div>
+            <div style="flex:1"><div class="lbl">Length</div><div class="field">51 cm</div></div>
+          </div>
+          <div style="margin-top:12px"><div class="lbl">Name</div><div class="field">Liam</div></div>
+          <div style="margin-top:16px"><div class="lbl">Show age as</div>
+            <div style="display:flex;gap:8px">
+              <span class="pill" style="background:#E8F0ED;color:#6B7B76">Weeks</span>
+              <span class="pill">Months</span>
+              <span class="pill" style="background:#E8F0ED;color:#6B7B76">Years + months</span>
+            </div>
+          </div>
+        </div>
+        <div style="position:absolute;bottom:18px;left:20px;right:20px"><button class="primary">Create</button></div>
+      </div></div>
+      <div class="cap">Create baby profile</div>
+    </div>
+
+  </div>
+
+  <h2>Onboarding sequence</h2>
+  <div class="flow">
+    <span><span class="num">1</span>Welcome</span><i class="ti ti-arrow-right"></i>
+    <span><span class="num">2</span>Sign up</span><i class="ti ti-arrow-right"></i>
+    <span style="background:#fff;border-radius:999px;padding:5px 12px;color:#0B5C55;font-weight:500"><i class="ti ti-git-branch"></i> gate: has a baby?</span><i class="ti ti-arrow-right"></i>
+    <span><span class="num">3</span>Create baby</span><i class="ti ti-arrow-right"></i>
+    <span><span class="num">4</span>Invite</span><i class="ti ti-arrow-right"></i>
+    <span><span class="num">5</span>Notify</span><i class="ti ti-arrow-right"></i>
+    <span style="color:#0F766E;font-weight:500">Timeline</span>
+  </div>
+  <div class="row five">
+
+    <div>
+      <div class="phone"><div class="screen sm white">
+        <div class="status sm"><span>9:41</span><span><i class="ti ti-wifi"></i></span></div>
+        <div style="display:flex;flex-direction:column;height:440px;padding:0 22px;justify-content:center">
+          <div class="av" style="width:60px;height:60px;font-size:24px;background:#D3E6E1;color:#0F766E;margin-bottom:24px"><i class="ti ti-heart"></i></div>
+          <div class="serif" style="font-size:26px;color:#1C2B27;font-weight:600;line-height:1.25">The private place your family keeps a childhood.</div>
+          <div style="font-size:13px;color:#6B7B76;margin-top:14px;line-height:1.5">Encrypted. EU-hosted. No public feed, ever.</div>
+        </div>
+        <div style="position:absolute;bottom:18px;left:22px;right:22px">
+          <button class="primary sm">Get started</button>
+          <button class="ghost">I have an account</button>
+        </div>
+      </div></div>
+      <div class="cap">1 · Welcome</div>
+    </div>
+
+    <div>
+      <div class="phone"><div class="screen sm white">
+        <div class="status sm"><span>9:41</span><span><i class="ti ti-wifi"></i></span></div>
+        <div style="padding:8px 22px 0;color:#1C2B27"><i class="ti ti-chevron-left" style="font-size:20px"></i></div>
+        <div style="padding:14px 22px 0">
+          <div class="serif" style="font-size:23px;color:#1C2B27;font-weight:600">Create your account</div>
+          <div style="background:#F1F5F4;border-radius:14px;padding:4px;display:flex;margin-top:18px">
+            <div style="flex:1;text-align:center;padding:9px;background:#0F766E;color:#fff;border-radius:11px;font-size:13px;font-weight:500">Sign up</div>
+            <div style="flex:1;text-align:center;padding:9px;color:#6B7B76;font-size:13px">Sign in</div>
+          </div>
+          <div style="margin-top:16px"><div class="lbl">Your name</div><div class="field">Anna de Vries</div></div>
+          <div style="margin-top:12px"><div class="lbl">Email</div><div class="field">anna@devries.test</div></div>
+          <div style="margin-top:12px"><div class="lbl">Password</div><div class="field" style="letter-spacing:3px">••••••••</div></div>
+          <div style="font-size:11px;color:#6B7B76;margin-top:14px;line-height:1.5">By continuing you agree to keep this space private to your family.</div>
+        </div>
+        <div style="position:absolute;bottom:18px;left:22px;right:22px"><button class="primary sm">Continue</button></div>
+      </div></div>
+      <div class="cap">2 · Sign up</div>
+    </div>
+
+    <div>
+      <div class="phone"><div class="screen sm white">
+        <div class="status sm"><span>9:41</span><span><i class="ti ti-wifi"></i></span></div>
+        <div style="padding:8px 20px 0;display:flex;justify-content:space-between;align-items:center;color:#1C2B27"><i class="ti ti-chevron-left" style="font-size:20px"></i><div class="dots"><span class="dot on"></span><span class="dot"></span><span class="dot"></span></div><span style="width:20px"></span></div>
+        <div style="padding:12px 20px 0">
+          <div class="serif" style="font-size:22px;color:#1C2B27;font-weight:600;line-height:1.25">Tell us about your baby</div>
+          <div style="background:#F1F5F4;border-radius:14px;padding:4px;display:flex;margin-top:16px">
+            <div style="flex:1;text-align:center;padding:9px;color:#6B7B76;font-size:13px">Expecting</div>
+            <div style="flex:1;text-align:center;padding:9px;background:#0F766E;color:#fff;border-radius:11px;font-size:13px;font-weight:500">Born</div>
+          </div>
+          <div style="margin-top:14px"><div class="lbl">Birth date</div><div class="field">14 March 2026</div></div>
+          <div style="display:flex;gap:10px;margin-top:11px">
+            <div style="flex:1"><div class="lbl">Weight</div><div class="field">3.4 kg</div></div>
+            <div style="flex:1"><div class="lbl">Length</div><div class="field">51 cm</div></div>
+          </div>
+          <div style="margin-top:11px"><div class="lbl">Name</div><div class="field">Liam</div></div>
+          <div style="margin-top:14px"><div class="lbl">Show age as</div>
+            <div style="display:flex;gap:7px;margin-top:2px">
+              <span class="pill sm" style="background:#E8F0ED;color:#6B7B76">Weeks</span>
+              <span class="pill sm" style="background:#D3E6E1;color:#0B5C55">Months</span>
+              <span class="pill sm" style="background:#E8F0ED;color:#6B7B76">Years+m</span>
+            </div>
+          </div>
+        </div>
+        <div style="position:absolute;bottom:18px;left:20px;right:20px"><button class="primary sm">Create</button></div>
+      </div></div>
+      <div class="cap">3 · Create baby ⭐</div>
+    </div>
+
+    <div>
+      <div class="phone"><div class="screen sm white">
+        <div class="status sm"><span>9:41</span><span><i class="ti ti-wifi"></i></span></div>
+        <div style="padding:8px 22px 0;display:flex;justify-content:space-between;align-items:center;color:#1C2B27"><i class="ti ti-chevron-left" style="font-size:20px"></i><div class="dots"><span class="dot"></span><span class="dot on"></span><span class="dot"></span></div><span style="width:20px"></span></div>
+        <div style="padding:14px 22px 0">
+          <div class="av" style="width:52px;height:52px;font-size:22px;background:#D3E6E1;color:#0F766E;margin-bottom:16px"><i class="ti ti-users"></i></div>
+          <div class="serif" style="font-size:22px;color:#1C2B27;font-weight:600">Invite family</div>
+          <div style="font-size:13px;color:#6B7B76;margin-top:8px;line-height:1.5">Grandparents and partners can follow along, like, and comment.</div>
+          <div style="margin-top:18px"><div class="lbl">Email</div><div class="field">oma@devries.test</div></div>
+          <div style="margin-top:12px"><div class="lbl">Role</div>
+            <div style="display:flex;gap:8px;margin-top:2px">
+              <span class="pill sm" style="background:#E8F0ED;color:#6B7B76">Owner</span>
+              <span class="pill sm" style="background:#D3E6E1;color:#0B5C55">Viewer</span>
+            </div>
+          </div>
+        </div>
+        <div style="position:absolute;bottom:18px;left:22px;right:22px">
+          <button class="primary sm">Send invite</button>
+          <button class="ghost">Skip for now</button>
+        </div>
+      </div></div>
+      <div class="cap">4 · Invite (skippable)</div>
+    </div>
+
+    <div>
+      <div class="phone"><div class="screen sm white">
+        <div class="status sm"><span>9:41</span><span><i class="ti ti-wifi"></i></span></div>
+        <div style="padding:8px 22px 0;display:flex;justify-content:space-between;align-items:center;color:#1C2B27"><i class="ti ti-chevron-left" style="font-size:20px"></i><div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot on"></span></div><span style="width:20px"></span></div>
+        <div style="display:flex;flex-direction:column;height:400px;padding:0 22px;justify-content:center;text-align:center;align-items:center">
+          <div class="av" style="width:64px;height:64px;font-size:28px;background:#D3E6E1;color:#0F766E;margin-bottom:20px"><i class="ti ti-bell"></i></div>
+          <div class="serif" style="font-size:22px;color:#1C2B27;font-weight:600">Stay in the loop</div>
+          <div style="font-size:13px;color:#6B7B76;margin-top:10px;line-height:1.5">Get a gentle nudge when family reacts or a new moment lands.</div>
+        </div>
+        <div style="position:absolute;bottom:18px;left:22px;right:22px">
+          <button class="primary sm">Enable notifications</button>
+          <button class="ghost">Not now</button>
+        </div>
+      </div></div>
+      <div class="cap">5 · Notifications (skippable)</div>
+    </div>
+
+  </div>
+
+  <h2>Calendar view <span style="font-family:'Inter';font-size:12px;font-weight:400;color:#6B7B76">— Phase 2</span></h2>
+  <p class="note">Tinybeans-style: each day <em>is</em> its first photo, so the month is scannable at a glance. Text/voice-only days show an icon; empty days a muted number; a small count marks multi-moment days. Tap a day to expand its moments below the grid (selected = teal ring). Reached from a list ⇄ grid toggle in the Timeline header (keeps the tab bar at 3).</p>
+  <div class="row" style="display:flex;justify-content:flex-start">
+    <div style="width:300px">
+      <div class="phone"><div class="screen white" style="height:620px">
+        <div class="status"><span>9:41</span><span><i class="ti ti-wifi"></i> <i class="ti ti-battery-3"></i></span></div>
+        <div style="padding:10px 20px 0;display:flex;align-items:center;justify-content:space-between">
+          <div style="display:flex;align-items:center;gap:12px">
+            <span class="serif" style="font-size:20px;color:#1C2B27;font-weight:600">March 2026</span>
+            <span style="display:flex;gap:12px;color:#0F766E"><i class="ti ti-chevron-left"></i><i class="ti ti-chevron-right"></i></span>
+          </div>
+          <div style="display:flex;background:#F1F5F4;border-radius:999px;padding:3px">
+            <span style="width:28px;height:28px;border-radius:999px;display:flex;align-items:center;justify-content:center;color:#6B7B76"><i class="ti ti-list" style="font-size:16px"></i></span>
+            <span style="width:28px;height:28px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:#fff;color:#0F766E;box-shadow:0 2px 6px rgba(28,43,39,.08)"><i class="ti ti-layout-grid" style="font-size:15px"></i></span>
+          </div>
+        </div>
+        <div style="padding:20px 20px 0">
+          <div class="pc-grid" style="gap:0;margin-bottom:2px">
+            <div class="wd">S</div><div class="wd">M</div><div class="wd">T</div><div class="wd">W</div><div class="wd">T</div><div class="wd">F</div><div class="wd">S</div>
+          </div>
+          <div class="pc-grid">
+            <div class="pc-cell pc-empty">1</div>
+            <div class="pc-cell pc-empty">2</div>
+            <div class="pc-cell" style="background-color:#A7D9C6"><span class="pc-date on-photo">3</span></div>
+            <div class="pc-cell pc-empty">4</div>
+            <div class="pc-cell pc-empty">5</div>
+            <div class="pc-cell pc-empty">6</div>
+            <div class="pc-cell pc-empty">7</div>
+
+            <div class="pc-cell" style="background-color:#E8CBB6"><span class="pc-date on-photo">8</span></div>
+            <div class="pc-cell pc-empty">9</div>
+            <div class="pc-cell pc-empty">10</div>
+            <div class="pc-cell pc-empty">11</div>
+            <div class="pc-cell" style="background:#E8F0ED;align-items:center;justify-content:center"><span class="pc-date" style="color:#6B7B76;position:absolute;top:0;left:0">12</span><i class="ti ti-file-text" style="color:#9FB3AC;font-size:15px"></i></div>
+            <div class="pc-cell pc-empty">13</div>
+            <div class="pc-cell pc-sel" style="background-color:#9FCBB8"><span class="pc-date on-photo">14</span><span class="pc-multi">2</span></div>
+
+            <div class="pc-cell pc-empty">15</div>
+            <div class="pc-cell pc-empty">16</div>
+            <div class="pc-cell pc-empty">17</div>
+            <div class="pc-cell pc-empty">18</div>
+            <div class="pc-cell pc-empty">19</div>
+            <div class="pc-cell" style="background-color:#BFD9B4"><span class="pc-date on-photo">20</span></div>
+            <div class="pc-cell pc-empty">21</div>
+
+            <div class="pc-cell pc-empty">22</div>
+            <div class="pc-cell pc-empty">23</div>
+            <div class="pc-cell pc-empty">24</div>
+            <div class="pc-cell pc-empty">25</div>
+            <div class="pc-cell pc-empty">26</div>
+            <div class="pc-cell" style="background-color:#D8C1A8"><span class="pc-date on-photo">27</span></div>
+            <div class="pc-cell pc-empty">28</div>
+
+            <div class="pc-cell pc-empty">29</div>
+            <div class="pc-cell pc-empty">30</div>
+            <div class="pc-cell pc-empty">31</div>
+          </div>
+        </div>
+        <div style="padding:16px 20px 0;margin-top:8px;border-top:6px solid #F4F7F5">
+          <div style="font-size:13px;color:#1C2B27;font-weight:500;padding-top:4px">Saturday 14 March</div>
+          <div class="drow">
+            <div class="dthumb" style="background:#9FCBB8"><i class="ti ti-photo" style="font-size:19px"></i></div>
+            <div style="flex:1"><div style="font-size:13px;color:#1C2B27">That grin at breakfast.</div><div style="margin-top:3px"><span style="color:#0B5C55;background:#D3E6E1;border-radius:999px;padding:1px 8px;font-size:10px"><i class="ti ti-star" style="font-size:10px"></i> First smile</span></div></div>
+            <span style="color:#E5735F;font-size:12px"><i class="ti ti-heart"></i> 4</span>
+          </div>
+          <div class="drow">
+            <div class="dthumb" style="background:#E8F0ED"><i class="ti ti-file-text" style="font-size:19px"></i></div>
+            <div style="flex:1"><div style="font-size:13px;color:#1C2B27">First proper giggle today.</div><div style="font-size:11px;color:#9AA8A2;margin-top:3px">Text moment</div></div>
+            <span style="color:#E5735F;font-size:12px"><i class="ti ti-heart"></i> 3</span>
+          </div>
+        </div>
+      </div></div>
+      <div class="cap">Calendar — photo grid + day</div>
+    </div>
+  </div>
+
+  <h2>Settings &amp; members</h2>
+  <p class="note">Grouped list. Owner sees Family + Privacy actions; a viewer sees a reduced set (no delete/remove). Simple mode = grandparent mode (larger text, simplified UI). Members screen: owner taps ⋮ to change role or remove.</p>
+  <div class="row">
+
+    <div>
+      <div class="phone"><div class="screen">
+        <div class="status"><span>9:41</span><span><i class="ti ti-wifi"></i> <i class="ti ti-battery-3"></i></span></div>
+        <div style="padding:8px 16px 0;display:flex;align-items:center"><span class="io-back" style="position:static"><i class="ti ti-chevron-left" style="font-size:20px"></i> Timeline</span></div>
+        <div style="padding:2px 18px 2px"><span class="serif" style="font-size:26px;color:#1C2B27;font-weight:600">Settings</span></div>
+        <div class="s-body">
+          <div class="s-gl">Baby</div>
+          <div class="s-grp">
+            <div class="s-row"><div class="av" style="width:30px;height:30px;font-size:12px">L</div><span class="s-rl">Liam’s profile</span><span class="s-rv">8 mo</span><i class="ti ti-chevron-right s-chev"></i></div>
+          </div>
+          <div class="s-gl">Account</div>
+          <div class="s-grp">
+            <div class="s-row"><span class="s-ri"><i class="ti ti-user"></i></span><span class="s-rl">Anna de Vries</span><i class="ti ti-chevron-right s-chev"></i></div>
+            <div class="s-row"><span class="s-ri"><i class="ti ti-language"></i></span><span class="s-rl">Language</span><span class="s-rv">English</span><i class="ti ti-chevron-right s-chev"></i></div>
+            <div class="s-row"><span class="s-ri"><i class="ti ti-clock"></i></span><span class="s-rl">Show age as</span><span class="s-rv">Months</span><i class="ti ti-chevron-right s-chev"></i></div>
+          </div>
+          <div class="s-gl">Notifications</div>
+          <div class="s-grp">
+            <div class="s-row"><span class="s-ri"><i class="ti ti-bell"></i></span><span class="s-rl">Push notifications</span><span class="s-tog"></span></div>
+            <div class="s-row"><span class="s-ri"><i class="ti ti-message-circle"></i></span><span class="s-rl">Comments &amp; likes</span><span class="s-tog"></span></div>
+          </div>
+          <div class="s-gl">Display</div>
+          <div class="s-grp">
+            <div class="s-row" style="opacity:.6"><span class="s-ri"><i class="ti ti-accessible"></i></span><span class="s-rl">Simple mode <span class="s-pill" style="background:#E8F0ED;color:#0B5C55">grandparent</span></span><span class="s-pill" style="background:#F1F4F2;color:#9AA8A2">soon</span></div>
+          </div>
+          <div class="s-gl">Family</div>
+          <div class="s-grp">
+            <div class="s-row"><span class="s-ri"><i class="ti ti-users"></i></span><span class="s-rl">Members &amp; roles</span><span class="s-rv">3</span><i class="ti ti-chevron-right s-chev"></i></div>
+          </div>
+          <div class="s-gl">Privacy &amp; data</div>
+          <div class="s-grp">
+            <div class="s-row"><span class="s-ri"><i class="ti ti-download"></i></span><span class="s-rl">Export my data</span><i class="ti ti-chevron-right s-chev"></i></div>
+            <div class="s-row"><span class="s-ri" style="background:#F7E4E1;color:#C2564B"><i class="ti ti-trash"></i></span><span class="s-rl" style="color:#C2564B">Delete account &amp; baby</span><i class="ti ti-chevron-right s-chev"></i></div>
+          </div>
+          <div class="s-gl">About</div>
+          <div class="s-grp">
+            <div class="s-row"><span class="s-ri"><i class="ti ti-heart"></i></span><span class="s-rl">About Baby Milestones</span><i class="ti ti-chevron-right s-chev"></i></div>
+            <div class="s-row"><span class="s-ri"><i class="ti ti-shield-lock"></i></span><span class="s-rl">Privacy &amp; terms</span><i class="ti ti-chevron-right s-chev"></i></div>
+            <div class="s-row"><span class="s-ri"><i class="ti ti-info-circle"></i></span><span class="s-rl">Version</span><span class="s-rv">1.0.0</span></div>
+          </div>
+          <div style="text-align:center;color:#C2564B;font-size:14px;font-weight:500;padding:20px 0 8px">Sign out</div>
+        </div>
+      </div></div>
+      <div class="cap">Settings</div>
+    </div>
+
+    <div>
+      <div class="phone"><div class="screen">
+        <div class="status"><span>9:41</span><span><i class="ti ti-wifi"></i> <i class="ti ti-battery-3"></i></span></div>
+        <div class="io-nav">
+          <span class="io-back"><i class="ti ti-chevron-left" style="font-size:20px"></i> Settings</span>
+          <span class="io-navtitle">Family &amp; members</span>
+          <span class="io-navright"></span>
+        </div>
+        <div class="s-body" style="padding-top:6px">
+          <div class="s-gl">Members</div>
+          <div class="s-grp">
+            <div class="s-row"><div class="av" style="width:38px;height:38px;font-size:14px">A</div><div style="flex:1"><div style="font-size:14px;color:#1C2B27">Anna de Vries</div><div class="s-rv">Owner · you</div></div></div>
+            <div class="s-row"><div class="av" style="width:38px;height:38px;font-size:14px;background:#7FA99B">M</div><div style="flex:1"><div style="font-size:14px;color:#1C2B27">Mark de Vries</div><div class="s-rv">Owner</div></div><i class="ti ti-dots-vertical" style="color:#9AA8A2;font-size:18px"></i></div>
+            <div class="s-row"><div class="av" style="width:38px;height:38px;font-size:14px;background:#E5735F">O</div><div style="flex:1"><div style="font-size:14px;color:#1C2B27">Oma</div><div class="s-rv">Viewer · grandparent</div></div><i class="ti ti-dots-vertical" style="color:#9AA8A2;font-size:18px"></i></div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:center;gap:8px;background:#0F766E;color:#fff;border-radius:16px;padding:14px;font-size:15px;font-weight:500;margin-top:16px"><i class="ti ti-user-plus" style="font-size:18px"></i> Invite member</div>
+          <div class="s-gl">Pending invites</div>
+          <div class="s-grp">
+            <div class="s-row"><span class="s-ri" style="background:#F1F4F2;color:#9AA8A2"><i class="ti ti-mail"></i></span><div style="flex:1"><div style="font-size:14px;color:#1C2B27">opa@devries.test</div><div class="s-rv">Viewer · invited</div></div><span class="s-pill" style="background:#FBEEC9;color:#8A6D1A">pending</span></div>
+          </div>
+          <div style="background:#fff;border-radius:16px;box-shadow:0 6px 16px rgba(28,43,39,.05);padding:14px;margin-top:22px">
+            <div style="font-size:12px;color:#6B7B76;margin-bottom:10px">Tap ⋮ on a member (owner only):</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <span class="s-pill" style="background:#E8F0ED;color:#0B5C55"><i class="ti ti-switch-horizontal" style="font-size:11px"></i> Change role</span>
+              <span class="s-pill" style="background:#F7E4E1;color:#C2564B"><i class="ti ti-user-minus" style="font-size:11px"></i> Remove member</span>
+            </div>
+          </div>
+        </div>
+      </div></div>
+      <div class="cap">Members — invite button</div>
+    </div>
+
+  </div>
+
+  <h2>Multiple babies <span style="font-family:'Inter';font-size:12px;font-weight:400;color:#6B7B76">— Phase 2</span></h2>
+  <p class="note">A family can have several children. The Timeline header baby chip is a <em>child switcher</em> (chevron = tappable): pick a child and the age indicator + timeline follow it. "All children" is an optional combined feed (each card tagged with the baby). "Add a baby" (owner) routes to the same Create-baby screen as onboarding. Also reachable from Settings → Baby → Add a baby.</p>
+  <div class="row" style="display:flex;justify-content:flex-start">
+    <div style="width:300px">
+      <div class="phone"><div class="screen">
+        <div class="status"><span>9:41</span><span><i class="ti ti-wifi"></i> <i class="ti ti-battery-3"></i></span></div>
+        <div style="padding:6px 18px 0;display:flex;align-items:center;justify-content:space-between">
+          <div style="display:flex;align-items:center;gap:10px;background:#fff;border-radius:999px;padding:5px 12px 5px 6px;box-shadow:0 4px 14px rgba(28,43,39,.08)">
+            <div class="av" style="width:34px;height:34px;font-size:13px">L</div>
+            <div><div style="font-size:11px;color:#6B7B76;line-height:1">Liam</div><div class="serif" style="font-size:15px;color:#1C2B27;font-weight:600">8 months old</div></div>
+            <i class="ti ti-chevron-down" style="color:#0F766E;font-size:16px"></i>
+          </div>
+          <div class="av" style="width:40px;height:40px;background:#fff;color:#0F766E;box-shadow:0 4px 12px rgba(28,43,39,.08)"><i class="ti ti-settings" style="font-size:18px"></i></div>
+        </div>
+        <div style="position:absolute;inset:0;background:rgba(28,43,39,.28)"></div>
+        <div style="position:absolute;top:88px;left:18px;right:60px;background:#fff;border-radius:20px;box-shadow:0 16px 40px rgba(28,43,39,.2);padding:8px">
+          <div style="font-size:11px;color:#9AA8A2;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px 4px;font-weight:500">Your children</div>
+          <div style="display:flex;align-items:center;gap:11px;padding:10px;border-radius:13px;background:#EAF3EF">
+            <div class="av" style="width:38px;height:38px;font-size:14px">L</div>
+            <div style="flex:1"><div style="font-size:14px;color:#1C2B27">Liam</div><div style="font-size:13px;color:#9AA8A2">8 months old</div></div>
+            <i class="ti ti-check" style="color:#0F766E;font-size:18px"></i>
+          </div>
+          <div style="display:flex;align-items:center;gap:11px;padding:10px">
+            <div class="av" style="width:38px;height:38px;font-size:14px;background:#C9A88E">S</div>
+            <div style="flex:1"><div style="font-size:14px;color:#1C2B27">Sofie</div><div style="font-size:13px;color:#9AA8A2">22 weeks pregnant</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:11px;padding:10px;border-radius:13px;background:#F6F1EA">
+            <div class="av" style="width:38px;height:38px;font-size:14px;background:#E8F0ED;color:#0F766E"><i class="ti ti-layout-list" style="font-size:18px"></i></div>
+            <div style="flex:1"><div style="font-size:14px;color:#1C2B27">All children</div><div style="font-size:13px;color:#9AA8A2">Combined timeline</div></div>
+          </div>
+          <div style="border-top:1px solid #F1F4F2;margin:4px 6px 0"></div>
+          <div style="display:flex;align-items:center;gap:11px;padding:12px 10px;color:#0F766E">
+            <div style="width:38px;height:38px;border-radius:50%;background:#E8F0ED;display:flex;align-items:center;justify-content:center"><i class="ti ti-plus" style="font-size:18px"></i></div>
+            <div style="font-size:14px;font-weight:500">Add a baby</div>
+          </div>
+        </div>
+      </div></div>
+      <div class="cap">Child switcher</div>
+    </div>
+  </div>
+
+  <h2>Milestones, profile &amp; birth transition</h2>
+  <p class="note">The milestone tracker (8 standard, tap an unlogged one to log → prefilled Add-moment), the baby profile with birth stats, and the record-birth sheet that turns a pregnancy into a born baby (auto-creates the "Welcome to the world" moment, PRD §5).</p>
+  <div class="row">
+
+    <div>
+      <div class="phone"><div class="screen">
+        <div class="status"><span>9:41</span><span><i class="ti ti-wifi"></i> <i class="ti ti-battery-3"></i></span></div>
+        <div style="padding:8px 18px 0"><div class="serif" style="font-size:24px;color:#1C2B27;font-weight:600">Milestones</div>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
+            <div style="flex:1;height:7px;background:#E3EAE7;border-radius:999px;overflow:hidden"><div style="width:37%;height:100%;background:#0F766E"></div></div>
+            <span style="font-size:12px;color:#6B7B76">3 of 8</span>
+          </div>
+        </div>
+        <div style="padding:14px 18px 0">
+          <div class="s-grp">
+            <div class="s-row"><span class="mi done"><i class="ti ti-check" style="font-size:16px"></i></span><span style="flex:1;font-size:14px;color:#1C2B27">First smile</span><span style="font-size:12px;color:#0F766E">2 May</span></div>
+            <div class="s-row"><span class="mi done"><i class="ti ti-check" style="font-size:16px"></i></span><span style="flex:1;font-size:14px;color:#1C2B27">First laugh</span><span style="font-size:12px;color:#0F766E">18 May</span></div>
+            <div class="s-row"><span class="mi done"><i class="ti ti-check" style="font-size:16px"></i></span><span style="flex:1;font-size:14px;color:#1C2B27">First sitting</span><span style="font-size:12px;color:#0F766E">20 Jun</span></div>
+            <div class="s-row"><span class="mi todo"></span><span style="flex:1;font-size:14px;color:#1C2B27">First tooth</span><span style="font-size:12px;color:#9AA8A2">not yet</span><i class="ti ti-chevron-right" style="color:#C3D0CA"></i></div>
+            <div class="s-row"><span class="mi todo"></span><span style="flex:1;font-size:14px;color:#1C2B27">First solid food</span><span style="font-size:12px;color:#9AA8A2">not yet</span><i class="ti ti-chevron-right" style="color:#C3D0CA"></i></div>
+            <div class="s-row"><span class="mi todo"></span><span style="flex:1;font-size:14px;color:#1C2B27">First crawl</span><span style="font-size:12px;color:#9AA8A2">not yet</span><i class="ti ti-chevron-right" style="color:#C3D0CA"></i></div>
+            <div class="s-row"><span class="mi todo"></span><span style="flex:1;font-size:14px;color:#1C2B27">First steps</span><span style="font-size:12px;color:#9AA8A2">not yet</span><i class="ti ti-chevron-right" style="color:#C3D0CA"></i></div>
+            <div class="s-row"><span class="mi todo"></span><span style="flex:1;font-size:14px;color:#1C2B27">First word</span><span style="font-size:12px;color:#9AA8A2">not yet</span><i class="ti ti-chevron-right" style="color:#C3D0CA"></i></div>
+          </div>
+        </div>
+        <div class="io-tabbar">
+          <div class="io-tab"><i class="ti ti-photo"></i><span>Timeline</span></div>
+          <div class="io-tab on"><i class="ti ti-star"></i><span>Milestones</span></div>
+          <div class="io-tab"><i class="ti ti-users"></i><span>Family</span></div>
+        </div>
+      </div></div>
+      <div class="cap">Milestone tracker</div>
+    </div>
+
+    <div>
+      <div class="phone"><div class="screen white">
+        <div class="status"><span>9:41</span><span><i class="ti ti-wifi"></i> <i class="ti ti-battery-3"></i></span></div>
+        <div class="io-nav"><span class="io-back"><i class="ti ti-chevron-left" style="font-size:20px"></i> Timeline</span><span class="io-navtitle">Profile</span><span style="position:absolute;right:14px;color:#0F766E;font-size:15px;font-weight:500">Edit</span></div>
+        <div style="text-align:center;padding:20px 18px 0">
+          <div class="av" style="width:88px;height:88px;font-size:34px;margin:0 auto">L</div>
+          <div class="serif" style="font-size:26px;color:#1C2B27;font-weight:600;margin-top:12px">Liam</div>
+          <div class="serif" style="font-size:16px;color:#0F766E;font-weight:600;margin-top:2px">8 months old</div>
+        </div>
+        <div style="padding:18px 18px 0">
+          <div class="s-grp">
+            <div class="s-row"><span style="flex:1;font-size:14px;color:#6B7B76">Born</span><span style="font-size:14px;color:#1C2B27">14 March 2025</span></div>
+            <div class="s-row"><span style="flex:1;font-size:14px;color:#6B7B76">Birth weight</span><span style="font-size:14px;color:#1C2B27">3.4 kg</span></div>
+            <div class="s-row"><span style="flex:1;font-size:14px;color:#6B7B76">Birth length</span><span style="font-size:14px;color:#1C2B27">51 cm</span></div>
+            <div class="s-row"><span style="flex:1;font-size:14px;color:#6B7B76">Parents</span><span style="font-size:14px;color:#1C2B27">Anna &amp; Mark</span></div>
+          </div>
+          <div style="font-size:11px;color:#6B7B76;text-transform:uppercase;letter-spacing:.06em;margin:18px 4px 8px;font-weight:500">Show age as</div>
+          <div style="display:flex;gap:8px">
+            <span style="border-radius:999px;padding:8px 14px;font-size:13px;background:#E8F0ED;color:#6B7B76">Weeks</span>
+            <span style="border-radius:999px;padding:8px 14px;font-size:13px;background:#0F766E;color:#fff;font-weight:500">Months</span>
+            <span style="border-radius:999px;padding:8px 14px;font-size:13px;background:#E8F0ED;color:#6B7B76">Years + months</span>
+          </div>
+        </div>
+      </div></div>
+      <div class="cap">Baby profile (born)</div>
+    </div>
+
+    <div>
+      <div class="phone"><div class="screen">
+        <div style="filter:brightness(.97);opacity:.5">
+          <div class="status"><span>9:41</span><span><i class="ti ti-wifi"></i></span></div>
+          <div style="text-align:center;padding:20px"><div class="av" style="width:76px;height:76px;font-size:30px;margin:0 auto;background:#C9A88E">S</div><div class="serif" style="font-size:22px;color:#1C2B27;font-weight:600;margin-top:10px">Sofie</div><div style="font-size:14px;color:#6B7B76">22 weeks pregnant</div></div>
+        </div>
+        <div style="position:absolute;inset:0;background:rgba(28,43,39,.35)"></div>
+        <div style="position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:28px 28px 0 0;padding:16px 18px 20px">
+          <div style="width:42px;height:5px;background:#E3EAE7;border-radius:999px;margin:0 auto 16px"></div>
+          <div class="serif" style="font-size:21px;color:#1C2B27;font-weight:600">Welcome to the world 🎉</div>
+          <div style="font-size:13px;color:#6B7B76;margin-top:6px;line-height:1.5">Give the little one a name and add the birth details — we'll create a celebratory first moment automatically.</div>
+          <div style="margin-top:18px"><div style="font-size:11px;color:#6B7B76;margin-bottom:5px">Name</div><div style="background:#F1F5F4;border-radius:13px;padding:12px 14px;color:#1C2B27;font-size:14px;border:1.5px solid #0F766E">Sofie</div></div>
+          <div style="margin-top:12px"><div style="font-size:11px;color:#6B7B76;margin-bottom:5px">Birth date</div><div style="background:#F1F5F4;border-radius:13px;padding:12px 14px;color:#1C2B27;font-size:14px">Today · 16 July 2026</div></div>
+          <div style="display:flex;gap:12px;margin-top:12px">
+            <div style="flex:1"><div style="font-size:11px;color:#6B7B76;margin-bottom:5px">Weight</div><div style="background:#F1F5F4;border-radius:13px;padding:12px 14px;color:#1C2B27;font-size:14px">3.2 kg</div></div>
+            <div style="flex:1"><div style="font-size:11px;color:#6B7B76;margin-bottom:5px">Length</div><div style="background:#F1F5F4;border-radius:13px;padding:12px 14px;color:#1C2B27;font-size:14px">49 cm</div></div>
+          </div>
+          <button class="primary" style="margin-top:20px"><i class="ti ti-cake" style="font-size:16px"></i> She's arrived</button>
+        </div>
+      </div></div>
+      <div class="cap">Record birth (pregnancy → born)</div>
+    </div>
+
+  </div>
+
+  <h2>Pregnancy mode &amp; states</h2>
+  <p class="note">The pre-birth timeline (progress ring + "22 weeks pregnant" + countdown), and the states every screen must handle: first-run empty, and loading skeletons.</p>
+  <div class="row">
+
+    <div>
+      <div class="phone"><div class="screen">
+        <div class="status"><span>9:41</span><span><i class="ti ti-wifi"></i> <i class="ti ti-battery-3"></i></span></div>
+        <div style="padding:6px 18px 0;display:flex;align-items:center;justify-content:space-between">
+          <div style="display:flex;align-items:center;gap:11px">
+            <div class="ring"><div class="av" style="width:46px;height:46px;font-size:16px;background:#C9A88E">S</div></div>
+            <div><div style="font-size:12px;color:#6B7B76">Sofie</div><div class="serif" style="font-size:19px;color:#1C2B27;font-weight:600">22 weeks pregnant</div></div>
+          </div>
+          <div class="av" style="width:38px;height:38px;background:#fff;color:#0F766E;box-shadow:0 4px 12px rgba(28,43,39,.08)"><i class="ti ti-settings" style="font-size:17px"></i></div>
+        </div>
+        <div style="padding:16px 18px 0">
+          <div style="padding:16px;background:#EAF3EF;border-radius:24px;display:flex;align-items:center;gap:14px">
+            <div class="av" style="width:44px;height:44px;background:#0F766E"><i class="ti ti-baby-carriage" style="font-size:20px"></i></div>
+            <div><div class="serif" style="font-size:16px;color:#1C2B27;font-weight:600">18 weeks to go</div><div style="font-size:12px;color:#6B7B76">Due 3 December 2026</div></div>
+          </div>
+          <div class="card" style="margin-top:14px;overflow:hidden">
+            <div style="height:130px;background:#C9B8A8;position:relative"><span style="position:absolute;top:12px;right:12px;background:rgba(28,43,39,.5);color:#fff;border-radius:999px;padding:5px 11px;font-size:12px;font-weight:500">20 weeks pregnant</span></div>
+            <div style="padding:12px 14px"><div style="font-size:14px;color:#1C2B27">First proper kick today 🦶</div>
+              <div style="display:flex;align-items:center;gap:8px;margin-top:10px;color:#6B7B76;font-size:12px"><div class="av" style="width:22px;height:22px;font-size:10px">A</div> Anna · 3 Nov<span style="margin-left:auto;color:#E5735F"><i class="ti ti-heart"></i> 5</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="av" style="position:absolute;bottom:86px;right:20px;width:54px;height:54px;box-shadow:0 8px 20px rgba(15,118,110,.4)"><i class="ti ti-plus" style="font-size:24px"></i></div>
+        <div class="io-tabbar"><div class="io-tab on"><i class="ti ti-photo"></i><span>Timeline</span></div><div class="io-tab"><i class="ti ti-star"></i><span>Milestones</span></div><div class="io-tab"><i class="ti ti-users"></i><span>Family</span></div></div>
+      </div></div>
+      <div class="cap">Pregnancy-state timeline</div>
+    </div>
+
+    <div>
+      <div class="phone"><div class="screen">
+        <div class="status"><span>9:41</span><span><i class="ti ti-wifi"></i> <i class="ti ti-battery-3"></i></span></div>
+        <div style="padding:6px 18px 0;display:flex;align-items:center;justify-content:space-between">
+          <div style="display:flex;align-items:center;gap:10px"><div class="av" style="width:40px;height:40px;font-size:14px">L</div><div><div style="font-size:11px;color:#6B7B76">Liam</div><div class="serif" style="font-size:18px;color:#1C2B27;font-weight:600">Newborn · 0 weeks</div></div></div>
+          <div class="av" style="width:38px;height:38px;background:#fff;color:#0F766E;box-shadow:0 4px 12px rgba(28,43,39,.08)"><i class="ti ti-settings" style="font-size:17px"></i></div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:400px;padding:0 34px;text-align:center">
+          <div class="av" style="width:84px;height:84px;background:#D3E6E1;color:#0F766E;margin-bottom:20px"><i class="ti ti-camera" style="font-size:36px"></i></div>
+          <div class="serif" style="font-size:21px;color:#1C2B27;font-weight:600">Start Liam's story</div>
+          <div style="font-size:14px;color:#6B7B76;margin-top:10px;line-height:1.5">Your timeline is empty. Add the first photo, video, or little note — the family will see it right away.</div>
+          <button class="primary" style="margin-top:22px;width:auto;padding:14px 22px"><i class="ti ti-plus" style="font-size:16px"></i> Add your first moment</button>
+        </div>
+        <div class="io-tabbar"><div class="io-tab on"><i class="ti ti-photo"></i><span>Timeline</span></div><div class="io-tab"><i class="ti ti-star"></i><span>Milestones</span></div><div class="io-tab"><i class="ti ti-users"></i><span>Family</span></div></div>
+      </div></div>
+      <div class="cap">Empty timeline (first run)</div>
+    </div>
+
+    <div>
+      <div class="phone"><div class="screen">
+        <div class="status"><span>9:41</span><span><i class="ti ti-wifi"></i> <i class="ti ti-battery-3"></i></span></div>
+        <div style="padding:6px 18px 0;display:flex;align-items:center;gap:10px">
+          <div class="sk" style="width:40px;height:40px;border-radius:50%"></div>
+          <div><div class="sk" style="width:50px;height:10px;margin-bottom:6px"></div><div class="sk" style="width:120px;height:16px"></div></div>
+        </div>
+        <div style="padding:16px 18px 0">
+          <div class="sk" style="height:46px;border-radius:999px;margin-bottom:16px"></div>
+          <div class="card" style="overflow:hidden;box-shadow:none">
+            <div class="sk" style="height:140px;border-radius:0"></div>
+            <div style="padding:14px"><div class="sk" style="width:90%;height:13px;margin-bottom:8px"></div><div class="sk" style="width:60%;height:13px;margin-bottom:14px"></div>
+              <div style="display:flex;align-items:center;gap:8px"><div class="sk" style="width:22px;height:22px;border-radius:50%"></div><div class="sk" style="width:80px;height:11px"></div></div>
+            </div>
+          </div>
+          <div class="card" style="overflow:hidden;box-shadow:none;margin-top:14px">
+            <div class="sk" style="height:100px;border-radius:0"></div>
+            <div style="padding:14px"><div class="sk" style="width:80%;height:13px"></div></div>
+          </div>
+        </div>
+        <div class="io-tabbar"><div class="io-tab on"><i class="ti ti-photo"></i><span>Timeline</span></div><div class="io-tab"><i class="ti ti-star"></i><span>Milestones</span></div><div class="io-tab"><i class="ti ti-users"></i><span>Family</span></div></div>
+      </div></div>
+      <div class="cap">Loading skeleton</div>
+    </div>
+
+  </div>
+
+  <h2>Pregnancy: no name yet, gender optional</h2>
+  <p class="note">Expecting parents often have no name (just a bump nickname) and may not know the gender. Name + nickname + gender are all optional in pregnancy; the header reads the week count, the avatar falls back to a sprout, and <strong>name becomes required at birth</strong> (record-birth). Gender is optional and neutral — "Surprise" is a first-class choice; no gendered colours anywhere.</p>
+  <div class="row">
+
+    <div>
+      <div class="phone"><div class="screen white">
+        <div class="status"><span>9:41</span><span><i class="ti ti-wifi"></i> <i class="ti ti-battery-3"></i></span></div>
+        <div style="padding:14px 20px 0">
+          <div class="serif" style="font-size:23px;color:#1C2B27;font-weight:600">Tell us about your baby</div>
+          <div style="background:#F1F5F4;border-radius:14px;padding:4px;display:flex;margin-top:16px">
+            <div style="flex:1;text-align:center;padding:9px;background:#0F766E;color:#fff;border-radius:11px;font-size:13px;font-weight:500">Expecting</div>
+            <div style="flex:1;text-align:center;padding:9px;color:#6B7B76;font-size:13px">Born</div>
+          </div>
+          <div style="margin-top:14px"><div style="font-size:11px;color:#6B7B76;margin-bottom:5px">Due date</div><div style="background:#F1F5F4;border-radius:13px;padding:12px 14px;color:#1C2B27;font-size:14px">3 December 2026</div></div>
+          <div style="margin-top:12px"><div style="font-size:11px;color:#6B7B76;margin-bottom:5px">Name or nickname <span style="color:#9AA8A2">· optional</span></div><div style="background:#F1F5F4;border-radius:13px;padding:12px 14px;font-size:14px;color:#9AA8A2">No name yet? Give the bump a nickname</div>
+            <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+              <span style="border-radius:999px;padding:6px 12px;font-size:12px;font-weight:500;background:#E8F0ED;color:#6B7B76">Peanut</span>
+              <span style="border-radius:999px;padding:6px 12px;font-size:12px;font-weight:500;background:#E8F0ED;color:#6B7B76">Bean</span>
+              <span style="border-radius:999px;padding:6px 12px;font-size:12px;font-weight:500;background:#E8F0ED;color:#6B7B76">Little one</span>
+            </div>
+          </div>
+          <div style="margin-top:14px"><div style="font-size:11px;color:#6B7B76;margin-bottom:5px">Gender <span style="color:#9AA8A2">· optional</span></div>
+            <div style="display:flex;gap:8px;margin-top:2px">
+              <span style="border-radius:999px;padding:7px 13px;font-size:12px;font-weight:500;background:#E8F0ED;color:#6B7B76">Girl</span>
+              <span style="border-radius:999px;padding:7px 13px;font-size:12px;font-weight:500;background:#E8F0ED;color:#6B7B76">Boy</span>
+              <span style="border-radius:999px;padding:7px 13px;font-size:12px;font-weight:500;background:#D3E6E1;color:#0B5C55"><i class="ti ti-gift" style="font-size:12px"></i> Surprise</span>
+            </div>
+          </div>
+        </div>
+        <div style="position:absolute;bottom:18px;left:20px;right:20px"><button class="primary">Create</button></div>
+      </div></div>
+      <div class="cap">Create baby · expecting (name + gender optional)</div>
+    </div>
+
+    <div>
+      <div class="phone"><div class="screen">
+        <div class="status"><span>9:41</span><span><i class="ti ti-wifi"></i> <i class="ti ti-battery-3"></i></span></div>
+        <div style="padding:6px 18px 0;display:flex;align-items:center;justify-content:space-between">
+          <div style="display:flex;align-items:center;gap:11px">
+            <div class="ring"><div class="av" style="width:42px;height:42px;background:#EAF3EF;color:#0F766E"><i class="ti ti-plant-2" style="font-size:20px"></i></div></div>
+            <div><div style="font-size:12px;color:#6B7B76">Baby on the way</div><div class="serif" style="font-size:19px;color:#1C2B27;font-weight:600">22 weeks pregnant</div></div>
+          </div>
+          <div class="av" style="width:38px;height:38px;background:#fff;color:#0F766E;box-shadow:0 4px 12px rgba(28,43,39,.08)"><i class="ti ti-settings" style="font-size:17px"></i></div>
+        </div>
+        <div style="padding:16px 18px 0">
+          <div style="padding:16px;background:#EAF3EF;border-radius:24px;display:flex;align-items:center;gap:14px">
+            <div class="av" style="width:44px;height:44px;background:#0F766E;color:#fff"><i class="ti ti-baby-carriage" style="font-size:20px"></i></div>
+            <div><div class="serif" style="font-size:16px;color:#1C2B27;font-weight:600">18 weeks to go</div><div style="font-size:12px;color:#6B7B76">Due 3 December 2026</div></div>
+          </div>
+          <div style="background:#fff;border-radius:20px;box-shadow:0 6px 16px rgba(28,43,39,.05);padding:14px;margin-top:14px;font-size:13px;color:#6B7B76;line-height:1.5"><i class="ti ti-info-circle" style="color:#0F766E"></i> No name yet — that's fine. You'll add it when the baby arrives.</div>
+        </div>
+        <div class="av" style="position:absolute;bottom:86px;right:20px;width:54px;height:54px;box-shadow:0 8px 20px rgba(15,118,110,.4)"><i class="ti ti-plus" style="font-size:24px"></i></div>
+        <div class="io-tabbar"><div class="io-tab on"><i class="ti ti-photo"></i><span>Timeline</span></div><div class="io-tab"><i class="ti ti-star"></i><span>Milestones</span></div><div class="io-tab"><i class="ti ti-users"></i><span>Family</span></div></div>
+      </div></div>
+      <div class="cap">Nameless pregnancy · sprout avatar</div>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>
