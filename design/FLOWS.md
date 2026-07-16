@@ -86,15 +86,20 @@ Roles: **Owner** sees FAB + can delete own moments. **Viewer** — no FAB; can l
 
 The signature moment. Owner-only. Uses the custom `record-birth` endpoint (atomic: sets fields **and** creates the welcome moment).
 
+**Two entry points to the record-birth sheet** (owner, pregnancy only):
+1. **Baby profile → "Baby has arrived" button** (primary, always available) — reach the profile by tapping the header baby chip on the pregnancy timeline.
+2. **Pregnancy timeline → "Baby has arrived? · Record the birth" shortcut** (an accentSoft row below the header; surfaced as the due date nears so it isn't nagging at 22 weeks).
+
 ```
-Baby profile (Expecting, showing pregnancy ring)
-   │ "Baby has arrived" button
-   ▼
-Record birth sheet: birthDate + weight + length
-   │ Confirm   → POST /babies/:id/record-birth
-   ▼
-Timeline: auto "Welcome to the world, {name}." card at top (celebratory)
-Header AgeIndicator flips pregnancy ring → age ("0 weeks old")
+Pregnancy timeline ──tap baby chip──▶ Baby profile (Expecting, pregnancy ring)
+        │  "Baby has arrived?" shortcut          │  "Baby has arrived" button
+        └──────────────┬─────────────────────────┘
+                       ▼
+   Record birth sheet: name (required if unnamed) + birthDate + weight + length
+                       │ Confirm  → POST /babies/:id/record-birth
+                       ▼
+   Timeline: auto "Welcome to the world, {name}." card at top (celebratory)
+   Header AgeIndicator flips pregnancy ring → age ("0 weeks old")
 ```
 
 Never a plain profile edit — always the endpoint, so the welcome card is created server-side in the caller's locale.

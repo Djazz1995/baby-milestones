@@ -62,7 +62,7 @@ Only what the UI needs — no Payload doc internals, no relationship ids, no `_s
 | `Baby` | id, familyId, **name?** (optional in pregnancy — may be a bump nickname or empty; **required at birth**), **gender?** (girl \| boy \| surprise — optional, neutral, no gendered UI), dueDate?, birthDate?, birthWeight?, birthLength?, parents[], displayFormat, photo? | §4, §5 |
 | `AgeDisplay` | phase (pregnancy \| born), value, unit, label (e.g. "8 months old") | §5 |
 | `DisplayFormat` | enum: weeks \| months \| yearsMonths | §5 |
-| `Moment` | id, babyId, type, **media[] (ordered, images+videos mixed)**, voiceNote?, caption?, body?, capturedAt, authorId, milestoneId?, reactionCount, commentCount, tags[]?, location? | §4, §6.2 |
+| `Moment` | id, babyId, type, **media[] (ordered, images+videos mixed)**, voiceNote?, caption?, body?, capturedAt, authorId, milestoneId?, **weightGrams?**, **lengthCm?** (optional measurements captured with the moment → feed the growth chart), reactionCount, commentCount, tags[]?, location? | §4, §6.2 |
 | `MomentType` | enum: media \| voice \| text — **derived from content, not user-chosen**: media[] non-empty → `media`; else voiceNote → `voice`; else `text`. (`media` = 1+ images/videos, mixed; a single photo = `media` with one item.) | §4 |
 | `Media` | id, kind (image\|video\|audio), url, thumbUrl?, width?, height?, durationSec? | §4 (ImageKit) |
 | `Milestone` | id, key, label, loggedMomentId?, loggedAt? | §4, §6.2 |
@@ -72,7 +72,7 @@ Only what the UI needs — no Payload doc internals, no relationship ids, no `_s
 | `Comment` | id, momentId, authorId, body, createdAt | §4 |
 | `Recap` | id, babyId, period (week\|month), rangeStart, rangeEnd, narrative, coverMomentId? | §8 (Phase 2) |
 | `SearchResult` | momentId, snippet, score | §8 (Phase 2) |
-| `GrowthPoint` | id, babyId, measuredAt, heightCm?, weightKg? | §6.6 (Phase 3) |
+| `GrowthPoint` | momentId, measuredAt, weightGrams?, lengthCm? — **derived from moments** that carry a measurement (+ the birth stats as the first point); no separate stored entity | §6.6 (Phase 3) |
 | `User` | id, email, displayName, locale, defaults (displayFormat, darkMode) | §7 |
 | `NotificationPayload` | type, targetId, deepLink | §6.4 |
 | `Paginated<T>` | items[], nextCursor? | timeline paging |
@@ -97,7 +97,7 @@ Each service calls `lib` (the Payload API client, ImageKit, AI), applies the cur
 | `CommentService` | comments | `list(momentId)→Comment[]`, `add(momentId, body)→Comment`, `delete(id)` |
 | `RecapService` | read AI recaps | `list(babyId)→Recap[]`, `get(id)→Recap` (reads batch-generated docs; **no live AI call**) |
 | `SearchService` | memory search | `query(babyId, text)→SearchResult[]` (Phase 2) |
-| `GrowthService` | growth chart data | `points(babyId)→GrowthPoint[]`, `add(point)` (Phase 3) |
+| `GrowthService` | growth chart data | `points(babyId)→GrowthPoint[]` — reads moments with `weightGrams`/`lengthCm` (+ birth stats), maps to points; measurements are written via `MomentService` on the moment, not a separate `add` (Phase 3) |
 | `ShareService` | export cards / social | `buildCard(momentOrRecap)→Media`, `export(target)` (Phase 3) |
 | `UserService` | profile, defaults, locale | `getUser()→User`, `updateDefaults()` |
 | `SessionService` | auth (Payload) | `ensureSession()`, `signIn`, `signOut` |

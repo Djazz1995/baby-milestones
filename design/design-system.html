@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Baby Milestones · Design System</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.24.0/dist/tabler-icons.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F1F5F4;--surface:#FFFFFF;--surfaceMuted:#E8F0ED;--border:#E3EAE7;
+    --textPrimary:#1C2B27;--textSecondary:#6B7B76;
+    --accent:#0F766E;--accentDark:#0B5C55;--accentSoft:#D3E6E1;--danger:#C2564B;--like:#E5735F;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--textPrimary);font-family:'Inter',sans-serif;font-size:15px;line-height:1.5;padding:0 0 80px}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 24px}
+  header.top{padding:44px 0 20px}
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:34px;margin:0}
+  .lede{color:var(--textSecondary);font-size:16px;margin:8px 0 0;max-width:620px}
+  .toc{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0 0}
+  .toc a{font-size:13px;color:var(--accentDark);background:var(--accentSoft);border-radius:999px;padding:5px 12px;text-decoration:none}
+  h2.sec{font-family:'Fraunces',serif;font-weight:600;font-size:22px;margin:48px 0 4px;padding-top:14px;border-top:1px solid var(--border)}
+  .sub{color:var(--textSecondary);font-size:14px;margin:0 0 20px}
+  h3{font-size:14px;font-weight:500;color:var(--textSecondary);text-transform:uppercase;letter-spacing:.06em;margin:26px 0 12px}
+  .grid{display:grid;gap:14px}
+  .tile{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px}
+  .tile .lbl{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--textSecondary);margin-top:14px}
+  .tile .note{font-size:13px;color:var(--textSecondary);margin-top:4px}
+  .row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+  /* swatches */
+  .swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+  .sw{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+  .sw .band{display:block;width:100%;height:64px;border-bottom:1px solid rgba(28,43,39,.06)}
+  .sw .meta{padding:10px 12px}
+  .sw .name{font-size:13px;font-weight:500}
+  .sw .hex{font-family:ui-monospace,monospace;font-size:12px;color:var(--textSecondary)}
+  .sw .role{font-size:12px;color:var(--textSecondary);margin-top:2px}
+  /* type */
+  .type-row{display:flex;align-items:baseline;gap:16px;padding:12px 0;border-bottom:1px solid var(--border)}
+  .type-row .tk{font-family:ui-monospace,monospace;font-size:12px;color:var(--textSecondary);width:120px;flex-shrink:0}
+  .serif{font-family:'Fraunces',serif}
+  /* tokens */
+  .box{background:var(--accent);border-radius:8px}
+  /* component helpers */
+  .btn{border:none;border-radius:18px;padding:13px 20px;font-family:'Inter';font-size:15px;font-weight:500;cursor:pointer}
+  .btn.primary{background:var(--accent);color:#fff}
+  .btn.secondary{background:var(--accentSoft);color:var(--accentDark)}
+  .btn.text{background:none;color:var(--accent);padding:13px 6px}
+  .btn.danger{background:none;color:var(--danger)}
+  .btn.disabled{background:#E7ECEA;color:#B4C0BA}
+  .chip{border-radius:999px;padding:7px 14px;font-size:13px;font-weight:500;display:inline-flex;align-items:center;gap:5px}
+  .chip.off{background:var(--surfaceMuted);color:var(--textSecondary)}
+  .chip.on{background:var(--accent);color:#fff}
+  .chip.soft{background:var(--accentSoft);color:var(--accentDark)}
+  .av{border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0}
+  .card{background:var(--surface);border-radius:24px;box-shadow:0 8px 24px rgba(28,43,39,.06);overflow:hidden;width:260px}
+  .glasspill{background:rgba(28,43,39,.5);color:#fff;border-radius:999px;padding:5px 11px;font-size:12px;font-weight:500}
+  .agechip{background:var(--accentSoft);color:var(--accentDark);border-radius:999px;padding:3px 10px;font-size:11px;font-weight:500;display:inline-block}
+  .growthchip{background:var(--surfaceMuted);color:var(--accentDark);border:1px solid var(--accentSoft);border-radius:999px;padding:3px 10px;font-size:11px;font-weight:500;display:inline-flex;align-items:center;gap:4px}
+  .field{background:var(--bg);border-radius:13px;padding:12px 14px;color:var(--textPrimary);font-size:14px}
+  .tog{width:44px;height:26px;border-radius:999px;background:var(--accent);position:relative;flex-shrink:0}
+  .tog.off{background:#D8E0DC}
+  .tog::after{content:"";position:absolute;top:3px;right:3px;width:20px;height:20px;border-radius:50%;background:#fff}
+  .tog.off::after{right:auto;left:3px}
+  .ring{width:52px;height:52px;border-radius:50%;background:conic-gradient(var(--accent) 55%,#DCE4E0 0);display:flex;align-items:center;justify-content:center}
+  .mi{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .mi.done{background:var(--accent);color:#fff}
+  .mi.todo{border:2px solid #D8E0DC}
+  .lrow{display:flex;align-items:center;gap:12px;padding:13px 14px;border-top:1px solid #F1F4F2}
+  .lrow:first-child{border-top:none}
+  .ri{width:30px;height:30px;border-radius:9px;background:var(--surfaceMuted);color:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .wave{display:flex;align-items:center;gap:3px;height:26px}
+  .wave i{display:block;width:3px;border-radius:2px;background:var(--accent)}
+  .dots{display:flex;gap:5px}
+  .dots i{width:6px;height:6px;border-radius:50%;background:#C3D0CA}
+  .dots i.on{background:var(--accent);width:16px;border-radius:999px}
+  .sk{background:#E7ECEA;border-radius:8px}
+  .fab{width:54px;height:54px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(15,118,110,.4)}
+  .tabbar{background:rgba(247,250,249,.9);border:1px solid rgba(255,255,255,.7);box-shadow:0 8px 30px rgba(28,43,39,.12);border-radius:26px;height:60px;display:flex;align-items:center;justify-content:space-around;width:280px;backdrop-filter:blur(6px)}
+  .tab{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;color:#94A29C}
+  .tab.on{color:var(--accent)}
+  .tab i{font-size:21px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>Baby Milestones · Design System</h1>
+    <p class="lede">Calm, rounded, teal-green. Crisp white cards on a soft canvas, one calm accent, big radii, soft shadows, iOS-native chrome. Companion to design/DESIGN_SYSTEM.md. Fonts: Fraunces (serif, name/age/titles only) + Inter.</p>
+    <nav class="toc">
+      <a href="#color">Color</a><a href="#type">Typography</a><a href="#space">Spacing &amp; radius</a><a href="#elev">Elevation</a>
+      <a href="#buttons">Buttons</a><a href="#chips">Chips &amp; toggles</a><a href="#inputs">Inputs</a><a href="#avatars">Avatars</a>
+      <a href="#badges">Badges &amp; pills</a><a href="#age">Age &amp; progress</a><a href="#moment">Moment card</a><a href="#voice">Voice</a><a href="#growth">Growth</a>
+      <a href="#lists">Lists &amp; rows</a><a href="#feedback">Empty / loading</a><a href="#chrome">Nav chrome</a>
+    </nav>
+  </header>
+
+  <!-- ============ COLOR ============ -->
+  <h2 class="sec" id="color">Color</h2>
+  <p class="sub">Every value is a token. No hardcoded hex in components; recolor = one swap. Maps to the gluestack-ui v3 scale. Dark mode is Phase 2 (light-first).</p>
+  <div class="swatches">
+    <div class="sw"><div class="band" style="background:#F1F5F4"></div><div class="meta"><div class="name">background</div><div class="hex">#F1F5F4</div><div class="role">app canvas</div></div></div>
+    <div class="sw"><div class="band" style="background:#FFFFFF;border-bottom:1px solid var(--border)"></div><div class="meta"><div class="name">surface</div><div class="hex">#FFFFFF</div><div class="role">cards, sheets</div></div></div>
+    <div class="sw"><div class="band" style="background:#E8F0ED"></div><div class="meta"><div class="name">surfaceMuted</div><div class="hex">#E8F0ED</div><div class="role">inset, secondary</div></div></div>
+    <div class="sw"><div class="band" style="background:#E3EAE7"></div><div class="meta"><div class="name">border</div><div class="hex">#E3EAE7</div><div class="role">hairlines</div></div></div>
+    <div class="sw"><div class="band" style="background:#1C2B27"></div><div class="meta"><div class="name">textPrimary</div><div class="hex">#1C2B27</div><div class="role">headings, body</div></div></div>
+    <div class="sw"><div class="band" style="background:#6B7B76"></div><div class="meta"><div class="name">textSecondary</div><div class="hex">#6B7B76</div><div class="role">meta, captions</div></div></div>
+    <div class="sw"><div class="band" style="background:#0F766E"></div><div class="meta"><div class="name">accent</div><div class="hex">#0F766E</div><div class="role">primary, FAB, active</div></div></div>
+    <div class="sw"><div class="band" style="background:#0B5C55"></div><div class="meta"><div class="name">accentDark</div><div class="hex">#0B5C55</div><div class="role">pressed, text-on-soft</div></div></div>
+    <div class="sw"><div class="band" style="background:#D3E6E1"></div><div class="meta"><div class="name">accentSoft</div><div class="hex">#D3E6E1</div><div class="role">secondary btn, chips</div></div></div>
+    <div class="sw"><div class="band" style="background:#0F766E"></div><div class="meta"><div class="name">success</div><div class="hex">#0F766E</div><div class="role">confirmations</div></div></div>
+    <div class="sw"><div class="band" style="background:#C2564B"></div><div class="meta"><div class="name">danger</div><div class="hex">#C2564B</div><div class="role">delete, revoke</div></div></div>
+    <div class="sw"><div class="band" style="background:#E5735F"></div><div class="meta"><div class="name">like</div><div class="hex">#E5735F</div><div class="role">filled heart</div></div></div>
+  </div>
+  <p class="note" style="color:var(--textSecondary);font-size:13px;margin-top:12px">Photo/media placeholder tints (soft greens/tans) are imagery, not brand tokens. Nothing pure-black or pure-white.</p>
+
+  <!-- ============ TYPOGRAPHY ============ -->
+  <h2 class="sec" id="type">Typography</h2>
+  <p class="sub">Warm serif (Fraunces) for the emotional anchors: baby name, age indicator, titles. Inter for everything else. Body never below 17 (grandparent-legible).</p>
+  <div class="tile">
+    <div class="type-row"><span class="tk">display · serif 32/600</span><span class="serif" style="font-size:32px;font-weight:600">8 months old</span></div>
+    <div class="type-row"><span class="tk">title · serif 24/600</span><span class="serif" style="font-size:24px;font-weight:600">Tell us about your baby</span></div>
+    <div class="type-row"><span class="tk">heading · sans 19/600</span><span style="font-size:19px;font-weight:600">Members &amp; roles</span></div>
+    <div class="type-row"><span class="tk">body · sans 17/400</span><span style="font-size:17px">That grin at breakfast melted us.</span></div>
+    <div class="type-row"><span class="tk">label · sans 15/500</span><span style="font-size:15px;font-weight:500">Add a voice note</span></div>
+    <div class="type-row" style="border-bottom:none"><span class="tk">meta · sans 13/400</span><span style="font-size:13px;color:var(--textSecondary)">Anna · 14 Mar</span></div>
+  </div>
+
+  <!-- ============ SPACING & RADIUS ============ -->
+  <h2 class="sec" id="space">Spacing &amp; radius</h2>
+  <p class="sub">Spacing scale (px): 4 · 8 · 12 · 16 · 20 · 24 · 32 · 48. Screen gutter 20, card padding 16–20. Rounding is a defining trait. When unsure, round more.</p>
+  <div class="grid" style="grid-template-columns:1fr 1fr">
+    <div class="tile">
+      <div class="row" style="align-items:flex-end;gap:8px">
+        <div class="box" style="width:4px;height:4px"></div><div class="box" style="width:8px;height:8px"></div><div class="box" style="width:12px;height:12px"></div><div class="box" style="width:16px;height:16px"></div><div class="box" style="width:20px;height:20px"></div><div class="box" style="width:24px;height:24px"></div><div class="box" style="width:32px;height:32px"></div><div class="box" style="width:48px;height:48px"></div>
+      </div>
+      <div class="lbl">spacing · 4 8 12 16 20 24 32 48</div>
+    </div>
+    <div class="tile">
+      <div class="row">
+        <div style="width:52px;height:52px;background:var(--accentSoft);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--accentDark)">12</div>
+        <div style="width:52px;height:52px;background:var(--accentSoft);border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--accentDark)">18</div>
+        <div style="width:52px;height:52px;background:var(--accentSoft);border-radius:24px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--accentDark)">24</div>
+        <div style="width:52px;height:52px;background:var(--accentSoft);border-radius:28px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--accentDark)">28</div>
+        <div style="width:52px;height:52px;background:var(--accentSoft);border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--accentDark)">full</div>
+      </div>
+      <div class="lbl">radius · sm12 (chips/fields) · md18 (buttons) · lg24 (cards) · xl28 (sheets/media) · full</div>
+    </div>
+  </div>
+
+  <!-- ============ ELEVATION ============ -->
+  <h2 class="sec" id="elev">Elevation</h2>
+  <p class="sub">Soft, not flat. Gentle diffuse shadows (low opacity, large blur). Stronger soft shadow on FAB + sheets. Never hard/dark drop shadows.</p>
+  <div class="row" style="gap:20px">
+    <div style="width:120px;height:76px;background:#fff;border:1px solid var(--border);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--textSecondary)">hairline</div>
+    <div style="width:120px;height:76px;background:#fff;border-radius:16px;box-shadow:0 8px 24px rgba(28,43,39,.06);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--textSecondary)">card</div>
+    <div style="width:120px;height:76px;background:#fff;border-radius:16px;box-shadow:0 16px 40px rgba(28,43,39,.2);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--textSecondary)">sheet / popover</div>
+    <div class="fab"><i class="ti ti-plus" style="font-size:24px"></i></div>
+  </div>
+
+  <!-- ============ BUTTONS ============ -->
+  <h2 class="sec" id="buttons">Buttons</h2>
+  <p class="sub">Radius md (18), min height 52 (thumb-friendly). One primary per screen. <code>Button</code></p>
+  <div class="tile"><div class="row">
+    <button class="btn primary">Post</button>
+    <button class="btn secondary">View details</button>
+    <button class="btn text">I have an account</button>
+    <button class="btn danger">Sign out</button>
+    <button class="btn disabled">Post</button>
+  </div>
+  <div class="lbl">primary · secondary (accentSoft) · text · danger · disabled</div></div>
+
+  <!-- ============ CHIPS & TOGGLES ============ -->
+  <h2 class="sec" id="chips">Chips, segmented &amp; toggles</h2>
+  <p class="sub"><code>Chip</code> (pill, selected = accentSoft/accent), <code>Segmented</code> control, <code>Toggle</code> switch.</p>
+  <div class="grid" style="grid-template-columns:1fr 1fr 1fr">
+    <div class="tile"><div class="row"><span class="chip on">Months</span><span class="chip off">Weeks</span><span class="chip soft"><i class="ti ti-gift"></i> Surprise</span></div><div class="lbl">chip · selected / default / soft</div></div>
+    <div class="tile"><div style="background:var(--bg);border-radius:14px;padding:4px;display:flex;width:200px"><div style="flex:1;text-align:center;padding:9px;color:var(--textSecondary);font-size:13px">Expecting</div><div style="flex:1;text-align:center;padding:9px;background:var(--accent);color:#fff;border-radius:11px;font-size:13px;font-weight:500">Born</div></div><div class="lbl">segmented · Expecting|Born</div></div>
+    <div class="tile"><div class="row"><span class="tog"></span><span class="tog off"></span></div><div class="lbl">toggle · on / off</div></div>
+  </div>
+
+  <!-- ============ INPUTS ============ -->
+  <h2 class="sec" id="inputs">Inputs</h2>
+  <p class="sub"><code>TextField</code>, <code>SearchField</code> (full pill), form field with label.</p>
+  <div class="grid" style="grid-template-columns:1fr 1fr">
+    <div class="tile">
+      <div style="font-size:11px;color:var(--textSecondary);margin-bottom:5px">Name or nickname · optional</div>
+      <div class="field" style="color:#9AA8A2">No name yet? Give the bump a nickname</div>
+      <div class="lbl">TextField + label + placeholder</div>
+    </div>
+    <div class="tile">
+      <div style="display:flex;align-items:center;gap:8px;background:#fff;border-radius:999px;padding:11px 16px;box-shadow:0 4px 14px rgba(28,43,39,.05);color:var(--textSecondary);font-size:14px"><i class="ti ti-search"></i> Search moments <i class="ti ti-adjustments-horizontal" style="margin-left:auto;color:var(--accent)"></i></div>
+      <div class="lbl">SearchField · full pill</div>
+    </div>
+  </div>
+
+  <!-- ============ AVATARS ============ -->
+  <h2 class="sec" id="avatars">Avatars</h2>
+  <p class="sub"><code>Avatar</code> · initials on accentSoft; unnamed pregnancy → sprout glyph; never gendered. Sizes 22 / 34 / 44 / 88.</p>
+  <div class="tile"><div class="row" style="gap:16px">
+    <div class="av" style="width:88px;height:88px;font-size:34px">L</div>
+    <div class="av" style="width:44px;height:44px;font-size:16px">A</div>
+    <div class="av" style="width:44px;height:44px;font-size:16px;background:#E5735F">O</div>
+    <div class="av" style="width:44px;height:44px;background:var(--accentSoft);color:var(--accent)"><i class="ti ti-plant-2" style="font-size:20px"></i></div>
+    <div class="ring"><div class="av" style="width:42px;height:42px;background:var(--accentSoft);color:var(--accent)"><i class="ti ti-plant-2" style="font-size:18px"></i></div></div>
+    <div class="av" style="width:22px;height:22px;font-size:10px">M</div>
+  </div><div class="lbl">initials · initials (coral) · sprout · sprout + pregnancy ring · small</div></div>
+
+  <!-- ============ BADGES & PILLS ============ -->
+  <h2 class="sec" id="badges">Badges &amp; pills</h2>
+  <p class="sub">Overlays + status. Milestone badge (top-left), count chip &amp; age glass pill &amp; voice mic (media), age chip (above caption), pending / soon status.</p>
+  <div class="tile"><div class="row" style="gap:14px">
+    <span class="chip" style="background:#fff;color:var(--accentDark);box-shadow:0 2px 8px rgba(28,43,39,.08)"><i class="ti ti-star"></i> First smile</span>
+    <span class="glasspill"><i class="ti ti-photo" style="font-size:11px"></i> 2/5</span>
+    <span class="glasspill"><i class="ti ti-microphone" style="font-size:11px"></i> 0:12</span>
+    <span class="agechip">3 months old</span>
+    <span class="chip" style="background:#FBEEC9;color:#8A6D1A;font-size:11px;padding:3px 10px">pending</span>
+    <span class="chip" style="background:#F1F4F2;color:#9AA8A2;font-size:11px;padding:3px 10px">soon</span>
+  </div><div class="lbl">milestone badge · count chip · voice mic · age chip · pending · soon</div></div>
+
+  <!-- ============ AGE & PROGRESS ============ -->
+  <h2 class="sec" id="age">Age indicator &amp; progress</h2>
+  <p class="sub"><code>AgeIndicator</code> (born + pregnancy ring), <code>ProgressBar</code> (milestones), <code>ProgressRing</code> (pregnancy). Age is derived, never stored.</p>
+  <div class="grid" style="grid-template-columns:1fr 1fr">
+    <div class="tile">
+      <div class="row" style="gap:16px">
+        <div class="row" style="gap:11px"><div class="av" style="width:44px;height:44px;font-size:16px">L</div><div><div style="font-size:12px;color:var(--textSecondary)">Liam</div><div class="serif" style="font-size:20px;font-weight:600">8 months old</div></div></div>
+      </div>
+      <div class="row" style="gap:11px;margin-top:14px"><div class="ring"><div class="av" style="width:42px;height:42px;background:#C9A88E">S</div></div><div><div style="font-size:12px;color:var(--textSecondary)">Baby on the way</div><div class="serif" style="font-size:20px;font-weight:600">22 weeks pregnant</div><div style="font-size:12px;color:var(--textSecondary);margin-top:1px">Due 3 December 2026</div></div></div>
+      <div class="lbl">AgeIndicator · born / pregnancy (ring)</div>
+    </div>
+    <div class="tile">
+      <div class="row" style="gap:10px"><div style="flex:1;height:7px;background:var(--border);border-radius:999px;overflow:hidden"><div style="width:37%;height:100%;background:var(--accent)"></div></div><span style="font-size:12px;color:var(--textSecondary)">3 of 8</span></div>
+      <div style="margin-top:16px"><div class="ring" style="width:60px;height:60px"><div class="av" style="width:48px;height:48px;background:#C9A88E;font-size:16px">S</div></div></div>
+      <div class="lbl">ProgressBar (milestones) · ProgressRing (pregnancy 22/40)</div>
+    </div>
+  </div>
+
+  <!-- ============ MOMENT CARD ============ -->
+  <h2 class="sec" id="moment">Moment card &amp; carousel</h2>
+  <p class="sub"><code>MomentCard</code> (media + text variants), <code>MediaCarousel</code> (ordered media[], dots + n/total). Milestone top-left · count top-right · mic + dots bottom · age chip above caption.</p>
+  <div class="row" style="gap:16px;align-items:flex-start">
+    <div>
+      <div class="card">
+        <div style="height:130px;background:#9FE1CB;position:relative">
+          <span class="chip" style="position:absolute;top:12px;left:12px;background:#fff;color:var(--accentDark);box-shadow:0 2px 8px rgba(28,43,39,.08);font-size:12px;padding:5px 11px"><i class="ti ti-star"></i> First smile</span>
+          <span class="glasspill" style="position:absolute;top:12px;right:12px"><i class="ti ti-photo" style="font-size:11px"></i> 2/5</span>
+          <span class="glasspill" style="position:absolute;bottom:12px;left:12px;font-size:11px"><i class="ti ti-microphone" style="font-size:11px"></i> 0:12</span>
+          <div class="dots" style="position:absolute;bottom:12px;left:0;right:0;justify-content:center"><i></i><i class="on"></i><i></i><i></i><i></i></div>
+        </div>
+        <div style="padding:12px 14px"><span class="agechip" style="margin-bottom:8px">3 months old</span>
+          <div style="font-size:14px">That grin at breakfast melted us.</div>
+          <div class="row" style="gap:8px;margin-top:10px;color:var(--textSecondary);font-size:12px"><div class="av" style="width:22px;height:22px;font-size:10px">A</div> Anna · 2h <span style="margin-left:auto;color:var(--like)"><i class="ti ti-heart"></i> 4</span><span><i class="ti ti-message-circle"></i> 2</span></div>
+        </div>
+      </div>
+      <div class="lbl" style="margin-left:2px">MomentCard · media (carousel)</div>
+    </div>
+    <div>
+      <div class="card" style="background:var(--surfaceMuted);box-shadow:none">
+        <div style="padding:14px"><span class="agechip" style="margin-bottom:8px">8 weeks old</span>
+          <div style="font-size:14px">Slept through the night for the first time. We did too.</div>
+          <div class="row" style="gap:8px;margin-top:10px;color:var(--textSecondary);font-size:12px"><div class="av" style="width:22px;height:22px;font-size:10px;background:#7FA99B">M</div> Mark · yesterday <span style="margin-left:auto;color:var(--like)"><i class="ti ti-heart"></i> 6</span></div>
+        </div>
+      </div>
+      <div class="lbl" style="margin-left:2px">MomentCard · text (no media)</div>
+    </div>
+  </div>
+
+  <!-- ============ VOICE ============ -->
+  <h2 class="sec" id="voice">Voice note</h2>
+  <p class="sub"><code>VoiceNote</code> · recorder row (Add-moment), player (Moment detail), mic chip (card). A spoken caption paired with media, or standalone.</p>
+  <div class="grid" style="grid-template-columns:1fr 1fr">
+    <div class="tile"><div style="display:flex;align-items:center;gap:8px;background:var(--surfaceMuted);border:1px solid var(--accentSoft);border-radius:16px;padding:12px 14px;color:var(--accentDark);font-size:14px;font-weight:500"><i class="ti ti-microphone"></i> Add a voice note <span style="margin-left:auto;font-weight:400;color:#9AA8A2;font-size:12px">optional</span></div><div class="lbl">recorder row (idle)</div></div>
+    <div class="tile"><div style="display:flex;align-items:center;gap:12px;background:var(--surfaceMuted);border-radius:18px;padding:12px 14px"><div class="av" style="width:40px;height:40px"><i class="ti ti-player-play" style="font-size:18px"></i></div><div class="wave" style="flex:1"><i style="height:9px"></i><i style="height:18px"></i><i style="height:26px"></i><i style="height:13px"></i><i style="height:22px"></i><i style="height:10px"></i><i style="height:28px"></i><i style="height:15px"></i><i style="height:20px"></i><i style="height:8px"></i><i style="height:24px"></i></div><span style="font-size:13px;color:var(--accentDark);font-weight:500">0:12</span></div><div class="lbl">player</div></div>
+  </div>
+
+  <!-- ============ GROWTH ============ -->
+  <h2 class="sec" id="growth">Growth &amp; measurements</h2>
+  <p class="sub"><code>Measurements</code> input (Add-moment), <code>GrowthChip</code> (on a moment), <code>GrowthChart</code> (Phase 3 — derived from every moment that carries a measurement, plus birth stats).</p>
+  <div class="grid" style="grid-template-columns:1fr 1fr">
+    <div class="tile">
+      <div style="display:flex;gap:10px">
+        <div style="flex:1"><div style="font-size:11px;color:var(--textSecondary);margin-bottom:5px">Weight</div><div class="field">6.2 kg</div></div>
+        <div style="flex:1"><div style="font-size:11px;color:var(--textSecondary);margin-bottom:5px">Length</div><div class="field">64 cm</div></div>
+      </div>
+      <div class="row" style="margin-top:12px"><span class="growthchip"><i class="ti ti-ruler-2" style="font-size:11px"></i> 6.2 kg · 64 cm</span></div>
+      <div class="lbl">Measurements input · GrowthChip</div>
+    </div>
+    <div class="tile">
+      <div style="background:var(--bg);border-radius:16px;padding:14px 12px 8px">
+        <svg viewBox="0 0 280 120" style="width:100%;height:auto">
+          <polyline points="10,104 55,84 100,70 145,50 190,40 235,28 270,20" fill="none" stroke="#0F766E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="10" cy="104" r="4" fill="#0F766E"/><circle cx="100" cy="70" r="4" fill="#0F766E"/><circle cx="190" cy="40" r="4" fill="#0F766E"/><circle cx="270" cy="20" r="5" fill="#0F766E" stroke="#fff" stroke-width="2"/>
+        </svg>
+      </div>
+      <div class="lbl">GrowthChart (Phase 3)</div>
+    </div>
+  </div>
+
+  <!-- ============ LISTS & ROWS ============ -->
+  <h2 class="sec" id="lists">Lists &amp; rows</h2>
+  <p class="sub"><code>ListRow</code> (settings), <code>MilestoneRow</code> (done/todo), <code>MemberRow</code>, <code>Comment</code>.</p>
+  <div class="grid" style="grid-template-columns:1fr 1fr">
+    <div class="tile" style="padding:0;overflow:hidden">
+      <div class="lrow"><span class="ri"><i class="ti ti-bell"></i></span><span style="flex:1;font-size:14px">Push notifications</span><span class="tog"></span></div>
+      <div class="lrow"><span class="ri"><i class="ti ti-language"></i></span><span style="flex:1;font-size:14px">Language</span><span style="font-size:13px;color:#9AA8A2">English</span><i class="ti ti-chevron-right" style="color:#C3D0CA"></i></div>
+      <div class="lrow"><span class="ri" style="background:#F7E4E1;color:var(--danger)"><i class="ti ti-trash"></i></span><span style="flex:1;font-size:14px;color:var(--danger)">Delete account &amp; baby</span><i class="ti ti-chevron-right" style="color:#C3D0CA"></i></div>
+    </div>
+    <div class="tile" style="padding:0;overflow:hidden">
+      <div class="lrow"><span class="mi done"><i class="ti ti-check" style="font-size:16px"></i></span><span style="flex:1;font-size:14px">First smile</span><span style="font-size:12px;color:var(--accent)">2 May</span></div>
+      <div class="lrow"><span class="mi todo"></span><span style="flex:1;font-size:14px">First tooth</span><span style="font-size:12px;color:#9AA8A2">not yet</span><i class="ti ti-chevron-right" style="color:#C3D0CA"></i></div>
+      <div class="lrow"><div class="av" style="width:38px;height:38px;font-size:14px">A</div><div style="flex:1"><div style="font-size:14px">Anna de Vries</div><div style="font-size:13px;color:#9AA8A2">Owner · you</div></div></div>
+    </div>
+  </div>
+  <div class="tile" style="margin-top:14px">
+    <div class="row" style="gap:10px;align-items:flex-start"><div class="av" style="width:30px;height:30px;font-size:12px;background:#E5735F">O</div><div><span style="font-size:13px;font-weight:500">Oma</span> <span style="font-size:11px;color:var(--textSecondary)">1h</span><div style="font-size:14px">Oh that face! ❤</div></div></div>
+    <div class="lbl">Comment · avatar + name + time + body</div>
+  </div>
+
+  <!-- ============ FEEDBACK ============ -->
+  <h2 class="sec" id="feedback">Empty, loading &amp; sheets</h2>
+  <p class="sub"><code>EmptyState</code> (warm, never a dead grey box), <code>Skeleton</code>, <code>BottomSheet</code>, <code>InfoCard</code>.</p>
+  <div class="grid" style="grid-template-columns:1fr 1fr 1fr">
+    <div class="tile" style="text-align:center">
+      <div class="av" style="width:64px;height:64px;background:var(--accentSoft);color:var(--accent);margin:6px auto 14px"><i class="ti ti-camera" style="font-size:28px"></i></div>
+      <div class="serif" style="font-size:18px;font-weight:600">Start Liam's story</div>
+      <div style="font-size:13px;color:var(--textSecondary);margin-top:6px">Your timeline is empty.</div>
+      <button class="btn primary" style="margin-top:14px;font-size:14px;padding:12px 18px"><i class="ti ti-plus"></i> Add first moment</button>
+      <div class="lbl">EmptyState</div>
+    </div>
+    <div class="tile">
+      <div class="sk" style="height:120px;border-radius:14px;margin-bottom:10px"></div>
+      <div class="sk" style="width:90%;height:12px;margin-bottom:7px"></div>
+      <div class="sk" style="width:60%;height:12px"></div>
+      <div class="lbl">Skeleton (loading)</div>
+    </div>
+    <div class="tile" style="padding:0;overflow:hidden">
+      <div style="background:#fff;border-radius:20px;padding:14px 16px 18px;border:1px solid var(--border)">
+        <div style="width:42px;height:5px;background:var(--border);border-radius:999px;margin:0 auto 12px"></div>
+        <div class="serif" style="font-size:16px;font-weight:600">Add a moment</div>
+        <div style="font-size:12px;color:var(--textSecondary);margin-top:4px">drag handle · rounded top · soft backdrop</div>
+      </div>
+      <div class="lbl" style="padding:0 14px 12px">BottomSheet</div>
+    </div>
+  </div>
+  <div class="tile" style="margin-top:14px"><div style="background:#fff;border:1px solid var(--border);border-radius:20px;padding:14px;font-size:13px;color:var(--textSecondary)"><i class="ti ti-info-circle" style="color:var(--accent)"></i> No name yet? That's fine. You'll add it when the baby arrives.</div><div class="lbl">InfoCard · gentle inline guidance</div></div>
+
+  <!-- ============ NAV CHROME ============ -->
+  <h2 class="sec" id="chrome">Navigation chrome (iOS-native)</h2>
+  <p class="sub"><code>TabBar</code> (liquid glass, expo-glass-effect), <code>NavBar</code> (native stack back: chevron + previous title, tint accent), <code>FAB</code>. See DESIGN_SYSTEM §5b.</p>
+  <div class="grid" style="grid-template-columns:1fr 1fr">
+    <div class="tile"><div class="tabbar"><div class="tab on"><i class="ti ti-photo"></i><span>Timeline</span></div><div class="tab"><i class="ti ti-star"></i><span>Milestones</span></div><div class="tab"><i class="ti ti-users"></i><span>Family</span></div></div><div class="lbl">TabBar · liquid glass, 3 tabs</div></div>
+    <div class="tile">
+      <div style="border:1px solid var(--border);border-radius:14px;overflow:hidden;width:280px">
+        <div style="height:44px;display:flex;align-items:center;justify-content:center;position:relative;border-bottom:1px solid var(--border)"><span style="position:absolute;left:12px;color:var(--accent);font-size:15px"><i class="ti ti-chevron-left"></i> Timeline</span><span style="font-size:15px;font-weight:600">Moment</span><span style="position:absolute;right:14px;color:var(--accent)"><i class="ti ti-dots"></i></span></div>
+      </div>
+      <div class="row" style="gap:16px;margin-top:14px"><div class="fab"><i class="ti ti-plus" style="font-size:24px"></i></div></div>
+      <div class="lbl">NavBar (native back) · FAB</div>
+    </div>
+  </div>
+
+  <p style="color:var(--textSecondary);font-size:13px;margin-top:48px;padding-top:14px;border-top:1px solid var(--border)">Full component behaviour + states in design/DESIGN_SYSTEM.md · screens in mockups.html · flows in FLOWS.md.</p>
+</div>
+</body>
+</html>
