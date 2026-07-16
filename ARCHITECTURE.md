@@ -4,7 +4,7 @@
 
 **App:** React Native (Expo SDK 54) + expo-router + NativeWind (Tailwind), gluestack-ui v3 primitives.
 **Backend:** **Payload CMS** (collections, auth, access control) on **Postgres**. The mobile app talks to Payload over its **REST/GraphQL API** (the Payload Local API is server-only and not used from the app).
-**Media delivery:** ImageKit.
+**Media delivery:** Hetzner Object Storage (S3-compatible, EU) via a **signed `/api/media/file/...` proxy** — the CMS 302-redirects to a ~2h presigned URL, access-gated by family scope. No keys client-side. (Supersedes an earlier ImageKit plan.)
 **AI:** batch/server-side (Payload jobs / a companion service) behind a swappable provider interface.
 
 ---
@@ -14,11 +14,11 @@
 **The application never touches backend response shapes directly.** Data flows through layers, and only **models** cross into the UI:
 
 ```
-Data (Payload API / ImageKit / AI)  →  Service  →  Model  →  Application (screens / components)
+Data (Payload API / signed media / AI)  →  Service  →  Model  →  Application (screens / components)
 ```
 
 - **Models** are the *only* data shapes screens and components import. No Payload document shapes, no collection field names, no `createdAt`/`_status`/relationship-id internals above the service layer.
-- **Services** own **all** I/O (Payload REST/GraphQL calls, media upload, ImageKit URL building, AI triggers), map raw Payload docs → models, and **throw on error**. Services are plain, framework-agnostic TypeScript — testable without React.
+- **Services** own **all** I/O (Payload REST/GraphQL calls, media upload, signed media-URL resolution, AI triggers), map raw Payload docs → models, and **throw on error**. Services are plain, framework-agnostic TypeScript — testable without React.
 - **Hooks** are thin React wrappers over services: hold loading/error state, **catch**, expose models to screens.
 - **Screens/components** call **hooks only** — never services, never `lib`, never the Payload client.
 
@@ -34,7 +34,7 @@ src/
   services/     business logic + all I/O; return models; throw on error
     mappers/    pure doc→model translators (Payload doc → model, resolve media URLs)
   hooks/        thin React wrappers (useTimeline, useBaby, useFamily…); state + catch
-  lib/          thin SDK clients (payload API client, imagekit, notifications, ai provider)
+  lib/          thin SDK clients (payload API client, media signed-URL builder, notifications, ai provider)
   screens/      UI (PRD §6 pages) — call hooks only
   components/    shared UI (gluestack v3 + NativeWind), reused across screens
   theme/        design tokens (NativeWind / gluestack token scale)
@@ -64,7 +64,7 @@ Only what the UI needs — no Payload doc internals, no relationship ids, no `_s
 | `DisplayFormat` | enum: weeks \| months \| yearsMonths | §5 |
 | `Moment` | id, babyId, type, **media[] (ordered, images+videos mixed)**, voiceNote?, caption?, body?, capturedAt, authorId, milestoneId?, **weightGrams?**, **lengthCm?** (optional measurements captured with the moment → feed the growth chart), reactionCount, commentCount, tags[]?, location? | §4, §6.2 |
 | `MomentType` | enum: media \| voice \| text — **derived from content, not user-chosen**: media[] non-empty → `media`; else voiceNote → `voice`; else `text`. (`media` = 1+ images/videos, mixed; a single photo = `media` with one item.) | §4 |
-| `Media` | id, kind (image\|video\|audio), url, thumbUrl?, width?, height?, durationSec? | §4 (ImageKit) |
+| `Media` | id, kind (image\|video\|audio), url, thumbUrl?, width?, height?, durationSec? — `url`/`thumbUrl` are **signed proxy paths** built from the CMS `sizes` (thumbnail/card/full) | §4 (Payload media, signed delivery) |
 | `Milestone` | id, key, label, loggedMomentId?, loggedAt? | §4, §6.2 |
 | `Family` | id, name, memberCount | §3 |
 | `Membership` | id, familyId, userId, role (owner\|viewer\|contributor), inviteStatus | §3 |
@@ -83,14 +83,14 @@ Only what the UI needs — no Payload doc internals, no relationship ids, no `_s
 
 ## 4. Services (`src/services`)
 
-Each service calls `lib` (the Payload API client, ImageKit, AI), applies the current user's family scope, **maps docs → models**, and returns models only. Throw on error.
+Each service calls `lib` (the Payload API client, media signed-URL builder, AI), applies the current user's family scope, **maps docs → models**, and returns models only. Throw on error.
 
 | Service | Responsibility | Key methods → returns |
 | --- | --- | --- |
 | `BabyService` | baby profile CRUD, birth transition | `get(id)→Baby`, `create/update`, `recordBirth(id, {date,weight,length})→Baby` (also creates the transition Moment) |
 | `AgeService` | pregnancy/age computation | `compute(baby, atDate)→AgeDisplay` (pure; no I/O). Fed `today` for the header's live age; fed `moment.capturedAt` for a moment's **age-at-capture** (pre-birth → pregnancy weeks). Same fn, different date. |
 | `MomentService` | timeline CRUD + media | `list(babyId, cursor)→Paginated<Moment>`, `get(id)→Moment`, `create(input)→Moment`, `delete(id)` |
-| `MediaService` | upload + ImageKit URLs | `upload(file)→Media` (to Payload media collection / ImageKit), `urlFor(path, transform)→string` |
+| `MediaService` | upload + signed URLs | `upload(file)→Media` (multipart to Payload `media`), `urlFor(filename, size)→string` (signed `/api/media/file/...` proxy; picks a `sizes` variant) |
 | `MilestoneService` | standard + logging | `list(babyId)→Milestone[]`, `log(babyId, key, moment)→Milestone` |
 | `FamilyService` | family + invites + roles | `members(familyId)→Membership[]`, `invite(contact, role)→Membership`, `setRole`, `revoke`, `approveContribution(momentId)` (Phase 2) |
 | `ReactionService` | likes | `like(momentId)→Reaction`, `unlike(momentId)` |
@@ -104,7 +104,7 @@ Each service calls `lib` (the Payload API client, ImageKit, AI), applies the cur
 
 **Shared read helper** (mirrors Shoply's `getPublished`): an internal `scoped(collection, query)` wrapper that always adds the current user's family filter, so no service can request another family's data. Payload **access control** enforces the same rule server-side — the helper is defense-in-depth, not the only guard.
 
-**Mappers** (`src/services/mappers/`): pure `toBaby(doc)`, `toMoment(doc)`, `toMedia(doc)`, `toRecap(doc)`… — Payload doc → model, resolve media/upload docs → ImageKit URLs, compute derived fields, strip internal fields. Payload's generated `payload-types` live **inside** mappers as input only — never above the service layer.
+**Mappers** (`src/services/mappers/`): pure `toBaby(doc)`, `toMoment(doc)`, `toMedia(doc)`, `toRecap(doc)`… — Payload doc → model, resolve media/upload docs → signed proxy URLs, compute derived fields, strip internal fields. Payload's generated `payload-types` live **inside** mappers as input only — never above the service layer.
 
 ---
 
@@ -114,7 +114,7 @@ Each service calls `lib` (the Payload API client, ImageKit, AI), applies the cur
 | --- | --- | --- |
 | `payload.ts` | Payload REST/GraphQL client | typed `fetch` wrapper: base URL from `EXPO_PUBLIC_PAYLOAD_API_URL`, attaches the auth token, GET/POST/PATCH/DELETE. The **only** module that knows the API shape. |
 | `auth.ts` | Payload auth endpoints | login / me / refresh; token persisted via `expo-secure-store`. |
-| `imagekit.ts` | ImageKit URL builder | full-quality delivery + transforms (thumbnails, responsive). Signed/transform URLs only — no secret keys in the client. |
+| `media.ts` | signed media proxy | builds `/api/media/file/:filename` URLs + picks a `sizes` variant (thumbnail 320² / card 768w / full 1600w). Delivery is a 302 → ~2h presigned URL (follow redirects); access-gated by Payload family scope. No secret keys in the client. |
 | `notifications.ts` | `expo-notifications` | local + push scheduling, tap deep-link routing. |
 | `ai/provider.ts` | `generateRecap(context)` / `searchMemories(query)` interface | **swappable vendor; server-side/batch only** — the app never calls it live (Phase 2). EU residency checked per §9. |
 
@@ -137,7 +137,7 @@ Mirrors Shoply's "no live inference on the hot path" discipline:
 - **Roles**: `owner` full; `viewer` read + react + comment; `contributor` (Phase 2) writes land in a pending state until an owner approves (`FamilyService.approveContribution`).
 - **Encryption**: TLS in transit; Postgres + media storage encrypted at rest (§9). Secrets never shipped in the client bundle.
 - **GDPR**: `UserService` / a dedicated `DataService` exposes **export all** and **delete all** (account + child), fulfilled server-side by Payload. EU data residency for Postgres, media storage, and any AI provider.
-- **Media privacy**: ImageKit delivery URLs are scoped/signed; no public listing.
+- **Media privacy**: delivered via the signed `/api/media/file/...` proxy (Payload access-gated → 302 presigned, ~2h); private bucket, no public listing.
 
 ---
 
@@ -172,7 +172,7 @@ Each phase ships something usable end-to-end. Depth-first on the core slice (pro
 ```
 A0  foundation: models + services + lib + Payload API client + auth + tokens
 A1  baby profile + age/pregnancy display  ← core atomic output
-A2  timeline home + add moment (photo/video/text/voice via ImageKit)  ← the loop
+A2  timeline home + add moment (photo/video/text/voice via signed media proxy)  ← the loop
 A3  moment detail + likes + comments
 A4  milestone tracker
 A5  family invite (owner/viewer) + roles (Payload access control)

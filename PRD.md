@@ -13,7 +13,7 @@
 
 ### 1.1 Summary
 
-Baby Milestones is a private, family-first app for capturing a child's life from pregnancy onward — photos, videos, voice notes, and text moments arranged on a beautiful timeline. It automatically tracks how far along a pregnancy is and, once the baby is born, switches to showing the baby's age. Parents invite family (grandparents, partners) to follow along, react, and comment. Media is delivered at full quality via ImageKit, stored under GDPR-native, encrypted infrastructure.
+Baby Milestones is a private, family-first app for capturing a child's life from pregnancy onward — photos, videos, voice notes, and text moments arranged on a beautiful timeline. It automatically tracks how far along a pregnancy is and, once the baby is born, switches to showing the baby's age. Parents invite family (grandparents, partners) to follow along, react, and comment. Media is stored in a private EU bucket (Hetzner Object Storage) and delivered at full quality via signed, access-controlled URLs, under GDPR-native, encrypted infrastructure.
 
 The core loop: **capture a moment → it lands on the timeline → family sees it, likes it, comments.** Everything else (AI recaps, grandparent mode, exports, growth tracking) builds on that loop.
 
@@ -97,7 +97,7 @@ Grouped by flow. Phase tag = when it ships. Deferred screens are listed but not 
 ### 6.1 Onboarding & Auth (Phase 1)
 
 1. **Welcome / value prop** — one-line pitch, privacy promise.
-2. **Sign up / sign in** — email (Supabase auth).
+2. **Sign up / sign in** — email + password (Payload CMS auth, JWT).
 3. **Create baby profile** — name; toggle *expecting* vs *born*; due date **or** birthdate + weight + length; parent name(s); choose display format.
 4. **Invite family (optional)** — send first invite link, pick role.
 5. **Notification permission** — native push grant.
@@ -155,7 +155,7 @@ Grouped by flow. Phase tag = when it ships. Deferred screens are listed but not 
 
 *Goal: core product in the hands of first families; prove the capture→timeline→react loop.*
 
-- Photo & video uploads (full quality, delivered via **ImageKit**)
+- Photo & video uploads (full quality, private EU bucket + **signed delivery URLs**)
 - Text entries
 - Voice notes
 - Timeline homepage (photo/video/text/voice moments, reverse-chronological)
@@ -215,7 +215,7 @@ Grouped by flow. Phase tag = when it ships. Deferred screens are listed but not 
 
 ## 8. AI Features (Phase 2+)
 
-- **Recaps** — batch job summarizes a week/month of moments into a warm narrative. Runs server-side (Edge Function / cron), never blocking the capture path. Humanized tone; avoids listy, robotic phrasing.
+- **Recaps** — batch job summarizes a week/month of moments into a warm narrative. Runs server-side (Payload job / cron), never blocking the capture path. Humanized tone; avoids listy, robotic phrasing.
 - **Memory search** — natural-language query over the family's own archive (captions, milestones, dates, later tags/location). Scoped strictly to that family's data.
 - **Social captions** (Phase 3) — draft captions for export.
 - **Auto milestone detection** (Phase 4) — vision suggests a milestone from a photo; **always parent-confirmed before it's logged** (no silent auto-tagging).
@@ -229,7 +229,7 @@ Grouped by flow. Phase tag = when it ships. Deferred screens are listed but not 
 - **Encryption in transit** (TLS) and **at rest** (storage + database) — Phase 1, non-negotiable.
 - **GDPR-native**: EU data residency; user can **export all data** and **delete all data** (account + child) from Settings.
 - **Private by default** — no public feed, no discovery, no ad targeting, no data selling.
-- **Media**: originals stored under EU residency; delivered/transformed via ImageKit. AI processing (Phase 2+) is scoped to the family's own data and checked for provider residency.
+- **Media**: originals + responsive sizes stored in a private EU bucket (Hetzner Object Storage); delivered via signed, access-controlled URLs. AI processing (Phase 2+) is scoped to the family's own data and checked for provider residency.
 - **Roles enforce access** — Viewers/Contributors never exceed their permission; enforced server-side (RLS), not just in UI.
 - **Children's data** — treat with heightened care; no third-party analytics on media content.
 
@@ -250,7 +250,7 @@ Grouped by flow. Phase tag = when it ships. Deferred screens are listed but not 
 - **Capture cadence** — moments per active family per week.
 - **Phase-2 recap engagement** — recap open + digest email open rates.
 - **Retention** — D30 / M3 family retention (a baby archive is a long-horizon product).
-- **Media reliability** — upload success rate, delivery latency via ImageKit.
+- **Media reliability** — upload success rate, signed-URL delivery latency.
 
 ---
 

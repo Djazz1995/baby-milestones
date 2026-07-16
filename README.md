@@ -9,7 +9,7 @@ Private, family-first baby timeline & memory app — pregnancy through childhood
 
 - **App:** React Native (Expo SDK 54) + expo-router + NativeWind + gluestack-ui v3
 - **Backend:** Payload CMS + Postgres (consumed by the app over Payload's REST/GraphQL API)
-- **Media:** ImageKit delivery
+- **Media:** private EU bucket (Hetzner Object Storage) + signed delivery URLs
 
 ## Get started
 

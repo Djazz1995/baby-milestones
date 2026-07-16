@@ -6,6 +6,7 @@ Backend: **Payload CMS + Postgres** (the RN app consumes Payload's REST/GraphQL 
 ## Docs
 - Product spec → @PRD.md (screens, functionalities, phases 1–4)
 - Architecture → @ARCHITECTURE.md (layered `screens → hooks → services → lib`; models-only above services)
+- Build plan → @BUILD_PLAN.md (phased app build A0–A4; synced to the CMS build plan)
 - Backend API contract → @CMS_INTEGRATION.md (Payload CMS: auth, collections, endpoints, media, seed logins — the backend lives in the separate `baby-milestones-cms` repo)
 
 ## Stack notes
