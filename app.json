@@ -6,17 +6,23 @@
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "babymilestones",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "light",
     "ios": {
       "bundleIdentifier": "com.babymilestones.app",
       "infoPlist": {
-        "UIBackgroundModes": ["remote-notification"]
+        "UIBackgroundModes": ["remote-notification"],
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSCameraUsageDescription": "Baby Milestones uses the camera so you can capture photos and videos of your child's moments.",
+        "NSMicrophoneUsageDescription": "Baby Milestones uses the microphone to record voice notes and videos for your child's timeline.",
+        "NSPhotoLibraryUsageDescription": "Baby Milestones needs access to your photos so you can add existing pictures and videos to the timeline.",
+        "NSPhotoLibraryAddUsageDescription": "Baby Milestones saves exported photos and videos to your library."
       }
     },
     "android": {
       "package": "com.babymilestones.app",
+      "permissions": ["CAMERA", "RECORD_AUDIO", "READ_MEDIA_IMAGES", "READ_MEDIA_VIDEO"],
       "adaptiveIcon": {
-        "backgroundColor": "#17131c",
+        "backgroundColor": "#F1F5F4",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
@@ -32,7 +38,7 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#17131c",
+          "backgroundColor": "#F1F5F4",
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 120
         }

@@ -44,7 +44,7 @@ Legend: **R** = regions top→bottom · **S** = states · **role** notes owner/v
 ## 8. Moment detail  ⭐ core
 **R:** Back · full-quality **media carousel** (swipe · page dots · **`n/total` count top-right** · milestone badge top-left · chevrons · **thumbnail strip** below; videos play inline) · **age-at-moment chip + growth chip (weight · length, if set) above the caption** · caption `body` · **voice-note player** (if `voiceNote` present — play + waveform + duration under the caption) · author avatar+name + capturedAt + **age-at-moment** `meta` · action row: **like** (heart) + count, **comment** + count · **comments thread** · comment composer (viewer + owner).
 - **Age-at-moment** = `AgeService.compute(baby, capturedAt)` — the baby's age (or pregnancy week) *when the moment happened*, distinct from the header's today-age. Pre-birth → "N weeks pregnant". See DESIGN_SYSTEM "AgeAtMoment".
-**S:** loading · loaded · liking (optimistic pop) · commenting · own moment → overflow menu **Delete** (owner) · 403 → "You don't have access". Media loads via signed `/api/media/file/...`.
+**S:** loading · loaded · liking (optimistic pop) · commenting · own moment → overflow menu **Delete** (owner); others' → overflow **Report** (UGC 1.2 → report sheet: reason + send, goes to owner + support) · 403 → "You don't have access". Media loads via signed `/api/media/file/...`.
 
 ## 9. Milestone tracker
 **R:** `title` "Milestones" · checklist of 8 standard `MilestoneRow` (first smile → first word). Unlogged = outline + "not yet"; logged = sage check + linked date (→ that moment).
@@ -66,11 +66,11 @@ Surfaced inside Moment detail (§8). Standalone screen only if thread deep-linke
 Grouped list of white rounded cards, each group titled with a muted uppercase label. Design → mockups.html "Settings".
 **R (groups):**
 - **Baby** — Liam's profile → (edit baby, §10) · **Add a baby** (owner → Create-baby screen). _Multiple babies + child switcher: Phase 2._
-- **Account** — name, email/change password, **Language NL|EN**, default display format, **Sign out**.
+- **Account** — name, email/change password, **Language** (row → **Language picker** screen: Nederlands / English with a check; FR/DE Phase 4), default display format, **Sign out**.
 - **Notifications** — master push toggle · comments & likes toggle (per-type granularity).
 - **Display** — **Simple mode (grandparent)** — **P1: row shows "soon" (disabled).** Legibility (large type + tap targets) is already baseline (see DESIGN_SYSTEM §6), so P1 needs no mode. **P2: manual toggle** (per device/user) → scales type ~1.3×, enlarges targets, simplifies the timeline to big photo cards + one large ♥, hides FAB/milestones/settings depth. _Dark mode: Phase 2._
 - **Family** — **Members & roles** → §11 management (count shown).
-- **Privacy & data** (GDPR, **P1 must-ship**) — Export all data · Delete account + baby (danger, double-confirm).
+- **Privacy & data** (GDPR + App Store, **P1 must-ship**) — Settings row → a **Privacy & data screen** (pushed) grouping: **Export my data** (`GET /api/users/export` → generate → save/share) · **Privacy policy** + **Terms** (external) · **Delete account** in a danger zone (`POST /api/users/delete-account`; role-aware confirm sheet with checkbox — sole owner "erases the whole archive", co-owner "your shared content stays, anonymized"). Design → mockups.html "Privacy & data screen" + "Privacy & compliance flows".
 - **About** — About Baby Milestones · Privacy & terms · Support/contact · Version `meta`.
 **role:** viewer sees a reduced set — no Family-manage, no Privacy delete/export of the family (own-account export only), no baby edit.
 **S:** idle · saving toggle · export (in-progress → done) · delete = double-confirm irreversible · language switch re-renders copy live.
